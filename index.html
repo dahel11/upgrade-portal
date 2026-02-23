@@ -118,9 +118,12 @@ async function loadSchedule(){
       return;
     }
 
-    document.getElementById("schedule").innerHTML = data.slice(0,6).map(s =>
-      `<div class='slot'><b>${s.days} • ${s.time}</b><br>${s.teacher}<br>Sisa kursi: ${s.seatsLeft}</div>`
-    ).join("");
+    document.getElementById("schedule").innerHTML = `
+      <b>Pilihan jadwal tersedia</b><br><br>
+      ${data.slice(0,6).map(s =>
+        `<div class='slot'><b>${s.days} • ${s.time}</b><br>${s.teacher}<br>Sisa kursi: ${s.seatsLeft}</div>`
+      ).join("")}
+    `;
 
   }catch{
     document.getElementById("schedule").innerHTML="Gagal memuat jadwal.";
