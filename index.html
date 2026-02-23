@@ -166,6 +166,7 @@ async function loadMateri(){
 }
   
 async function submitForm(){
+  console.log("SUBMIT KE TRIGGER");
   const formData = new FormData();
   formData.append("entry.875605922", document.getElementById("nama").value);
   formData.append("entry.1265930966", document.getElementById("nomor").value);
