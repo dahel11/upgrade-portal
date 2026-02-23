@@ -3,7 +3,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>Portal Upgrade Paket</title>
+  <title>Portal Upgrade Paket Belajar</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
@@ -18,7 +18,7 @@
 
 <body>
 
-<h2>Portal Upgrade Paket</h2>
+<h2>Portal Upgrade Paket Belajar</h2>
 
 <div class="card">
   <b>Pilih kelas</b>
@@ -33,7 +33,7 @@
 </div>
 
 <div id="mapelSection" class="card" style="display:none">
-  <b>Pilih mapel premium</b>
+  <b>Pilih mapel tambahan</b>
   <select id="mapel">
     <option value="">Pilih mapel</option>
     <option value="Fisika">Fisika</option>
@@ -59,11 +59,11 @@ let mapel = "";
 document.getElementById("kelas").onchange = function() {
   kelas = this.value;
   if(["7","8","9","10"].includes(kelas)){
-    mapel = "IPA";
-    loadSchedule();
-  } else {
-    document.getElementById("mapelSection").style.display="block";
-  }
+  mapel = "IPA";
+  document.getElementById("mapelSection").style.display="none";
+  loadSchedule();
+} else {
+  document.getElementById("mapelSection").style.display="block";
 }
 
 document.getElementById("mapel").onchange = function(){
@@ -77,7 +77,12 @@ async function loadSchedule(){
   document.getElementById("formSection").style.display="block";
 
   try{
-    let res = await fetch(`https://e2oc2ege54.execute-api.ap-southeast-1.amazonaws.com/slotschedule?kelas=${kelas}&subject=${mapel}&sem=2&year=2026&curriculum=Kurikulum%20Merdeka`);
+    let subject = encodeURIComponent(mapel);
+
+    let res = await fetch(
+      `https://e2oc2ege54.execute-api.ap-southeast-1.amazonaws.com/slotschedule?kelas=${kelas}&sem=2&year=2026&curriculum=Kurikulum%20Merdeka&subject=${subject}`
+    );
+
     let data = await res.json();
 
     if(!data.length){
@@ -108,7 +113,7 @@ async function submitForm(){
     body:formData
   });
 
-  alert("Permintaan terkirim. Tim kami akan menghubungi.");
+  alert("Permintaan terkirim. Kakak Siaga akan menghubungi segera.");
 }
 
 </script>
