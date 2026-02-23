@@ -143,7 +143,18 @@ async function loadMateri(){
   box.style.display="block";
   box.innerHTML = `
     <b>Materi pembelajaran</b><br><br>
-    ${data.map(m => `<div class="slot">${m.materi.replace(/\n/g,"<br>")}</div>`).join("")}
+    ${data.map(m => {
+      const lines = m.materi
+        .split(/\r?\n/)        
+        .map(l => l.trim())
+        .filter(l => l.length);
+
+      return `
+        <div class="slot">
+          ${lines.map(l => `• ${l}`).join("<br>")}
+        </div>
+      `;
+    }).join("")}
   `;
 }
   
