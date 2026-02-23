@@ -82,9 +82,7 @@ async function loadSchedule(){
   try{
     let subject = encodeURIComponent(mapel);
 
-    let res = await fetch(
-      `https://e2oc2ege54.execute-api.ap-southeast-1.amazonaws.com/slotschedule?kelas=${kelas}&sem=2&year=2026&curriculum=Kurikulum%20Merdeka&subject=${subject}`
-    );
+    let res = await fetch(`/api/schedule?kelas=${kelas}&subject=${mapel}`);
 
     let data = await res.json();
 
