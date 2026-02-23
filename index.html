@@ -166,16 +166,23 @@ async function loadMateri(){
 }
   
 async function submitForm(){
+  const formData = new FormData();
 
-  const url =
-    "https://docs.google.com/forms/d/e/1FAIpQLSdeu8mdcvTxVzQXm3A2mla9hhO-i4T3erD-dFJhYo_r1qdbhQ/formResponse" +
-    "?entry.875605922=" + encodeURIComponent(document.getElementById("nama").value) +
-    "&entry.1265930966=" + encodeURIComponent(document.getElementById("nomor").value) +
-    "&entry.2132303950=" + encodeURIComponent(kelas) +
-    "&entry.1880586050=" + encodeURIComponent(mapel) +
-    "&entry.1375621433=" + encodeURIComponent(document.getElementById("preferensi").value);
+  formData.append("entry.875605922", document.getElementById("nama").value);
+  formData.append("entry.1265930966", document.getElementById("nomor").value);
+  formData.append("entry.2132303950", kelas);
+  formData.append("entry.1880586050", mapel);
+  formData.append("entry.1375621433", document.getElementById("preferensi").value);
 
-  await fetch(url, { mode: "no-cors" });
+  if(kelas === "11"){
+    formData.append("entry.1564078808", mapel);
+  }
+
+  await fetch("https://docs.google.com/forms/d/e/1FAIpQLSdeu8mdcvTxVzQXm3A2mla9hhO-i4T3erD-dFJhYo_r1qdbhQ/formResponse", {
+    method:"POST",
+    mode:"no-cors",
+    body:formData
+  });
 
   alert("Permintaan terkirim. Kakak Siaga akan menghubungi segera.");
 }
