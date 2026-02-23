@@ -1,0 +1,126 @@
+import { useState, useEffect } from "react";
+
+export default function UpgradePortal() {
+  const [kelas, setKelas] = useState("");
+  const [mapel, setMapel] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [schedule, setSchedule] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const formEndpoint = "https://docs.google.com/forms/d/e/1FAIpQLSdeu8mdcvTxVzQXm3A2mla9hhO-i4T3erD-dFJhYo_r1qdbhQ/formResponse";
+
+  useEffect(() => {
+    if (!kelas || !mapel) return;
+
+    const fetchSchedule = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `https://e2oc2ege54.execute-api.ap-southeast-1.amazonaws.com/slotschedule?kelas=${kelas}&subject=${mapel}&sem=2&year=2026&curriculum=Kurikulum%20Merdeka`
+        );
+        const data = await res.json();
+        setSchedule(data.slice(0, 6));
+      } catch (e) {
+        setSchedule([]);
+      }
+      setLoading(false);
+    };
+
+    fetchSchedule();
+  }, [kelas, mapel]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const data = new FormData(e.target);
+
+    await fetch(formEndpoint, {
+      method: "POST",
+      mode: "no-cors",
+      body: data,
+    });
+
+    setSubmitted(true);
+  };
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+        <div className="bg-white rounded-2xl shadow p-6 text-center space-y-3 max-w-md">
+          <h2 className="font-semibold text-lg">Terima kasih 🙏</h2>
+          <p className="text-sm">Permintaan upgrade Anda telah kami terima. Tim kami akan segera menghubungi untuk membantu proses selanjutnya.</p>
+          <a href="https://colearn.id" className="px-4 py-2 rounded-xl bg-gray-200 inline-block">Kembali ke Website Utama</a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6 flex justify-center">
+      <div className="max-w-3xl w-full space-y-6">
+        <h1 className="text-2xl font-bold text-center">Portal Resmi Upgrade Paket</h1>
+
+        <section className="bg-white rounded-2xl shadow p-5">
+          <h2 className="font-semibold mb-2">Pilih Kelas</h2>
+          <select
+            className="w-full border rounded-xl p-2"
+            value={kelas}
+            onChange={(e) => {
+              setKelas(e.target.value);
+              if (["7", "8", "9", "10"].includes(e.target.value)) setMapel("IPA");
+            }}
+          >
+            <option value="">Pilih kelas</option>
+            <option value="7">Kelas 7</option>
+            <option value="8">Kelas 8</option>
+            <option value="9">Kelas 9</option>
+            <option value="10">Kelas 10</option>
+            <option value="11">Kelas 11</option>
+          </select>
+        </section>
+
+        {kelas === "11" && (
+          <section className="bg-white rounded-2xl shadow p-5">
+            <h2 className="font-semibold mb-2">Pilih Mapel Premium</h2>
+            <select className="w-full border rounded-xl p-2" value={mapel} onChange={(e) => setMapel(e.target.value)}>
+              <option value="">Pilih mapel</option>
+              <option value="Fisika">Fisika</option>
+              <option value="Kimia">Kimia</option>
+              <option value="Fisika+Kimia">Fisika+Kimia</option>
+            </select>
+          </section>
+        )}
+
+        {mapel && (
+          <section className="bg-white rounded-2xl shadow p-5 space-y-3">
+            <h2 className="font-semibold">Jadwal Tersedia</h2>
+            {loading && <p className="text-sm text-gray-500">Memuat jadwal...</p>}
+            {!loading && schedule.length === 0 && (
+              <p className="text-sm text-gray-500">Slot sedang penuh. Silakan tulis preferensi jadwal, tim kami akan membantu mencarikan alternatif.</p>
+            )}
+            <div className="space-y-2">
+              {schedule.map((s, i) => (
+                <div key={i} className="border rounded-xl p-3 text-sm">
+                  <p className="font-medium">{s.days} • {s.time}</p>
+                  <p className="text-gray-500">{s.teacher}</p>
+                  <p className="text-xs text-blue-600">Sisa kursi: {s.seatsLeft}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {mapel && (
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow p-5 space-y-3">
+            <input name="entry.875605922" placeholder="Nama Murid" className="w-full border rounded-xl p-2" required />
+            <input name="entry.1265930966" placeholder="Nomor Murid" className="w-full border rounded-xl p-2" required />
+            <input type="hidden" name="entry.2132303950" value={kelas} />
+            <input type="hidden" name="entry.1880586050" value={mapel} />
+            <textarea name="entry.1375621433" placeholder="Preferensi jadwal" className="w-full border rounded-xl p-2" />
+            <button className="w-full bg-blue-600 text-white py-2 rounded-xl">Kirim Permintaan Upgrade</button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
