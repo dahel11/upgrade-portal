@@ -84,6 +84,7 @@ document.getElementById("kelas").onchange = function() {
     mapel = "IPA";
     document.getElementById("mapelSection").style.display="none";
     loadSchedule();
+    loadMateri();
   } else {
     mapel = "";
     document.getElementById("mapelSection").style.display="block";
@@ -93,6 +94,7 @@ document.getElementById("kelas").onchange = function() {
 document.getElementById("mapel").onchange = function(){
   mapel = this.value;
   loadSchedule();
+  loadMateri();
 }
 
 async function loadSchedule(){
@@ -119,13 +121,13 @@ async function loadSchedule(){
   }catch{
     document.getElementById("schedule").innerHTML="Gagal memuat jadwal.";
   }
-  
-  loadMateri();
-  
 }
 
 async function loadMateri(){
   const box = document.getElementById("materiBox");
+
+  box.style.display = "block";
+  box.innerHTML = "Memuat materi...";
 
   const res = await fetch(
   `https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?type=materi&kelas=${kelas}&mapel=${encodeURIComponent(mapel)}`
