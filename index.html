@@ -38,7 +38,6 @@
     <option value="">Pilih mapel</option>
     <option value="Fisika">Fisika</option>
     <option value="Kimia">Kimia</option>
-    <option value="Fisika+Kimia">Fisika+Kimia</option>
   </select>
 </div>
 
@@ -82,7 +81,7 @@ async function loadSchedule(){
   try{
     let subject = encodeURIComponent(mapel);
 
-    let res = await fetch(`/api/schedule?kelas=${kelas}&subject=${mapel}`);
+    let res = await fetch(`https://script.google.com/macros/s/AKfycbxM4VOQCQYIpmE5pAn-R70kouPnhao_fiRzz_id49uIwMKUPl7LFS5zxX5Yf-8p5xZgHg/exec?kelas=${kelas}&subject=${encodeURIComponent(mapel)}`);
 
     let data = await res.json();
 
