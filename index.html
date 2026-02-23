@@ -42,6 +42,8 @@
 </div>
 
 <div id="priceBox" class="card" style="display:none"></div>
+
+<div id="materiBox" class="card" style="display:none"></div>
   
 <div id="schedule" class="card" style="display:none"></div>
 
@@ -101,7 +103,7 @@ async function loadSchedule(){
   try{
     let subject = encodeURIComponent(mapel);
 
-    let res = await fetch(`https://script.google.com/macros/s/AKfycbxM4VOQCQYIpmE5pAn-R70kouPnhao_fiRzz_id49uIwMKUPl7LFS5zxX5Yf-8p5xZgHg/exec?kelas=${kelas}&subject=${encodeURIComponent(mapel)}`);
+    let res = await fetch(`https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?kelas=${kelas}&subject=${encodeURIComponent(mapel)}`);
 
     let data = await res.json();
 
@@ -117,8 +119,32 @@ async function loadSchedule(){
   }catch{
     document.getElementById("schedule").innerHTML="Gagal memuat jadwal.";
   }
+  
+  loadMateri();
+  
 }
 
+async function loadMateri(){
+  const box = document.getElementById("materiBox");
+
+  const res = await fetch(
+    'https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?type=materi&kelas=${kelas}&mapel=${encodeURIComponent(mapel)}`
+  );
+
+  const data = await res.json();
+
+  if(!data.length){
+    box.style.display="none";
+    return;
+  }
+
+  box.style.display="block";
+  box.innerHTML = `
+    <b>Materi pembelajaran</b><br><br>
+    ${data.map(m => `<div class="slot">${m.materi.replace(/\n/g,"<br>")}</div>`).join("")}
+  `;
+}
+  
 async function submitForm(){
   const formData = new FormData();
   formData.append("entry.875605922", document.getElementById("nama").value);
