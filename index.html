@@ -58,13 +58,16 @@ let mapel = "";
 
 document.getElementById("kelas").onchange = function() {
   kelas = this.value;
+  
   if(["7","8","9","10"].includes(kelas)){
-  mapel = "IPA";
-  document.getElementById("mapelSection").style.display="none";
-  loadSchedule();
-} else {
-  document.getElementById("mapelSection").style.display="block";
-}
+    mapel = "IPA";
+    document.getElementById("mapelSection").style.display="none";
+    loadSchedule();
+  } else {
+    mapel = "";
+    document.getElementById("mapelSection").style.display="block";
+  }
+};
 
 document.getElementById("mapel").onchange = function(){
   mapel = this.value;
