@@ -174,8 +174,12 @@ async function submitForm(){
   formData.append("entry.1880586050", mapel);
   formData.append("entry.1375621433", document.getElementById("preferensi").value);
 
+  if(["7","8","9","10"].includes(kelas)){
+  formData.append("entry.1880586050", mapel);
+  }
+
   if(kelas === "11"){
-    formData.append("entry.1564078808", mapel);
+  formData.append("entry.1564078808", mapel);
   }
 
   await fetch("https://docs.google.com/forms/d/e/1FAIpQLSdeu8mdcvTxVzQXm3A2mla9hhO-i4T3erD-dFJhYo_r1qdbhQ/formResponse", {
