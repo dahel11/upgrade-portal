@@ -41,6 +41,8 @@
   </select>
 </div>
 
+<div id="priceBox" class="card" style="display:none"></div>
+  
 <div id="schedule" class="card" style="display:none"></div>
 
 <div id="formSection" class="card" style="display:none">
@@ -57,6 +59,24 @@ let mapel = "";
 
 document.getElementById("kelas").onchange = function() {
   kelas = this.value;
+
+  const priceBox = document.getElementById("priceBox");
+
+  if(["7","8","9","10"].includes(kelas)){
+    priceBox.style.display = "block";
+    priceBox.innerHTML = "Biaya upgrade IPA: <b>Rp 49.000 / bulan</b>";
+  }
+  else if(kelas === "11"){
+    priceBox.style.display = "block";
+    priceBox.innerHTML = `
+      Biaya upgrade:<br>
+      • Fisika: <b>Rp 49.000</b><br>
+      • Kimia: <b>Rp 49.000</b><br>
+      • Fisika + Kimia: <b>Rp 79.000</b>
+    `;
+  } else {
+    priceBox.style.display = "none";
+  }
   
   if(["7","8","9","10"].includes(kelas)){
     mapel = "IPA";
