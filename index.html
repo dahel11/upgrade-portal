@@ -118,12 +118,15 @@ async function loadSchedule(){
       return;
     }
 
-    document.getElementById("schedule").innerHTML = `
-      <b>Pilihan jadwal tersedia</b><br><br>
-      ${data.slice(0,6).map(s =>
-        `<div class='slot'><b>${s.days} • ${s.time}</b><br>${s.teacher}<br>Sisa kursi: ${s.seatsLeft}</div>`
-      ).join("")}
-    `;
+    document.getElementById("schedule").innerHTML =
+      "<b>Pilihan jadwal tersedia</b><br><br>" +
+      data.slice(0,6).map(s => `
+        <div class='slot' onclick="pickSlot('${s.days}','${s.time}','${s.teacher}')">
+          <b>${s.days} • ${s.time}</b><br>
+          ${s.teacher}<br>
+          Sisa kursi: ${s.seatsLeft}
+        </div>
+      `).join("");
 
   }catch{
     document.getElementById("schedule").innerHTML="Gagal memuat jadwal.";
@@ -181,6 +184,24 @@ async function submitForm(){
   });
 
   alert("Permintaan terkirim. Kakak Siaga akan menghubungi segera.");
+}
+
+function pickSlot(day,time,teacher){
+  const text =
+    (mapel || "") +
+    " - " +
+    day +
+    " " +
+    time +
+    " " +
+    teacher;
+
+  document.getElementById("preferensi").value = text;
+
+  // auto scroll ke form (kerasa premium)
+  document.getElementById("formSection").scrollIntoView({
+    behavior:"smooth"
+  });
 }
   
 </script>
