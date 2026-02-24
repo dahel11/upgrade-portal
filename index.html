@@ -73,7 +73,15 @@ let mapel = "";
 document.getElementById("kelas").onchange = function() {
   kelas = this.value;
 
+  document.getElementById("preferensi").value = "";
   document.getElementById("submitBtn").disabled = true;
+
+  document.querySelectorAll(".slot").forEach(s=>{
+    s.style.borderColor="#eee";
+    s.style.background="white";
+    const icon = s.querySelector(".checkIcon");
+    if(icon) icon.style.opacity = 0;
+  });
 
   const priceBox = document.getElementById("priceBox");
 
@@ -107,7 +115,15 @@ document.getElementById("kelas").onchange = function() {
 document.getElementById("mapel").onchange = function(){
   mapel = this.value;
 
+  document.getElementById("preferensi").value = "";
   document.getElementById("submitBtn").disabled = true;
+
+  document.querySelectorAll(".slot").forEach(s=>{
+    s.style.borderColor="#eee";
+    s.style.background="white";
+    const icon = s.querySelector(".checkIcon");
+    if(icon) icon.style.opacity = 0;
+  });
   
   loadSchedule();
   loadMateri();
