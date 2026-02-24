@@ -119,9 +119,10 @@ async function loadSchedule(){
     }
 
     document.getElementById("schedule").innerHTML =
-      "<b>Pilihan jadwal tersedia</b><br><br>" +
+      "<b>Pilihan jadwal tersedia</b><br>" +
+      "<div style='font-size:13px;color:#666;margin-bottom:6px'>Klik salah satu jadwal untuk memilih</div>" +
       data.slice(0,6).map(s => `
-        <div class='slot' onclick="pickSlot('${s.days}','${s.time}','${s.teacher}')">
+        <div class='slot' onclick="pickSlot('${s.days}','${s.time}','${s.teacher}',event)">
           <b>${s.days} • ${s.time}</b><br>
           ${s.teacher}<br>
           Sisa kursi: ${s.seatsLeft}
