@@ -166,23 +166,15 @@ async function loadMateri(){
 }
   
 async function submitForm(){
+
   const formData = new FormData();
 
   formData.append("entry.875605922", document.getElementById("nama").value);
   formData.append("entry.1265930966", document.getElementById("nomor").value);
   formData.append("entry.2132303950", kelas);
-  formData.append("entry.1880586050", mapel);
   formData.append("entry.1375621433", document.getElementById("preferensi").value);
 
-  if(["7","8","9","10"].includes(kelas)){
-  formData.append("entry.1880586050", mapel);
-  }
-
-  if(kelas === "11"){
-  formData.append("entry.1564078808", mapel);
-  }
-
-  await fetch("https://docs.google.com/forms/d/e/1FAIpQLSdeu8mdcvTxVzQXm3A2mla9hhO-i4T3erD-dFJhYo_r1qdbhQ/formResponse", {
+  await fetch("https://docs.google.com/forms/d/e/1FAIpQLSdeu8mdcvTxVzQXm3A2mla9hhO-i4T3erD-dFJhYo_r1qdbhQ/formResponse",{
     method:"POST",
     mode:"no-cors",
     body:formData
