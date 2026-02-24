@@ -148,9 +148,7 @@ async function loadSchedule(){
 
     document.getElementById("schedule").innerHTML =
       "<b>Pilihan jadwal tersedia</b><br>" +
-      "<div style="font-size:12px;color:#666;margin-top:2px">
-        Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.
-      </div>" +
+      "<div style='font-size:12px;color:#666;margin-top:2px'>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga</div>" +
       data.slice(0,6).map(s => `
         <div class='slot' onclick="pickSlot('${s.days}','${s.time}','${s.teacher}',event)">
           <div style="display:flex;justify-content:space-between;align-items:center">
