@@ -54,8 +54,8 @@
 
 <div id="formSection" class="card" style="display:none">
   <input id="nama" placeholder="Nama murid"/>
-  <input id="nomor" placeholder="Nomor murid"/>
-  <textarea id="preferensi" placeholder="Preferensi jadwal"></textarea>
+  <input id="nomor" placeholder="Nomor HP murid"/>
+  <textarea id="preferensi" placeholder="Pilihan jadwal"></textarea>
   <div style="font-size:13px; color:#555; margin-top:10px; line-height:1.5">
   Jumlah sesi mata pelajaran tambahan akan menyesuaikan hingga tanggal jatuh tempo.<br>
   Pada bulan berikutnya, pembayaran seluruh mata pelajaran akan digabung dan dibayarkan sesuai tanggal jatuh tempo.
@@ -148,7 +148,7 @@ async function loadSchedule(){
 
     document.getElementById("schedule").innerHTML =
       "<b>Pilihan jadwal tersedia</b><br>" +
-      "<div style='font-size:13px;color:#666;margin-bottom:6px'>Klik salah satu jadwal untuk memilih</div>" +
+      "<div style='font-size:13px;color:#666;margin-bottom:6px'>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga</div>" +
       data.slice(0,6).map(s => `
         <div class='slot' onclick="pickSlot('${s.days}','${s.time}','${s.teacher}',event)">
           <div style="display:flex;justify-content:space-between;align-items:center">
