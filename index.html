@@ -12,6 +12,11 @@
     select, input, textarea, button { width:100%; padding:10px; margin-top:8px; }
     button { background:#2563eb; color:white; border:none; border-radius:8px; }
     .slot { border:1px solid #eee; padding:10px; border-radius:8px; margin-top:8px; }
+    button:disabled{
+      background:#cbd5e1;
+      cursor:not-allowed;
+      opacity:0.8;
+    }
   </style>
 
 </head>
@@ -55,7 +60,9 @@
   Jumlah sesi mata pelajaran tambahan akan menyesuaikan hingga tanggal jatuh tempo.<br>
   Pada bulan berikutnya, pembayaran seluruh mata pelajaran akan digabung dan dibayarkan sesuai tanggal jatuh tempo.
 </div>
-  <button onclick="submitForm()">Kirim Permintaan Upgrade</button>
+  <button id="submitBtn" onclick="submitForm()" disabled>
+    Kirim Permintaan Upgrade
+  </button>
 </div>
 
 <script>
@@ -65,6 +72,8 @@ let mapel = "";
 
 document.getElementById("kelas").onchange = function() {
   kelas = this.value;
+
+  document.getElementById("submitBtn").disabled = true;
 
   const priceBox = document.getElementById("priceBox");
 
@@ -97,6 +106,9 @@ document.getElementById("kelas").onchange = function() {
 
 document.getElementById("mapel").onchange = function(){
   mapel = this.value;
+
+  document.getElementById("submitBtn").disabled = true;
+  
   loadSchedule();
   loadMateri();
 }
@@ -197,7 +209,6 @@ function pickSlot(day,time,teacher,event){
   document.querySelectorAll(".slot").forEach(slot=>{
     slot.style.borderColor="#eee";
     slot.style.background="white";
-
     const icon = slot.querySelector(".checkIcon");
     if(icon) icon.style.opacity = 0;
   });
@@ -213,6 +224,8 @@ function pickSlot(day,time,teacher,event){
     (mapel || "") + " - " + day + " " + time + " " + teacher;
 
   document.getElementById("preferensi").value = text;
+
+  document.getElementById("submitBtn").disabled = false;
 
   document.getElementById("formSection").scrollIntoView({
     behavior:"smooth"
