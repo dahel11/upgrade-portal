@@ -123,11 +123,16 @@ async function loadSchedule(){
       "<div style='font-size:13px;color:#666;margin-bottom:6px'>Klik salah satu jadwal untuk memilih</div>" +
       data.slice(0,6).map(s => `
         <div class='slot' onclick="pickSlot('${s.days}','${s.time}','${s.teacher}',event)">
-          <b>${s.days} • ${s.time}</b><br>
-          ${s.teacher}<br>
-          Sisa kursi: ${s.seatsLeft}
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <b>${s.days} • ${s.time}</b><br>
+              ${s.teacher}<br>
+              Sisa kursi: ${s.seatsLeft}
+            </div>
+            <div class="checkIcon" style="font-size:20px;opacity:0">✓</div>
+          </div>
         </div>
-      `).join("");
+    `).join("");
 
   }catch{
     document.getElementById("schedule").innerHTML="Gagal memuat jadwal.";
@@ -187,19 +192,28 @@ async function submitForm(){
   alert("Permintaan terkirim. Kakak Siaga akan menghubungi segera.");
 }
 
-function pickSlot(day,time,teacher){
+function pickSlot(day,time,teacher,event){
+
+  document.querySelectorAll(".slot").forEach(slot=>{
+    slot.style.borderColor="#eee";
+    slot.style.background="white";
+
+    const icon = slot.querySelector(".checkIcon");
+    if(icon) icon.style.opacity = 0;
+  });
+
+  const el = event.currentTarget;
+  el.style.borderColor="#2563eb";
+  el.style.background="#eef2ff";
+
+  const icon = el.querySelector(".checkIcon");
+  if(icon) icon.style.opacity = 1;
+
   const text =
-    (mapel || "") +
-    " - " +
-    day +
-    " " +
-    time +
-    " " +
-    teacher;
+    (mapel || "") + " - " + day + " " + time + " " + teacher;
 
   document.getElementById("preferensi").value = text;
 
-  // auto scroll ke form (kerasa premium)
   document.getElementById("formSection").scrollIntoView({
     behavior:"smooth"
   });
