@@ -127,6 +127,12 @@ document.getElementById("kelas").onchange = function() {
   } else {
     mapel = "";
     document.getElementById("mapelSection").style.display="block";
+
+    document.getElementById("schedule").style.display = "none";
+    document.getElementById("materiBox").style.display = "none";
+    document.getElementById("schedule").innerHTML = "";
+    document.getElementById("materiBox").innerHTML = "";
+}
   }
 };
 
