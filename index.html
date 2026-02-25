@@ -105,10 +105,13 @@ document.getElementById("kelas").onchange = function() {
   else if(kelas === "11"){
     priceBox.style.display = "block";
     priceBox.innerHTML = `
-      Biaya penambahan:<br>
-      • Fisika atau Kimia: <b>Rp 49.000</b><br>
-      • Fisika + Kimia: <b>Rp 79.000</b>
-      <div style="margin-top:4px;color:#666;font-size:14px">
+      <div>
+        Biaya penambahan:<br>
+        • Fisika atau Kimia: <b>Rp 49.000</b><br>
+        • Fisika + Kimia: <b>Rp 79.000</b>
+      </div>
+
+      <div style="margin-top:6px;color:#666;font-size:14px">
         Total biaya per bulan: paket Matematika + mapel tambahan
       </div>
     `;
