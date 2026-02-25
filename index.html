@@ -95,14 +95,13 @@ document.getElementById("kelas").onchange = function() {
 
   if(["7","8","9","10"].includes(kelas)){
     priceBox.style.display = "block";
-    priceBox.innerHTML = "Biaya upgrade IPA: <b>Rp 49.000 / bulan</b>";
+    priceBox.innerHTML = "Biaya penambahan IPA: <b>Rp 49.000 / bulan</b>";
   }
   else if(kelas === "11"){
     priceBox.style.display = "block";
     priceBox.innerHTML = `
-      Biaya upgrade:<br>
-      • Fisika: <b>Rp 49.000</b><br>
-      • Kimia: <b>Rp 49.000</b><br>
+      Biaya penambahan:<br>
+      • Fisika atau Kimia: <b>Rp 49.000</b><br>
       • Fisika + Kimia: <b>Rp 79.000</b>
     `;
   } else {
