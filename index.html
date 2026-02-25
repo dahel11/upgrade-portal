@@ -81,7 +81,7 @@ let mapel = "";
 document.getElementById("kelas").onchange = function() {
   kelas = this.value;
 
-  document.getElementById("preferensi").value = "";
+  document.getElementById("preferensi").value = "";  
   document.getElementById("submitBtn").disabled = true;
 
   document.querySelectorAll(".slot").forEach(s=>{
@@ -133,7 +133,7 @@ document.getElementById("kelas").onchange = function() {
 document.getElementById("mapel").onchange = function(){
   mapel = this.value;
 
-  document.getElementById("preferensi").value = "";
+  document.getElementById("preferensi").value = "";  
   document.getElementById("submitBtn").disabled = true;
 
   document.querySelectorAll(".slot").forEach(s=>{
@@ -264,7 +264,22 @@ function pickSlot(day,time,teacher,event){
   document.getElementById("formSection").scrollIntoView({
     behavior:"smooth"
   });
+
+  validateForm();
 }
+
+function validateForm(){
+  const nama = document.getElementById("nama").value.trim();
+  const nomor = document.getElementById("nomor").value.trim();
+  const jadwal = document.getElementById("preferensi").value.trim();
+
+  const isValid = nama && nomor && jadwal;
+
+  document.getElementById("submitBtn").disabled = !isValid;
+}
+
+document.getElementById("nama").oninput = validateForm;
+document.getElementById("nomor").oninput = validateForm;
   
 </script>
 
