@@ -159,6 +159,29 @@ document.getElementById("mapel").onchange = function(){
   loadMateri();
 }
 
+const ramadanMap = {
+  "16:00-17:00": "15:00-16:00",
+  "17:15-18:15": "16:15-17:15",
+  "19:00-20:00": "19:30-20:30"
+};
+
+function formatTime(time){
+  if(ramadanMap[time]){
+    return `
+      <span style="text-decoration:line-through;color:#9ca3af">
+        ${time}
+      </span>
+      <span style="margin-left:6px;font-weight:600">
+        ${ramadanMap[time]} WIB
+      </span>
+      <div style="font-size:12px;color:#f59e0b">
+        Jadwal selama Ramadan
+      </div>
+    `;
+  }
+  return `${time} WIB`;
+}
+  
 async function loadSchedule(){
   document.getElementById("schedule").style.display="block";
   document.getElementById("schedule").innerHTML="Memuat jadwal...";
@@ -183,7 +206,7 @@ async function loadSchedule(){
         <div class='slot' onclick="pickSlot('${s.days}','${s.time}','${s.teacher}',event)">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div>
-              <b>${s.days} • ${s.time} WIB</b><br>
+              <b>${s.days} • ${formatTime(s.time)}</b>
               ${s.teacher}<br>
               Sisa kursi: ${s.seatsLeft}
             </div>
