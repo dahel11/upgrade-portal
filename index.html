@@ -273,6 +273,13 @@ async function submitForm(){
   alert("Permintaan terkirim. Kakak Siaga akan menghubungi segera.");
 }
 
+function getDisplayTime(time){
+  if(ramadanMap[time]){
+    return ramadanMap[time];
+  }
+  return time;
+}
+  
 function pickSlot(day,time,teacher,event){
 
   document.querySelectorAll(".slot").forEach(slot=>{
@@ -289,8 +296,10 @@ function pickSlot(day,time,teacher,event){
   const icon = el.querySelector(".checkIcon");
   if(icon) icon.style.opacity = 1;
 
+  const displayTime = getDisplayTime(time);
+
   const text =
-    (mapel || "") + " - " + day + " " + time + " " + teacher;
+    (mapel || "") + " - " + day + " " + displayTime + " WIB " + teacher;
 
   document.getElementById("preferensi").value = text;
 
