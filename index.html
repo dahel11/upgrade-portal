@@ -329,7 +329,7 @@ function validateForm(){
   const nomor = document.getElementById("nomor").value.trim();
   const jadwal = document.getElementById("preferensi").value.trim();
 
-  const nomorValid = /^[1-9][0-9]{8,12}$/.test(nomor);
+  const nomorValid = nomor.length >= 9 && nomor.length <= 12;
 
   const isValid = nama && nomorValid && jadwal;
 
