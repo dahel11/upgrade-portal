@@ -69,7 +69,13 @@
 
 <div id="formSection" class="card" style="display:none">
   <input id="nama" placeholder="Nama murid"/>
-  <input id="nomor" placeholder="Nomor HP murid"/>
+  <input id="nomor" type="tel" placeholder="Nomor HP murid"/>
+
+  <div style="font-size:12px;color:#666;margin-top:4px">
+    Gunakan nomor yang terdaftar di aplikasi CoLearn.<br>
+    Format: <b>8123456789</b> (tanpa 0 atau 62 di depan).
+  </div>
+  
   <textarea id="preferensi" placeholder="Pilihan jadwal"></textarea>
   <div style="font-size:13px; color:#555; margin-top:10px; line-height:1.5">
   Jumlah sesi mata pelajaran tambahan akan menyesuaikan hingga tanggal jatuh tempo.<br>
@@ -329,7 +335,9 @@ function validateForm(){
   const nomor = document.getElementById("nomor").value.trim();
   const jadwal = document.getElementById("preferensi").value.trim();
 
-  const isValid = nama && nomor && jadwal;
+  const nomorValid = /^[1-9][0-9]{8,12}$/.test(nomor);
+
+  const isValid = nama && nomorValid && jadwal;
 
   document.getElementById("submitBtn").disabled = !isValid;
 }
