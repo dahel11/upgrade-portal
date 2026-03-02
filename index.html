@@ -238,8 +238,20 @@ async function loadMateri(){
   }
 
   box.style.display="block";
+
+  let materiTitle = "Materi Pembelajaran";
+
+  if(["7","8","9","10"].includes(kelas)){
+    materiTitle = "Materi Pembelajaran IPA";
+  }
+
+  if(kelas === "11" && mapel){
+    materiTitle = "Materi Pembelajaran " + mapel;
+  }
+
   box.innerHTML = `
-    <b>Materi pembelajaran</b><br><br>
+    <b>${materiTitle}</b><br><br>
+  
     ${data.map(m => {
       const lines = m.materi
         .split(/\r?\n/)        
