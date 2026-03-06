@@ -275,7 +275,7 @@ async function loadSchedule(){
       "<b>Pilihan jadwal tersedia</b><br>" +
       "<div style='font-size:13px;color:#666;margin-top:2px'><b>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</b></div>" +
       data.slice(0,6).map(s => `
-        <div class='slot' onclick="pickSlot('${s.days}','${s.time}','${s.teacher}',event)">
+        <div class='slot' onclick="pickSlot('${mapel}','${s.days}','${s.time}','${s.teacher}',event)">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div>
               <b>${s.days} • ${formatTime(s.time)}</b>
