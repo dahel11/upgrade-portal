@@ -257,8 +257,11 @@ async function loadSchedule(){
   try{
     if(mapel === "FisikaKimia"){
 
-      document.getElementById("schedule").innerHTML="Memuat jadwal...";
+      const box = document.getElementById("schedule");
+      box.innerHTML = "Memuat jadwal...";
 
+      await new Promise(r => setTimeout(r, 10));
+      
       await loadScheduleBySubject("Fisika");
       await loadScheduleBySubject("Kimia");
 
