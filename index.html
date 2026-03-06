@@ -151,7 +151,11 @@ document.getElementById("kelas").onchange = function() {
   if(["7","8","9","10"].includes(kelas)){
     priceBox.style.display = "block";
     priceBox.innerHTML = `
-      Biaya penambahan: <b>Rp 49.000</b>
+      Biaya penambahan: <b>Rp 49.000</b> 
+      <span style="font-size:14px;color:#6b7280">
+        (1x kelas per minggu)
+      </span>
+
       <div style="margin-top:4px;color:#666;font-size:14px">
         Total biaya per bulan: <b>Rp 139.000</b>
       </div>
@@ -162,8 +166,17 @@ document.getElementById("kelas").onchange = function() {
     priceBox.innerHTML = `
       <div>
         Biaya penambahan:<br>
-        • Fisika atau Kimia: <b>Rp 49.000</b><br>
+
+        • Fisika atau Kimia: <b>Rp 49.000</b>
+        <span style="font-size:14px;color:#6b7280;margin-left:4px">
+          (1x kelas per minggu)
+        </span>
+        <br>
+
         • Fisika + Kimia: <b>Rp 79.000</b>
+        <span style="font-size:14px;color:#6b7280;margin-left:4px">
+          (2x kelas per minggu — Fisika 1x & Kimia 1x)
+        </span>
       </div>
 
       <div style="margin-top:6px;color:#666;font-size:14px">
