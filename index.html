@@ -91,6 +91,7 @@
     <option value="">Pilih mapel</option>
     <option value="Fisika">Fisika</option>
     <option value="Kimia">Kimia</option>
+    <option value="FisikaKimia">Fisika + Kimia</option>
   </select>
 </div>
 
@@ -132,6 +133,8 @@
 
 let kelas = "";
 let mapel = "";
+let jadwalFisika = "";
+let jadwalKimia = "";
 
 document.getElementById("kelas").onchange = function() {
   kelas = this.value;
@@ -249,7 +252,15 @@ async function loadSchedule(){
   document.getElementById("formSection").style.display="block";
 
   try{
-    let subject = encodeURIComponent(mapel);
+    if(mapel === "FisikaKimia"){
+
+      document.getElementById("schedule").innerHTML="";
+
+      await loadScheduleBySubject("Fisika");
+      await loadScheduleBySubject("Kimia");
+
+      return;
+    }
 
     let res = await fetch(`https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?kelas=${kelas}&subject=${encodeURIComponent(mapel)}`);
 
@@ -281,6 +292,38 @@ async function loadSchedule(){
   }
 }
 
+async function loadScheduleBySubject(subject){
+
+  let res = await fetch(
+    `https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?kelas=${kelas}&subject=${subject}`
+  );
+
+  let data = await res.json();
+
+  if(!data.length){
+    return;
+  }
+
+  document.getElementById("schedule").innerHTML +=
+    "<b>Pilihan jadwal " + subject + " tersedia</b><br>" +
+    "<div style='font-size:13px;color:#666;margin-top:2px'><b>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</b></div>";
+
+  document.getElementById("schedule").innerHTML +=
+    data.slice(0,6).map(s => `
+      <div class='slot' onclick="pickSlot('${subject}','${s.days}','${s.time}','${s.teacher}',event)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <b>${s.days} • ${formatTime(s.time)}</b>
+            ${s.teacher}<br>
+            Sisa kursi: ${s.seatsLeft}
+          </div>
+          <div class="checkIcon" style="font-size:20px;opacity:0">✓</div>
+        </div>
+      </div>
+    `).join("");
+
+}
+  
 async function loadMateri(){
   const box = document.getElementById("materiBox");
 
@@ -354,7 +397,7 @@ function getDisplayTime(time){
   return time;
 }
   
-function pickSlot(day,time,teacher,event){
+function pickSlot(mapelSlot,day,time,teacher,event){
 
   document.querySelectorAll(".slot").forEach(slot=>{
     slot.style.borderColor="#eee";
@@ -373,9 +416,18 @@ function pickSlot(day,time,teacher,event){
   const displayTime = getDisplayTime(time);
 
   const text =
-    (mapel || "") + " - " + day + " " + displayTime + " WIB " + teacher;
+    mapelSlot + " - " + day + " " + displayTime + " WIB " + teacher;
 
-  document.getElementById("preferensi").value = text;
+  if(mapelSlot === "Fisika"){
+    jadwalFisika = text;
+  }
+
+  if(mapelSlot === "Kimia"){
+    jadwalKimia = text;
+  }
+
+  document.getElementById("preferensi").value =
+    [jadwalFisika, jadwalKimia].filter(Boolean).join("\n");
 
   document.getElementById("submitBtn").disabled = false;
 
@@ -387,17 +439,30 @@ function pickSlot(day,time,teacher,event){
 }
 
 function validateForm(){
+
   const nama = document.getElementById("nama").value.trim();
   const nomor = document.getElementById("nomor").value.trim();
-  const jadwal = document.getElementById("preferensi").value.trim();
 
   const nomorValid = nomor.length >= 9 && nomor.length <= 12;
 
-  const isValid = nama && nomorValid && jadwal;
+  let jadwalValid = false;
+
+  if(mapel === "Fisika"){
+    jadwalValid = !!jadwalFisika;
+  }
+  else if(mapel === "Kimia"){
+    jadwalValid = !!jadwalKimia;
+  }
+  else if(mapel === "FisikaKimia"){
+    jadwalValid = jadwalFisika && jadwalKimia;
+  }
+
+  const isValid = nama && nomorValid && jadwalValid;
 
   document.getElementById("submitBtn").disabled = !isValid;
-}
 
+}
+  
 document.getElementById("nama").oninput = validateForm;
 document.getElementById("nomor").oninput = validateForm;
 
