@@ -259,8 +259,6 @@ async function loadSchedule(){
 
       const box = document.getElementById("schedule");
       box.innerHTML = "Memuat jadwal...";
-
-      await new Promise(r => setTimeout(r, 10));
       
       await loadScheduleBySubject("Fisika");
       await loadScheduleBySubject("Kimia");
@@ -302,7 +300,7 @@ async function loadScheduleBySubject(subject){
 
   const box = document.getElementById("schedule");
 
-  if(box.innerHTML === "Memuat jadwal..."){
+  (box.innerHTML.includes("Memuat jadwal...")){
     box.innerHTML = "";
   }
   
