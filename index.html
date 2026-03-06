@@ -418,6 +418,10 @@ function pickSlot(mapelSlot,day,time,teacher,event){
   const text =
     mapelSlot + " - " + day + " " + displayTime + " WIB " + teacher;
 
+  if(mapelSlot === "IPA"){
+    document.getElementById("preferensi").value = text;
+  }
+  
   if(mapelSlot === "Fisika"){
     jadwalFisika = text;
   }
@@ -427,7 +431,9 @@ function pickSlot(mapelSlot,day,time,teacher,event){
   }
 
   document.getElementById("preferensi").value =
-    [jadwalFisika, jadwalKimia].filter(Boolean).join("\n");
+    mapelSlot === "IPA"
+      ? text
+      : [jadwalFisika, jadwalKimia].filter(Boolean).join("\n");
 
   document.getElementById("submitBtn").disabled = false;
 
