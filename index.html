@@ -257,7 +257,7 @@ async function loadSchedule(){
   try{
     if(mapel === "FisikaKimia"){
 
-      document.getElementById("schedule").innerHTML="";
+      document.getElementById("schedule").innerHTML="Memuat jadwal...";
 
       await loadScheduleBySubject("Fisika");
       await loadScheduleBySubject("Kimia");
@@ -297,6 +297,12 @@ async function loadSchedule(){
 
 async function loadScheduleBySubject(subject){
 
+  const box = document.getElementById("schedule");
+
+  if(box.innerHTML === "Memuat jadwal..."){
+    box.innerHTML = "";
+  }
+  
   let res = await fetch(
     `https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?kelas=${kelas}&subject=${subject}`
   );
@@ -335,7 +341,7 @@ async function loadMateri(){
 
   if(mapel === "FisikaKimia"){
 
-    box.innerHTML = "";
+    box.innerHTML = "Memuat materi...";
 
     await loadMateriBySubject("Fisika");
     await loadMateriBySubject("Kimia");
@@ -395,6 +401,10 @@ async function loadMateriBySubject(subject){
   const data = await res.json();
 
   if(!data.length) return;
+
+  if(box.innerHTML === "Memuat materi..."){
+    box.innerHTML = "";
+  }
 
   box.innerHTML += `
     <b>Materi Pembelajaran ${subject}</b><br><br>
