@@ -466,6 +466,9 @@ function validateForm(){
 
   let jadwalValid = false;
 
+  if(mapel === "IPA"){
+    jadwalValid = !!document.getElementById("preferensi").value.trim();
+  }
   if(mapel === "Fisika"){
     jadwalValid = !!jadwalFisika;
   }
