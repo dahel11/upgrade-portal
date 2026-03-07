@@ -679,9 +679,13 @@ function lihatUpgrade(){
 
   upgradeDirty = false;
 
-  document.getElementById("updateHint").style.display = "none";
+  const btn = document.getElementById("lihatBtn");
 
-  document.getElementById("lihatBtn").style.background = "#2563eb";
+  btn.disabled = true;
+  btn.style.background = "#cbd5e1"; // abu
+  btn.innerText = "Harga dan jadwal sudah diperbarui";
+
+  document.getElementById("updateHint").style.display = "none";
 
 }
 
@@ -702,7 +706,8 @@ upgradeCheckboxes.forEach(id=>{
 
       upgradeDirty = true;
 
-      btn.style.background = "#f59e0b";
+      btn.disabled = false;
+      btn.style.background = "#2563eb";
       btn.innerText = "Perbarui harga dan jadwal";
 
       document.getElementById("updateHint").style.display = "block";
