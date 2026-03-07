@@ -412,7 +412,7 @@ async function loadSchedule(){
       freqParam = "&frequency=2x";
     }
     
-    let res = await fetch(`https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?kelas=${kelas}&subject=${encodeURIComponent(mapel)}${freqParam}`);
+    let res = await fetch(`https://script.google.com/macros/s/AKfycbyxrEj7vkND7YmfFt41ACKRVrAEKWD9goEpv0z10Qo62i7-4sd2tGqDGiZKEjrskVsRmA/exec?kelas=${kelas}&subject=${encodeURIComponent(mapel)}${freqParam}`);
 
     let data = await res.json();
 
@@ -457,7 +457,7 @@ async function loadScheduleBySubject(subject){
   }
   
   let res = await fetch(
-    `https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?kelas=${kelas}&subject=${subject}${freqParam}`
+    `https://script.google.com/macros/s/AKfycbyxrEj7vkND7YmfFt41ACKRVrAEKWD9goEpv0z10Qo62i7-4sd2tGqDGiZKEjrskVsRmA/exec?kelas=${kelas}&subject=${subject}${freqParam}`
   );
 
   let data = await res.json();
@@ -504,7 +504,7 @@ async function loadMateri(){
   }
   
   const res = await fetch(
-  `https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?type=materi&kelas=${kelas}&mapel=${encodeURIComponent(mapel)}`
+  `https://script.google.com/macros/s/AKfycbyxrEj7vkND7YmfFt41ACKRVrAEKWD9goEpv0z10Qo62i7-4sd2tGqDGiZKEjrskVsRmA/exec?type=materi&kelas=${kelas}&mapel=${encodeURIComponent(mapel)}`
   );
 
   const data = await res.json();
@@ -549,7 +549,7 @@ async function loadMateriBySubject(subject){
   const box = document.getElementById("materiBox");
 
   const res = await fetch(
-  `https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?type=materi&kelas=${kelas}&mapel=${subject}`
+  `https://script.google.com/macros/s/AKfycbyxrEj7vkND7YmfFt41ACKRVrAEKWD9goEpv0z10Qo62i7-4sd2tGqDGiZKEjrskVsRmA/exec?type=materi&kelas=${kelas}&mapel=${subject}`
   );
 
   const data = await res.json();
