@@ -406,7 +406,13 @@ async function loadSchedule(){
       return;
     }
 
-    let res = await fetch(`https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?kelas=${kelas}&subject=${encodeURIComponent(mapel)}`);
+    let freqParam = "";
+
+    if(mapel === "Matematika"){
+      freqParam = "&frequency=2x";
+    }
+    
+    let res = await fetch(`https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?kelas=${kelas}&subject=${encodeURIComponent(mapel)}${freqParam}`);
 
     let data = await res.json();
 
@@ -444,8 +450,14 @@ async function loadScheduleBySubject(subject){
     box.innerHTML = "";
   }
   
+  let freqParam = "";
+
+  if(subject === "Matematika"){
+    freqParam = "&frequency=2x";
+  }
+  
   let res = await fetch(
-    `https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?kelas=${kelas}&subject=${subject}`
+    `https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?kelas=${kelas}&subject=${subject}${freqParam}`
   );
 
   let data = await res.json();
