@@ -281,19 +281,38 @@ document.getElementById("kelas").onchange = function() {
     priceBox.style.display = "none";
   }
   
-  if(["7","8","9","10"].includes(kelas)){
+  if(["7","8","9"].includes(kelas)){
     mapel = "IPA";
     document.getElementById("mapelSection").style.display="none";
     loadSchedule();
     loadMateri();
-  } else {
+  } 
+  
+  else if(kelas === "10" || kelas === "11"){
+
     mapel = "";
-    document.getElementById("mapelSection").style.display="block";
+
+    document.getElementById("mapelSection").style.display="none";
+    document.getElementById("upgradeSection").style.display="block";
 
     document.getElementById("schedule").style.display = "none";
     document.getElementById("materiBox").style.display = "none";
+    document.getElementById("priceBox").style.display = "none";
+
     document.getElementById("schedule").innerHTML = "";
     document.getElementById("materiBox").innerHTML = "";
+
+  }
+
+  else{
+
+    mapel = "";
+
+    document.getElementById("upgradeSection").style.display="none";
+
+    document.getElementById("schedule").style.display = "none";
+    document.getElementById("materiBox").style.display = "none";
+
   }
 };
 
