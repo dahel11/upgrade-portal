@@ -140,7 +140,7 @@
         Frekuensi kelas Matematika (2x/Minggu)
 
         <div class="upgradeNote">
-          Jika saat ini sudah 2x/Minggu, opsi ini dapat diabaikan
+          Jika saat ini sudah 2x/Minggu, abaikan opsi ini
         </div>
 
       </div>
@@ -663,9 +663,6 @@ function pickSlot(mapelSlot,day,time,teacher,event){
   document.getElementById("preferensi").value = jadwalList.join("\n");
 
   document.getElementById("submitBtn").disabled = false;
-
-  document.getElementById("formSection").scrollIntoView({
-    behavior:"smooth"
   });
 
   validateForm();
@@ -716,7 +713,7 @@ async function lihatUpgrade(){
   const btn = document.getElementById("lihatBtn");
 
   btn.disabled = true;
-  btn.style.background = "#1d4ed8"; // biru lebih tua
+  btn.style.background = "#93c5fd";
   btn.innerText = "Memuat jadwal...";
   
   const pilihIPA = document.getElementById("checkIPA").checked;
@@ -760,8 +757,9 @@ async function lihatUpgrade(){
 
   document.getElementById("updateHint").style.display="none";
 
-  scheduleBox.scrollIntoView({
-    behavior:"smooth"
+  document.getElementById("schedule").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
   });
 
 }
