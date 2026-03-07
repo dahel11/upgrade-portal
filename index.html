@@ -209,6 +209,7 @@ let kelas = "";
 let mapel = "";
 let jadwalFisika = "";
 let jadwalKimia = "";
+let jadwalMTK = "";
 let upgradeDirty = false;
 
 document.getElementById("kelas").onchange = function() {
@@ -349,6 +350,7 @@ document.getElementById("mapel").onchange = function(){
 
   jadwalFisika = "";
   jadwalKimia = "";
+  jadwalMTK = "";
 
   document.getElementById("preferensi").value = "";  
   document.getElementById("submitBtn").disabled = true;
@@ -623,10 +625,16 @@ function pickSlot(mapelSlot,day,time,teacher,event){
     jadwalKimia = text;
   }
 
+  if(mapelSlot === "Matematika"){
+    jadwalMTK = text;
+  }
+
   document.getElementById("preferensi").value =
     mapelSlot === "IPA"
       ? text
-      : [jadwalFisika, jadwalKimia].filter(Boolean).join("\n");
+      : [jadwalFisika, jadwalKimia, jadwalMTK]
+          .filter(Boolean)
+          .join("\n");
 
   document.getElementById("submitBtn").disabled = false;
 
@@ -646,17 +654,25 @@ function validateForm(){
 
   let jadwalValid = false;
 
-  if(mapel === "IPA"){
+  const pilihIPA = document.getElementById("checkIPA")?.checked;
+  const pilihFisika = document.getElementById("checkFisika")?.checked;
+  const pilihKimia = document.getElementById("checkKimia")?.checked;
+  const pilihMTK = document.getElementById("checkMTK")?.checked;
+
+  if(pilihIPA){
     jadwalValid = !!document.getElementById("preferensi").value.trim();
   }
-  if(mapel === "Fisika"){
-    jadwalValid = !!jadwalFisika;
+
+  if(pilihFisika){
+    jadwalValid = jadwalValid && jadwalFisika || !!jadwalFisika;
   }
-  else if(mapel === "Kimia"){
-    jadwalValid = !!jadwalKimia;
+
+  if(pilihKimia){
+    jadwalValid = jadwalValid && jadwalKimia || !!jadwalKimia;
   }
-  else if(mapel === "FisikaKimia"){
-    jadwalValid = jadwalFisika && jadwalKimia;
+
+  if(pilihMTK){
+    jadwalValid = jadwalValid && jadwalMTK || !!jadwalMTK;
   }
 
   const isValid = nama && nomorValid && jadwalValid;
@@ -670,25 +686,58 @@ function lihatUpgrade(){
   const pilihIPA = document.getElementById("checkIPA").checked;
   const pilihFisika = document.getElementById("checkFisika").checked;
   const pilihKimia = document.getElementById("checkKimia").checked;
+  const pilihMTK = document.getElementById("checkMTK").checked;
 
-  if(pilihIPA){
-    mapel = "IPA";
-  }
-
-  if(pilihFisika && pilihKimia){
-    mapel = "FisikaKimia";
-  }
-  else if(pilihFisika){
-    mapel = "Fisika";
-  }
-  else if(pilihKimia){
-    mapel = "Kimia";
-  }
-
-  if(!mapel){
-    alert("Silakan pilih mata pelajaran terlebih dahulu");
+  if(!pilihIPA && !pilihFisika && !pilihKimia && !pilihMTK){
+    alert("Silakan pilih penambahan terlebih dahulu");
     return;
   }
+
+  document.getElementById("schedule").innerHTML="";
+  document.getElementById("materiBox").innerHTML="";
+
+  document.getElementById("schedule").style.display="block";
+  document.getElementById("materiBox").style.display="block";
+
+  mapel="";
+
+  if(pilihIPA){
+    mapel="IPA";
+    loadMateri();
+    loadSchedule();
+  }
+
+  if(pilihFisika){
+    mapel="Fisika";
+    loadMateri();
+    loadSchedule();
+  }
+
+  if(pilihKimia){
+    mapel="Kimia";
+    loadMateri();
+    loadSchedule();
+  }
+
+  if(pilihMTK){
+    mapel="Matematika";
+    loadMateri();
+    loadSchedule();
+  }
+
+  const btn = document.getElementById("lihatBtn");
+
+  btn.disabled = true;
+  btn.style.background="#cbd5e1";
+  btn.innerText="Harga dan jadwal sudah diperbarui";
+
+  document.getElementById("updateHint").style.display="none";
+
+  document.getElementById("schedule").scrollIntoView({
+    behavior:"smooth"
+  });
+
+}
 
   loadMateri();
   loadSchedule();
