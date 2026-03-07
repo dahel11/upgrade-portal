@@ -153,6 +153,10 @@
     Lihat harga dan jadwal
   </button>
 
+  <div style="font-size:13px;color:#666;margin-top:6px">
+    Anda dapat memilih lebih dari satu opsi
+  </div>
+
 </div>
 <div id="mapelSection" class="card" style="display:none">
   <b>Pilih mapel tambahan</b>
@@ -639,25 +643,61 @@ function validateForm(){
 
 function lihatUpgrade(){
 
-  if(document.getElementById("checkIPA").checked){
+  const pilihIPA = document.getElementById("checkIPA").checked;
+  const pilihFisika = document.getElementById("checkFisika").checked;
+  const pilihKimia = document.getElementById("checkKimia").checked;
+
+  if(pilihIPA){
     mapel = "IPA";
-    loadMateri();
-    loadSchedule();
   }
 
-  if(document.getElementById("checkFisika").checked){
+  if(pilihFisika && pilihKimia){
+    mapel = "FisikaKimia";
+  }
+  else if(pilihFisika){
     mapel = "Fisika";
-    loadMateri();
-    loadSchedule();
+  }
+  else if(pilihKimia){
+    mapel = "Kimia";
   }
 
-  if(document.getElementById("checkKimia").checked){
-    mapel = "Kimia";
-    loadMateri();
-    loadSchedule();
+  if(!mapel){
+    alert("Silakan pilih mata pelajaran terlebih dahulu");
+    return;
   }
+
+  loadMateri();
+  loadSchedule();
+
+  document.getElementById("lihatBtn").innerText = "Perbarui harga dan jadwal";
+
+  document.getElementById("schedule").scrollIntoView({
+    behavior:"smooth"
+  });
 
 }
+
+const upgradeCheckboxes = [
+  "checkIPA",
+  "checkFisika",
+  "checkKimia",
+  "checkMTK"
+];
+
+upgradeCheckboxes.forEach(id=>{
+  const el = document.getElementById(id);
+
+  if(el){
+    el.addEventListener("change",function(){
+
+      const btn = document.getElementById("lihatBtn");
+
+      btn.style.background = "#f59e0b";
+      btn.innerText = "Perbarui harga dan jadwal";
+
+    });
+  }
+});
   
 document.getElementById("nama").oninput = validateForm;
 document.getElementById("nomor").oninput = validateForm;
