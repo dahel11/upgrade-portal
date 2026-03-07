@@ -85,6 +85,43 @@
   </select>
 </div>
 
+<div id="upgradeSection" class="card" style="display:none">
+
+  <b>Penambahan yang ingin dilakukan</b>
+
+  <div style="margin-top:10px">
+
+    <label id="optIPA" style="display:none">
+      <input type="checkbox" id="checkIPA">
+      Mata pelajaran IPA
+    </label>
+
+    <label id="optFisika" style="display:none">
+      <input type="checkbox" id="checkFisika">
+      Fisika
+    </label>
+
+    <label id="optKimia" style="display:none">
+      <input type="checkbox" id="checkKimia">
+      Kimia
+    </label>
+
+    <label id="optMTK" style="display:none">
+      <input type="checkbox" id="checkMTK">
+      Frekuensi kelas Matematika (2x per minggu)
+    
+      <div style="font-size:13px; margin-top:4px;">
+        Jika saat ini sudah 2x per minggu, opsi ini dapat diabaikan.
+      </div>    
+    </label>
+
+  </div>
+
+  <button id="lihatBtn" style="margin-top:12px" onclick="lihatUpgrade()">
+    Lihat harga dan jadwal
+  </button>
+
+</div>
 <div id="mapelSection" class="card" style="display:none">
   <b>Pilih mapel tambahan</b>
   <select id="mapel">
@@ -149,6 +186,28 @@ document.getElementById("kelas").onchange = function() {
     if(icon) icon.style.opacity = 0;
   });
 
+  const upgradeSection = document.getElementById("upgradeSection");
+
+  if(kelas === "10" || kelas === "11"){
+
+    upgradeSection.style.display = "block";
+
+    document.getElementById("optIPA").style.display =
+      kelas === "10" ? "block" : "none";
+
+    document.getElementById("optFisika").style.display =
+      kelas === "11" ? "block" : "none";
+
+    document.getElementById("optKimia").style.display =
+      kelas === "11" ? "block" : "none";
+
+    document.getElementById("optMTK").style.display = "block";
+
+  }
+  else{
+    upgradeSection.style.display = "none";
+  }
+  
   const priceBox = document.getElementById("priceBox");
 
   if(["7","8","9","10"].includes(kelas)){
@@ -524,6 +583,28 @@ function validateForm(){
   const isValid = nama && nomorValid && jadwalValid;
 
   document.getElementById("submitBtn").disabled = !isValid;
+
+}
+
+function lihatUpgrade(){
+
+  if(document.getElementById("checkIPA").checked){
+    mapel = "IPA";
+    loadMateri();
+    loadSchedule();
+  }
+
+  if(document.getElementById("checkFisika").checked){
+    mapel = "Fisika";
+    loadMateri();
+    loadSchedule();
+  }
+
+  if(document.getElementById("checkKimia").checked){
+    mapel = "Kimia";
+    loadMateri();
+    loadSchedule();
+  }
 
 }
   
