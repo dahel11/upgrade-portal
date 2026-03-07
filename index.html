@@ -153,8 +153,9 @@
     Lihat harga dan jadwal
   </button>
 
-  <div style="font-size:13px;color:#666;margin-top:6px">
-    Anda dapat memilih lebih dari satu opsi
+  <div id="updateHint"
+       style="font-size:13px;color:#f59e0b;margin-top:6px;display:none">
+    Pilihan berubah. Klik "Perbarui harga dan jadwal".
   </div>
 
 </div>
@@ -208,6 +209,7 @@ let kelas = "";
 let mapel = "";
 let jadwalFisika = "";
 let jadwalKimia = "";
+let upgradeDirty = false;
 
 document.getElementById("kelas").onchange = function() {
   kelas = this.value;
@@ -675,6 +677,12 @@ function lihatUpgrade(){
     behavior:"smooth"
   });
 
+  upgradeDirty = false;
+
+  document.getElementById("updateHint").style.display = "none";
+
+  document.getElementById("lihatBtn").style.background = "#2563eb";
+
 }
 
 const upgradeCheckboxes = [
@@ -692,8 +700,12 @@ upgradeCheckboxes.forEach(id=>{
 
       const btn = document.getElementById("lihatBtn");
 
+      upgradeDirty = true;
+
       btn.style.background = "#f59e0b";
       btn.innerText = "Perbarui harga dan jadwal";
+
+      document.getElementById("updateHint").style.display = "block";
 
     });
   }
