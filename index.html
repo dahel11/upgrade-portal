@@ -207,6 +207,7 @@
 
 let kelas = "";
 let mapel = "";
+let jadwalIPA = "";
 let jadwalFisika = "";
 let jadwalKimia = "";
 let jadwalMTK = "";
@@ -627,7 +628,7 @@ function pickSlot(mapelSlot,day,time,teacher,event){
     mapelSlot + " - " + day + " " + displayTime + " WIB " + teacher;
 
   if(mapelSlot === "IPA"){
-    document.getElementById("preferensi").value = text;
+    jadwalIPA = text;
   }
   
   if(mapelSlot === "Fisika"){
@@ -645,7 +646,7 @@ function pickSlot(mapelSlot,day,time,teacher,event){
   document.getElementById("preferensi").value =
     mapelSlot === "IPA"
       ? text
-      : [jadwalFisika, jadwalKimia, jadwalMTK]
+      : [jadwalIPA, jadwalFisika, jadwalKimia, jadwalMTK]
           .filter(Boolean)
           .join("\n");
 
@@ -764,31 +765,19 @@ upgradeCheckboxes.forEach(id=>{
 
       const btn = document.getElementById("lihatBtn");
 
-      const selected = upgradeCheckboxes
-        .filter(i => document.getElementById(i).checked);
+      jadwalIPA = "";
+      jadwalFisika = "";
+      jadwalKimia = "";
+      jadwalMTK = "";
 
-      const isAdding =
-        selected.length > prevSelected.length &&
-        prevSelected.every(i => selected.includes(i));
+      document.getElementById("preferensi").value = "";
 
-      if(!isAdding){
-        jadwalFisika = "";
-        jadwalKimia = "";
-        jadwalMTK = "";
-
-        document.getElementById("preferensi").value = "";
-
-        document.querySelectorAll(".slot").forEach(s=>{
-          s.style.borderColor="#eee";
-          s.style.background="white";
-          const icon = s.querySelector(".checkIcon");
-          if(icon) icon.style.opacity = 0;
-        });
-      }
-
-      prevSelected = selected;
-
-      upgradeDirty = true;
+      document.querySelectorAll(".slot").forEach(s=>{
+        s.style.borderColor="#eee";
+        s.style.background="white";
+        const icon = s.querySelector(".checkIcon");
+        if(icon) icon.style.opacity = 0;
+      });
 
       btn.disabled = false;
       btn.style.background = "#2563eb";
