@@ -695,6 +695,12 @@ function validateForm(){
 
 async function lihatUpgrade(){
 
+  const btn = document.getElementById("lihatBtn");
+
+  btn.disabled = true;
+  btn.style.background = "#1d4ed8"; // biru lebih tua
+  btn.innerText = "Memuat jadwal...";
+  
   const pilihIPA = document.getElementById("checkIPA").checked;
   const pilihFisika = document.getElementById("checkFisika").checked;
   const pilihKimia = document.getElementById("checkKimia").checked;
@@ -729,15 +735,14 @@ async function lihatUpgrade(){
     await loadMateriBySubject("Matematika");
   }
 
-  const btn = document.getElementById("lihatBtn");
+  document.getElementById("formSection").style.display = "block";
 
-  btn.disabled = true;
   btn.style.background="#cbd5e1";
   btn.innerText="Harga dan jadwal sudah diperbarui";
 
   document.getElementById("updateHint").style.display="none";
 
-  document.getElementById("schedule").scrollIntoView({
+  scheduleBox.scrollIntoView({
     behavior:"smooth"
   });
 
