@@ -424,7 +424,7 @@ async function loadSchedule(){
     document.getElementById("schedule").innerHTML =
       "<b>Pilihan jadwal " + mapel + " tersedia</b><br>" +
       "<div style='font-size:13px;color:#666;margin-top:2px'><b>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</b></div>" +
-      data.slice(0,6).map(s => `
+      data.slice(0,10).map(s => `
         <div class='slot' data-mapel="${mapel}" onclick="pickSlot('${mapel}','${s.days}','${s.time}','${s.teacher}',event)">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div>
@@ -473,7 +473,7 @@ async function loadScheduleBySubject(subject){
     "<div style='font-size:13px;color:#666;margin-bottom:8px'><b>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</b></div>";
 
   box.innerHTML +=
-    data.slice(0,6).map(s => `
+    data.slice(0,10).map(s => `
       <div class='slot' data-mapel="${subject}" onclick="pickSlot('${subject}','${s.days}','${s.time}','${s.teacher}',event)">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
@@ -693,50 +693,43 @@ function validateForm(){
 
 }
 
-function lihatUpgrade(){
+async function lihatUpgrade(){
 
   const pilihIPA = document.getElementById("checkIPA").checked;
   const pilihFisika = document.getElementById("checkFisika").checked;
   const pilihKimia = document.getElementById("checkKimia").checked;
   const pilihMTK = document.getElementById("checkMTK").checked;
 
-  if(!pilihIPA && !pilihFisika && !pilihKimia && !pilihMTK){
-    alert("Silakan pilih penambahan terlebih dahulu");
-    return;
-  }
+  const scheduleBox = document.getElementById("schedule");
+  const materiBox = document.getElementById("materiBox");
 
-  document.getElementById("schedule").innerHTML="";
-  document.getElementById("materiBox").innerHTML="";
+  scheduleBox.innerHTML = "";
+  materiBox.innerHTML = "";
 
-  document.getElementById("schedule").style.display="block";
-  document.getElementById("materiBox").style.display="block";
-
-  mapel="";
+  scheduleBox.style.display = "block";
+  materiBox.style.display = "block";
 
   if(pilihIPA){
-    mapel="IPA";
-    loadMateri();
-    loadSchedule();
+    await loadScheduleBySubject("IPA");
+    await loadMateriBySubject("IPA");
   }
 
   if(pilihFisika){
-    mapel="Fisika";
-    loadMateri();
-    loadSchedule();
+    await loadScheduleBySubject("Fisika");
+    await loadMateriBySubject("Fisika");
   }
 
   if(pilihKimia){
-    mapel="Kimia";
-    loadMateri();
-    loadSchedule();
+    await loadScheduleBySubject("Kimia");
+    await loadMateriBySubject("Kimia");
   }
 
   if(pilihMTK){
-    mapel="Matematika";
-    loadMateri();
-    loadSchedule();
+    await loadScheduleBySubject("Matematika");
+    await loadMateriBySubject("Matematika");
   }
 
+}
   const btn = document.getElementById("lihatBtn");
 
   btn.disabled = true;
