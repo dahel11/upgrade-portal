@@ -737,27 +737,6 @@ function lihatUpgrade(){
     behavior:"smooth"
   });
 
-  loadMateri();
-  loadSchedule();
-
-  document.getElementById("lihatBtn").innerText = "Perbarui harga dan jadwal";
-
-  document.getElementById("schedule").scrollIntoView({
-    behavior:"smooth"
-  });
-
-  upgradeDirty = false;
-
-  const btn = document.getElementById("lihatBtn");
-
-  btn.disabled = true;
-  btn.style.background = "#cbd5e1"; // abu
-  btn.innerText = "Harga dan jadwal sudah diperbarui";
-
-  document.getElementById("updateHint").style.display = "none";
-
-}
-
 const upgradeCheckboxes = [
   "checkIPA",
   "checkFisika",
