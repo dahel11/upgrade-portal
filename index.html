@@ -132,7 +132,7 @@
       <span>Kimia</span>
     </label>
 
-    <label id="optMTK" style="display:none">
+    <label id="optMTK" style="display:none; align-items:flex-start; gap:8px;">
 
       <input type="checkbox" id="checkMTK">
 
@@ -233,7 +233,7 @@ document.getElementById("kelas").onchange = function() {
     document.getElementById("optKimia").style.display =
       kelas === "11" ? "block" : "none";
 
-    document.getElementById("optMTK").style.display = "block";
+    document.getElementById("optMTK").style.display = "flex";
 
   }
   else{
