@@ -673,8 +673,12 @@ function validateForm(){
   const pilihKimia = document.getElementById("checkKimia")?.checked;
   const pilihMTK = document.getElementById("checkMTK")?.checked;
 
-  if(pilihIPA){
+  if(mapel === "IPA"){
     jadwalValid = !!document.getElementById("preferensi").value.trim();
+  }
+
+  if(pilihIPA){
+    jadwalValid = !!jadwalIPA;
   }
 
   if(pilihFisika){
