@@ -248,7 +248,7 @@ document.getElementById("kelas").onchange = function() {
   
   const priceBox = document.getElementById("priceBox");
 
-  if(["7","8","9","10"].includes(kelas)){
+  if(["7","8","9"].includes(kelas)){
     priceBox.style.display = "block";
     priceBox.innerHTML = `
       Biaya penambahan: <b>Rp 49.000</b> 
@@ -258,6 +258,26 @@ document.getElementById("kelas").onchange = function() {
 
       <div style="margin-top:4px;color:#666;font-size:14px">
         Total biaya per bulan: <b>Rp 139.000</b>
+      </div>
+    `;
+  }
+  else if(kelas === "10"){
+    priceBox.style.display = "block";
+    priceBox.innerHTML = `
+      <div>
+        Biaya penambahan:<br>
+
+        • IPA: <b>Rp 49.000</b>
+        <span style="font-size:14px;margin-left:4px">
+          (kelas IPA 1x per minggu)
+        </span>
+        <br>
+
+        • Matematika 2x/Minggu: <b>Rp 25.000</b>
+      </div>
+
+      <div style="margin-top:6px;color:#666;font-size:14px">
+        Total biaya per bulan: paket Matematika + penambahan
       </div>
     `;
   }
@@ -277,6 +297,9 @@ document.getElementById("kelas").onchange = function() {
         <span style="font-size:14px;margin-left:4px">
           (2x kelas per minggu — Fisika 1x & Kimia 1x)
         </span>
+        <br>
+
+        • Matematika 2x/Minggu: <b>Rp 25.000</b>
       </div>
 
       <div style="margin-top:6px;color:#666;font-size:14px">
