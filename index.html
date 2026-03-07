@@ -661,8 +661,6 @@ function pickSlot(mapelSlot,day,time,teacher,event){
   if(jadwalMTK) jadwalList.push(jadwalMTK);
 
   document.getElementById("preferensi").value = jadwalList.join("\n");
-
-  document.getElementById("submitBtn").disabled = false;
   
   validateForm();
 }
@@ -672,7 +670,7 @@ function validateForm(){
   const nama = document.getElementById("nama").value.trim();
   const nomor = document.getElementById("nomor").value.trim();
 
-  const nomorValid = nomor.length >= 9 && nomor.length <= 12;
+  const nomorValid = /^8[1-9][0-9]{7,10}$/.test(nomor);
 
   let jadwalValid = false;
 
