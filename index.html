@@ -155,7 +155,7 @@
 
   <div id="updateHint"
        style="font-size:13px;color:#555;margin-top:6px;display:none">
-    Klik "Perbarui harga dan jadwal"
+    Klik "Lihat harga dan jadwal"
   </div>
 
 </div>
@@ -316,7 +316,7 @@ document.getElementById("kelas").onchange = function() {
       </div>
 
       <div style="margin-top:6px;color:#666;font-size:14px">
-        Total biaya per bulan: paket Matematika + mapel tambahan
+        Total biaya per bulan: paket Matematika + penambahan
       </div>
     `;
   } else {
@@ -435,7 +435,7 @@ async function loadSchedule(){
 
     document.getElementById("schedule").innerHTML =
       "<b>Pilihan jadwal " + mapel + " tersedia</b><br>" +
-      "<div style='font-size:13px;color:#666;margin-top:2px'><b>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</b></div>" +
+      "<div style='font-size:13px;color:#666;margin-top:2px'>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</div>" +
       data.slice(0,10).map(s => `
         <div class='slot' data-mapel="${mapel}" onclick="pickSlot('${mapel}','${s.days}','${s.time}','${s.teacher}',event)">
           <div style="display:flex;justify-content:space-between;align-items:center">
@@ -482,7 +482,7 @@ async function loadScheduleBySubject(subject){
 
   box.innerHTML +=
     "<div style='margin-top:"+marginTop+";margin-bottom:6px'><b>Pilihan jadwal " + subject + " tersedia</b></div>" +
-    "<div style='font-size:13px;color:#666;margin-bottom:8px'><b>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</b></div>";
+    "<div style='font-size:13px;color:#666;margin-bottom:8px'>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</div>";
 
   box.innerHTML +=
     data.slice(0,10).map(s => `
@@ -794,7 +794,7 @@ upgradeCheckboxes.forEach(id=>{
 
       btn.disabled = false;
       btn.style.background = "#2563eb";
-      btn.innerText = "Perbarui harga dan jadwal";
+      btn.innerText = "Lihat harga dan jadwal";
 
       document.getElementById("updateHint").style.display = "block";
 
@@ -807,7 +807,7 @@ document.getElementById("nomor").oninput = validateForm;
 
 document.getElementById("nomor").addEventListener("input", function(){
 
-  let val = this.value.replace(/\D/g,""); // hapus non angka
+  let val = this.value.replace(/\D/g,""); 
 
   if(val.startsWith("62")){
     val = val.slice(2);
