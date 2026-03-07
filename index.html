@@ -210,6 +210,7 @@ let mapel = "";
 let jadwalFisika = "";
 let jadwalKimia = "";
 let jadwalMTK = "";
+let prevSelected = [];
 let upgradeDirty = false;
 
 document.getElementById("kelas").onchange = function() {
@@ -710,7 +711,7 @@ async function lihatUpgrade(){
   const materiBox = document.getElementById("materiBox");
 
   scheduleBox.innerHTML = "Memuat jadwal...";
-  materiBox.innerHTML = "Memuat materi...";
+  materiBox.innerHTML = "";
 
   scheduleBox.style.display = "block";
   materiBox.style.display = "block";
@@ -762,6 +763,30 @@ upgradeCheckboxes.forEach(id=>{
     el.addEventListener("change",function(){
 
       const btn = document.getElementById("lihatBtn");
+
+      const selected = upgradeCheckboxes
+        .filter(i => document.getElementById(i).checked);
+
+      const isAdding =
+        selected.length > prevSelected.length &&
+        prevSelected.every(i => selected.includes(i));
+
+      if(!isAdding){
+        jadwalFisika = "";
+        jadwalKimia = "";
+        jadwalMTK = "";
+
+        document.getElementById("preferensi").value = "";
+
+        document.querySelectorAll(".slot").forEach(s=>{
+          s.style.borderColor="#eee";
+          s.style.background="white";
+          const icon = s.querySelector(".checkIcon");
+          if(icon) icon.style.opacity = 0;
+        });
+      }
+
+      prevSelected = selected;
 
       upgradeDirty = true;
 
