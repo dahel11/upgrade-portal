@@ -661,6 +661,8 @@ function pickSlot(mapelSlot,day,time,teacher,event){
   if(jadwalMTK) jadwalList.push(jadwalMTK);
 
   document.getElementById("preferensi").value = jadwalList.join("\n");
+
+  document.getElementById("submitBtn").disabled = false;
   
   validateForm();
 }
