@@ -62,6 +62,27 @@
       padding:12px 20px;
       font-size:16px;
     }
+    #upgradeSection label{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    #upgradeSection input[type="checkbox"]{
+      width:auto;
+      padding:0;
+      margin-top:4px;
+    }
+
+    .upgradeText{
+      display:block;
+    }
+
+    .upgradeNote{
+      font-size:13px;
+      margin-top:4px;
+    }
   </style>
 
 </head>
@@ -111,15 +132,17 @@
       <span>Kimia</span>
     </label>
 
-    <label id="optMTK" style="display:none; display:flex; align-items:flex-start; gap:8px; margin-top:10px;">
-  
+    <label id="optMTK" style="display:none">
+
       <input type="checkbox" id="checkMTK">
 
-      <div>
+      <div class="upgradeText">
         Frekuensi kelas Matematika (2x per minggu)
-        <div style="font-size:13px; margin-top:4px;">
+
+        <div class="upgradeNote">
           Jika saat ini sudah 2x per minggu, opsi ini dapat diabaikan.
         </div>
+
       </div>
 
     </label>
