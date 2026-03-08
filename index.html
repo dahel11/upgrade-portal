@@ -211,10 +211,10 @@
 
 let kelas = "";
 let mapel = "";
-let jadwalIPA = "";
-let jadwalFisika = "";
-let jadwalKimia = "";
-let jadwalMTK = "";
+
+let selectedSchedule = {};
+let jadwalText = {};
+  
 let prevSelected = [];
 let upgradeDirty = false;
 
@@ -226,10 +226,8 @@ document.getElementById("kelas").onchange = function() {
   document.getElementById("checkKimia").checked = false;
   document.getElementById("checkMTK").checked = false;
 
-  jadwalIPA = "";
-  jadwalFisika = "";
-  jadwalKimia = "";
-  jadwalMTK = "";
+  selectedSchedule = {};
+  jadwalText = {};
   
   document.getElementById("preferensi").value = "";  
   document.getElementById("submitBtn").disabled = true;
@@ -619,8 +617,45 @@ function getDisplayTime(time){
   }
   return time;
 }
+
+function hasConflict(mapelSlot,days,time){
+
+  for(const mapel in selectedSchedule){
+
+    if(mapel === mapelSlot) continue;
+
+    const sched = selectedSchedule[mapel];
+
+    if(!sched) continue;
+
+    if(sched.time !== time) continue;
+
+    const overlap = sched.days.some(d => days.includes(d));
+
+    if(overlap){
+      return mapel;
+    }
+
+  }
+
+  return null;
+}
   
 function pickSlot(mapelSlot,day,time,teacher,event){
+
+  const days = day.split(",");
+
+  const conflict = hasConflict(mapelSlot,days,time);
+
+  if(conflict){
+    alert("Jadwal bentrok dengan " + conflict);
+    return;
+  }
+
+  selectedSchedule[mapelSlot] = {
+    days: days,
+    time: time
+  };
 
   document.querySelectorAll(".slot[data-mapel='"+mapelSlot+"']").forEach(slot=>{
     slot.style.borderColor="#eee";
@@ -641,33 +676,11 @@ function pickSlot(mapelSlot,day,time,teacher,event){
   const text =
     mapelSlot + " - " + day + " " + displayTime + " WIB " + teacher;
 
-  if(mapelSlot === "IPA"){
-    jadwalIPA = text;
-  }
-  
-  if(mapelSlot === "Fisika"){
-    jadwalFisika = text;
-  }
+  jadwalText[mapelSlot] = text;
 
-  if(mapelSlot === "Kimia"){
-    jadwalKimia = text;
-  }
+  document.getElementById("preferensi").value =
+    Object.values(jadwalText).join("\n");
 
-  if(mapelSlot === "Matematika"){
-    jadwalMTK = text;
-  }
-
-  const jadwalList = [];
-
-  if(jadwalIPA) jadwalList.push(jadwalIPA);
-  if(jadwalFisika) jadwalList.push(jadwalFisika);
-  if(jadwalKimia) jadwalList.push(jadwalKimia);
-  if(jadwalMTK) jadwalList.push(jadwalMTK);
-
-  document.getElementById("preferensi").value = jadwalList.join("\n");
-
-  document.getElementById("submitBtn").disabled = false;
-  
   validateForm();
 }
 
@@ -782,10 +795,8 @@ upgradeCheckboxes.forEach(id=>{
 
       const btn = document.getElementById("lihatBtn");
 
-      jadwalIPA = "";
-      jadwalFisika = "";
-      jadwalKimia = "";
-      jadwalMTK = "";
+      selectedSchedule = {};
+      jadwalText = {};
 
       document.getElementById("preferensi").value = "";
 
