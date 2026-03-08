@@ -702,20 +702,15 @@ function validateForm(){
     jadwalValid = !!document.getElementById("preferensi").value.trim();
   }
 
-  if(pilihIPA){
-    jadwalValid = !!jadwalIPA;
-  }
+  let required = [];
 
-  if(pilihFisika){
-    jadwalValid = jadwalValid && jadwalFisika || !!jadwalFisika;
-  }
+  if(pilihIPA) required.push("IPA");
+  if(pilihFisika) required.push("Fisika");
+  if(pilihKimia) required.push("Kimia");
+  if(pilihMTK) required.push("Matematika");
 
-  if(pilihKimia){
-    jadwalValid = jadwalValid && jadwalKimia || !!jadwalKimia;
-  }
-
-  if(pilihMTK){
-    jadwalValid = jadwalValid && jadwalMTK || !!jadwalMTK;
+  if(required.length){
+    jadwalValid = required.every(m => selectedSchedule[m]);
   }
 
   const isValid = nama && nomorValid && jadwalValid;
