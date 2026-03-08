@@ -643,7 +643,7 @@ function hasConflict(mapelSlot,days,time){
   
 function pickSlot(mapelSlot,day,time,teacher,event){
 
-  const days = day.split(",");
+  const days = day.split(",").map(d => d.trim());
 
   const conflict = hasConflict(mapelSlot,days,time);
 
