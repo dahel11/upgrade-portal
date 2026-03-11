@@ -755,6 +755,17 @@ function validateForm(){
 
 async function lihatUpgrade(){
 
+  const nomor = document.getElementById("nomor").value;
+
+  const student = await getStudent(nomor);
+
+  if(student.tenure === "semesterly"){
+    runSemesterUpgrade(student);
+  }
+  else{
+    runMonthlyUpgrade();
+  }
+  
   const btn = document.getElementById("lihatBtn");
 
   btn.disabled = true;
@@ -816,6 +827,18 @@ const upgradeCheckboxes = [
   "checkMTK"
 ];
 
+async function getStudent(userId){
+
+  const res = await fetch(
+    "https://script.google.com/macros/s/AKfycbysTFquCQpXDY5G9IcRzY6Mp8L7BM4nKMaE1zig1kC3SJzAMBGYbeC1X9Fg3WKDu1w0/exec?user_id="+userId
+  );
+
+  const data = await res.json();
+
+  return data;
+
+}
+  
 upgradeCheckboxes.forEach(id=>{
   const el = document.getElementById(id);
 
