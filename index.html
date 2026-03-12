@@ -269,8 +269,6 @@ document.getElementById("kelas").onchange = function() {
   if(["7","8","9"].includes(kelas)){
     mapel = "IPA";
     document.getElementById("mapelSection").style.display="none";
-    loadSchedule();
-    loadMateri();
   } 
   
   else if(kelas === "10" || kelas === "11"){
@@ -729,10 +727,10 @@ async function lihatUpgrade(){
   Harga dihitung hingga akhir semester (14 Juni 2026)
   </div>`;
   
-  const pilihIPA = document.getElementById("checkIPA").checked;
-  const pilihFisika = document.getElementById("checkFisika").checked;
-  const pilihKimia = document.getElementById("checkKimia").checked;
-  const pilihMTK = document.getElementById("checkMTK").checked;
+  const pilihIPA = document.getElementById("checkIPA")?.checked;
+  const pilihFisika = document.getElementById("checkFisika")?.checked;
+  const pilihKimia = document.getElementById("checkKimia")?.checked;
+  const pilihMTK = document.getElementById("checkMTK")?.checked;
 
   const scheduleBox = document.getElementById("schedule");
   const materiBox = document.getElementById("materiBox");
@@ -742,6 +740,11 @@ async function lihatUpgrade(){
 
   scheduleBox.style.display = "block";
   materiBox.style.display = "block";
+
+  if(["7","8","9"].includes(kelas)){
+    await loadScheduleBySubject("IPA");
+    await loadMateriBySubject("IPA");
+  }
 
   if(pilihIPA){
     await loadScheduleBySubject("IPA");
