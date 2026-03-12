@@ -263,67 +263,8 @@ document.getElementById("kelas").onchange = function() {
   
   const priceBox = document.getElementById("priceBox");
 
-  if(["7","8","9"].includes(kelas)){
-    priceBox.style.display = "block";
-    priceBox.innerHTML = `
-      Biaya penambahan: <b>Rp 49.000</b> 
-      <span style="font-size:14px">
-        (1x kelas IPA per minggu)
-      </span>
-
-      <div style="margin-top:4px;color:#666;font-size:14px">
-        Total biaya per bulan: <b>Rp 139.000</b>
-      </div>
-    `;
-  }
-  else if(kelas === "10"){
-    priceBox.style.display = "block";
-    priceBox.innerHTML = `
-      <div>
-        Biaya penambahan:<br>
-
-        • IPA: <b>Rp 49.000</b>
-        <span style="font-size:14px">
-          (kelas IPA 1x per minggu)
-        </span>
-        <br>
-
-        • Matematika 2x/Minggu: <b>Rp 25.000</b>
-      </div>
-
-      <div style="margin-top:6px;color:#666;font-size:14px">
-        Total biaya per bulan: paket Matematika + penambahan
-      </div>
-    `;
-  }
-  else if(kelas === "11"){
-    priceBox.style.display = "block";
-    priceBox.innerHTML = `
-      <div>
-        Biaya penambahan:<br>
-
-        • Fisika atau Kimia: <b>Rp 49.000</b>
-        <span style="font-size:14px">
-          (1x kelas Fisika/Kimia per minggu)
-        </span>
-        <br>
-
-        • Fisika + Kimia: <b>Rp 79.000</b>
-        <span style="font-size:14px">
-          (2x kelas per minggu — Fisika 1x & Kimia 1x)
-        </span>
-        <br>
-
-        • Matematika 2x/Minggu: <b>Rp 25.000</b>
-      </div>
-
-      <div style="margin-top:6px;color:#666;font-size:14px">
-        Total biaya per bulan: paket Matematika + penambahan
-      </div>
-    `;
-  } else {
-    priceBox.style.display = "none";
-  }
+  priceBox.style.display = "none";
+  priceBox.innerHTML = "";
   
   if(["7","8","9"].includes(kelas)){
     mapel = "IPA";
@@ -760,6 +701,33 @@ async function lihatUpgrade(){
   btn.disabled = true;
   btn.style.background = "#60a5fa";
   btn.innerText = "Memuat jadwal...";
+
+  const today = new Date();
+
+  const semesterEnd = "2026-06-14"; 
+  const breakStart = "2026-03-16";
+  const breakEnd = "2026-03-29";
+
+  let priceUpgrade = 49000;
+
+  const totalUpgrade = calculateSemesterUpgrade(
+    today,
+    semesterEnd,
+    priceUpgrade,
+    breakStart,
+    breakEnd
+  );
+
+  const priceBox = document.getElementById("priceBox");
+
+  priceBox.style.display = "block";
+
+  priceBox.innerHTML =
+  `Biaya upgrade hingga akhir semester: 
+  <b>Rp ${totalUpgrade.toLocaleString()}</b>
+  <div style="margin-top:6px;color:#666;font-size:13px">
+  Harga dihitung hingga akhir semester (14 Juni 2026)
+  </div>`;
   
   const pilihIPA = document.getElementById("checkIPA").checked;
   const pilihFisika = document.getElementById("checkFisika").checked;
@@ -864,6 +832,52 @@ document.getElementById("nomor").addEventListener("input", function(){
   this.value = val;
 
 });
+
+function calculateSemesterUpgrade(startDate,endDate,priceUpgrade,breakStart,breakEnd){
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  const startDay = start.getDate();
+  const endDay = end.getDate();
+
+  let lastMonthlyDate;
+
+  if(startDay > endDay){
+    lastMonthlyDate = new Date(end.getFullYear(),end.getMonth()-1,startDay);
+  }else{
+    lastMonthlyDate = new Date(end.getFullYear(),end.getMonth(),startDay);
+  }
+
+  const fullMonths =
+    (lastMonthlyDate.getFullYear()-start.getFullYear())*12 +
+    (lastMonthlyDate.getMonth()-start.getMonth());
+
+  const costFullMonth = priceUpgrade * fullMonths;
+
+  const diffDays =
+    Math.floor((end-lastMonthlyDate)/(1000*60*60*24))+1;
+
+  const daysInMonth =
+    new Date(lastMonthlyDate.getFullYear(),lastMonthlyDate.getMonth()+1,0).getDate();
+
+  const prorateCost = priceUpgrade*(diffDays/daysInMonth);
+
+  const breakStartDate = new Date(breakStart);
+  const breakEndDate = new Date(breakEnd);
+
+  const breakDays =
+    Math.floor((breakEndDate-breakStartDate)/(1000*60*60*24))+1;
+
+  const breakMonthDays =
+    new Date(breakEndDate.getFullYear(),breakEndDate.getMonth()+1,0).getDate();
+
+  const breakCost = (priceUpgrade/breakMonthDays)*breakDays;
+
+  const total = Math.round(costFullMonth+prorateCost-breakCost);
+
+  return total;
+}
   
 </script>
 
