@@ -241,7 +241,18 @@ document.getElementById("kelas").onchange = function() {
 
   const upgradeSection = document.getElementById("upgradeSection");
 
-  if(kelas === "10" || kelas === "11"){
+  if(["7","8","9"].includes(kelas)){
+
+    upgradeSection.style.display = "block";
+
+    document.getElementById("optIPA").style.display = "none";
+    document.getElementById("optFisika").style.display = "none";
+    document.getElementById("optKimia").style.display = "none";
+    document.getElementById("optMTK").style.display = "none";
+
+  }
+
+  else if(kelas === "10" || kelas === "11"){
 
     upgradeSection.style.display = "block";
 
@@ -257,6 +268,7 @@ document.getElementById("kelas").onchange = function() {
     document.getElementById("optMTK").style.display = "flex";
 
   }
+
   else{
     upgradeSection.style.display = "none";
   }
