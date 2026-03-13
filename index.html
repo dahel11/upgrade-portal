@@ -734,18 +734,27 @@ async function lihatUpgrade(){
   const pilihFisika = document.getElementById("checkFisika")?.checked;
   const pilihKimia = document.getElementById("checkKimia")?.checked;
   const pilihMTK = document.getElementById("checkMTK")?.checked;
-
-  // hitung harga upgrade
+  
   if(["7","8","9"].includes(kelas)){
     priceUpgrade += 49000;
   }
+  
+  if(pilihIPA){
+    priceUpgrade += 49000;
+  }
+  
+  if(pilihFisika && pilihKimia){
+    priceUpgrade += 79000;
+  }
+  else{
+    if(pilihFisika) priceUpgrade += 49000;
+    if(pilihKimia) priceUpgrade += 49000;
+  }
+  
+  if(pilihMTK){
+    priceUpgrade += 25000;
+  }
 
-  if(pilihIPA) priceUpgrade += 49000;
-  if(pilihFisika) priceUpgrade += 49000;
-  if(pilihKimia) priceUpgrade += 49000;
-  if(pilihMTK) priceUpgrade += 25000;
-
-  // kalau tidak ada pilihan
   if(priceUpgrade === 0){
     alert("Silakan pilih penambahan terlebih dahulu.");
     btn.disabled = false;
