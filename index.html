@@ -101,7 +101,7 @@
 
 <div class="card" id="lookupSection">
 
-  <b>Masukkan nomor WhatsApp murid yang terdaftar di CoLearn</b>
+  <b>Masukkan nomor murid yang terdaftar di CoLearn</b>
 
   <input 
     id="lookupPhone"
@@ -117,7 +117,7 @@
 
 <div class="card" id="studentInfo" style="display:none">
 
-  <b>Data murid ditemukan</b>
+  <b>Data murid ditemukan</b><br>
 
   <div id="studentName"></div>
   <div id="studentGrade"></div>
@@ -227,7 +227,7 @@
     <h2>Formulir berhasil terkirim</h2>
 
     <p>
-      Terima kasih. Permintaan penambahan mata pelajaran sedang diproses.<br>
+      Terima kasih. Permintaan sedang diproses.<br>
       Kakak Siaga akan segera menghubungi melalui WhatsApp.
     </p>
 
@@ -976,7 +976,7 @@ async function lookupStudent(){
   try{
 
     const res = await fetch(
-      `https://script.google.com/macros/s/AKfycbzqB1Z7b8ZI4tbPMbUmttoMDNYMctmkAUnVyjRfRoFreOzqTpCit7rjsKA7xzHyEPKe/exec?type=studentLookup&phone=${phone}`
+      `https://script.google.com/macros/s/AKfycbwyD-MHGQfSzcAQ39tOi-Y8jHfSrTdHaiNdw8pxzCEMJtdwojNcoSvmiRscLTatmmkP/exec?type=studentLookup&phone=${phone}`
     );
 
     const data = await res.json();
@@ -1002,7 +1002,7 @@ async function lookupStudent(){
       "Kelas: " + data.grade;
 
     document.getElementById("studentTenure").innerText =
-      "Skema pembayaran: " + (tenureMap[data.tenure] || data.tenure);
+      "Pembayaran: " + (tenureMap[data.tenure] || data.tenure);
 
     kelas = String(data.grade);
 
