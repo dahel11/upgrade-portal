@@ -274,29 +274,36 @@ let state = {
 
 function resetPortal(){
 
-  ["checkIPA","checkFisika","checkKimia","checkMTK"].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.checked=false;
-  });
+  document.getElementById("checkIPA").checked = false;
+  document.getElementById("checkFisika").checked = false;
+  document.getElementById("checkKimia").checked = false;
+  document.getElementById("checkMTK").checked = false;
 
-  document.getElementById("priceBox").style.display="none";
-  document.getElementById("schedule").style.display="none";
-  document.getElementById("materiBox").style.display="none";
+  const priceBox = document.getElementById("priceBox");
+  priceBox.style.display = "none";
+  priceBox.innerHTML = "";
 
-  document.getElementById("priceBox").innerHTML="";
-  document.getElementById("schedule").innerHTML="";
-  document.getElementById("materiBox").innerHTML="";
+  const scheduleBox = document.getElementById("schedule");
+  scheduleBox.style.display = "none";
+  scheduleBox.innerHTML = "";
 
-  document.getElementById("preferensi").value="";
-  document.getElementById("submitBtn").disabled=true;
+  const materiBox = document.getElementById("materiBox");
+  materiBox.style.display = "none";
+  materiBox.innerHTML = "";
 
-  state.selectedSchedule={};
-  state.jadwalText={};
+  document.getElementById("preferensi").value = "";
+  document.getElementById("submitBtn").disabled = true;
 
-  const btn=document.getElementById("lihatBtn");
-  btn.disabled=true;
-  btn.innerText="Lihat harga dan jadwal";
-  btn.style.background="#2563eb";
+  selectedSchedule = {};
+  jadwalText = {};
+
+  const btn = document.getElementById("lihatBtn");
+  btn.disabled = true;
+  btn.style.background = "#2563eb";
+  btn.innerText = "Lihat harga dan jadwal";
+
+  document.getElementById("updateHint").style.display = "none";
+  document.getElementById("upgradeSection").style.display = "none";
 
 }
 
