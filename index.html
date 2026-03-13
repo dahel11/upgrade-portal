@@ -360,6 +360,8 @@ async function lookupStudent(){
     kelasSelect.value = state.kelas;
     kelasSelect.dispatchEvent(new Event("change"));
 
+    document.getElementById("upgradeSection").style.display = "block";
+
     btn.innerText="Data ditemukan";
 
   }catch{
