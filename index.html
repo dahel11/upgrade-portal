@@ -728,7 +728,32 @@ async function lihatUpgrade(){
   const breakStart = "2026-03-16";
   const breakEnd = "2026-03-29";
 
-  let priceUpgrade = 49000;
+  let priceUpgrade = 0;
+
+  const pilihIPA = document.getElementById("checkIPA")?.checked;
+  const pilihFisika = document.getElementById("checkFisika")?.checked;
+  const pilihKimia = document.getElementById("checkKimia")?.checked;
+  const pilihMTK = document.getElementById("checkMTK")?.checked;
+
+  if(["7","8","9"].includes(kelas)){
+    priceUpgrade += 49000;
+  }
+
+  if(pilihIPA){
+    priceUpgrade += 49000;
+  }
+
+  if(pilihFisika){
+    priceUpgrade += 49000;
+  }
+  
+  if(pilihKimia){
+    priceUpgrade += 49000;
+  }
+  
+  if(pilihMTK){
+    priceUpgrade += 25000;
+  }
 
   const totalUpgrade = calculateSemesterUpgrade(
     today,
