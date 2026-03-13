@@ -250,6 +250,17 @@ let jadwalText = {};
 let prevSelected = [];
 let upgradeDirty = false;
 
+let studentTenure = "";
+
+const semesterEndMap = {
+  "7": "2026-06-14",
+  "8": "2026-06-14",
+  "9": "2026-05-03",
+  "10": "2026-06-14",
+  "11": "2026-06-14",
+  "12": "2026-04-29"
+};
+
 document.getElementById("kelas").onchange = function() {
   kelas = this.value;
 
@@ -741,7 +752,7 @@ function validateForm(){
   document.getElementById("submitBtn").disabled = !isValid;
 
 }
-
+  
 async function lihatUpgrade(){
 
   const btn = document.getElementById("lihatBtn");
@@ -752,7 +763,7 @@ async function lihatUpgrade(){
 
   const today = new Date();
 
-  const semesterEnd = "2026-06-14"; 
+  const semesterEnd = semesterEndMap[kelas];
   const breakStart = "2026-03-16";
   const breakEnd = "2026-03-29";
 
@@ -791,23 +802,52 @@ async function lihatUpgrade(){
     return;
   }
 
-  const totalUpgrade = calculateSemesterUpgrade(
-    today,
-    semesterEnd,
-    priceUpgrade,
-    breakStart,
-    breakEnd
-  );
+  let totalUpgrade;
 
+  if(studentTenure === "semesterly"){
+  
+    totalUpgrade = calculateSemesterUpgrade(
+      today,
+      semesterEnd,
+      priceUpgrade,
+      breakStart,
+      breakEnd
+    );
+  
+  }
+  
+  if(studentTenure === "monthly"){
+  
+    totalUpgrade = priceUpgrade;
+  
+  }
+  
   const priceBox = document.getElementById("priceBox");
 
+  let titleText = "Biaya upgrade hingga akhir semester";
+
+  if(studentTenure === "monthly"){
+    titleText = "Biaya penambahan";
+  }
+
   priceBox.style.display = "block";
-  priceBox.innerHTML =
-  `Biaya upgrade hingga akhir semester: 
-  <b>Rp ${totalUpgrade.toLocaleString()}</b>
-  <div style="margin-top:6px;color:#666;font-size:13px">
-  Harga dihitung hingga akhir semester (14 Juni 2026)
-  </div>`;
+  if(studentTenure === "semesterly"){
+
+    priceBox.innerHTML =
+    `Biaya upgrade hingga akhir semester: 
+    <b>Rp ${totalUpgrade.toLocaleString()}</b>
+    <div style="margin-top:6px;color:#666;font-size:13px">
+    Harga dihitung hingga akhir semester (${formatTanggal(semesterEnd)})
+    </div>`;
+
+  }
+
+  if(studentTenure === "monthly"){
+
+    priceBox.innerHTML =
+    `Biaya penambahan: <b>Rp ${priceUpgrade.toLocaleString()}</b>`;
+
+  }
 
   const scheduleBox = document.getElementById("schedule");
   const materiBox = document.getElementById("materiBox");
@@ -1006,6 +1046,8 @@ async function lookupStudent(){
     document.getElementById("studentTenure").innerText =
       "Pembayaran: " + (tenureMap[data.tenure] || data.tenure);
 
+    studentTenure = data.tenure;
+
     kelas = String(data.grade);
 
     document.getElementById("kelas").value = kelas;
@@ -1021,6 +1063,18 @@ async function lookupStudent(){
     btn.innerText = "Cek Data Murid";
 
   }
+
+}
+
+function formatTanggal(dateStr){
+
+  const d = new Date(dateStr);
+
+  return d.toLocaleDateString("id-ID",{
+    day:"numeric",
+    month:"long",
+    year:"numeric"
+  });
 
 }
 
