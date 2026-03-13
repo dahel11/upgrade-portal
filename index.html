@@ -958,7 +958,7 @@ function calculateSemesterUpgrade(startDate,endDate,priceUpgrade,breakStart,brea
   return total;
 }
 
-async function lookupStudent(){
+aasync function lookupStudent(){
 
   const btn = document.getElementById("lookupBtn");
   const phoneInput = document.getElementById("lookupPhone");
@@ -973,43 +973,52 @@ async function lookupStudent(){
   btn.disabled = true;
   btn.innerText = "Mengecek data...";
 
-  // DATA PALSU UNTUK TEST
-  const data = {
-    found: true,
-    name: "Budi Santoso",
-    grade: 10,
-    tenure: "monthly"
-  };
+  try{
 
-  if(!data.found){
-    alert("Nomor tidak ditemukan");
+    const res = await fetch(
+      `https://script.google.com/macros/s/AKfycbygJ8h_9RvNVDBj5gJHiZXxcx3vAodaXfq4orlc6kVWPJL4UuAAnG9WWeU95_FduDVw/exec?type=studentLookup&phone=${phone}`
+    );
+
+    const data = await res.json();
+
+    const tenureMap = {
+      monthly: "per bulan",
+      semesterly: "per semester"
+    };
+
+    if(!data.found){
+      alert("Nomor tidak ditemukan");
+      btn.disabled = false;
+      btn.innerText = "Cek Data Murid";
+      return;
+    }
+
+    document.getElementById("studentInfo").style.display="block";
+
+    document.getElementById("studentName").innerText =
+      "Nama: " + data.name;
+
+    document.getElementById("studentGrade").innerText =
+      "Kelas: " + data.grade;
+
+    document.getElementById("studentTenure").innerText =
+      "Skema pembayaran: " + (tenureMap[data.tenure] || data.tenure);
+
+    kelas = String(data.grade);
+
+    document.getElementById("kelas").value = kelas;
+    document.getElementById("kelas").dispatchEvent(new Event("change"));
+
+    btn.innerText = "Data ditemukan";
+
+  }catch(e){
+
+    alert("Gagal mengambil data murid");
+
     btn.disabled = false;
     btn.innerText = "Cek Data Murid";
-    return;
+
   }
-
-  // tampilkan info murid
-  document.getElementById("studentInfo").style.display = "block";
-
-  document.getElementById("studentName").innerText =
-    "Nama: " + data.name;
-
-  document.getElementById("studentGrade").innerText =
-    "Kelas: " + data.grade;
-
-  document.getElementById("studentTenure").innerText =
-    "Program: " + data.tenure;
-
-  // set kelas otomatis ke portal
-  kelas = String(data.grade);
-
-  document.getElementById("kelas").value = kelas;
-
-  // trigger logic kelas yang sudah ada
-  document.getElementById("kelas")
-    .dispatchEvent(new Event("change"));
-
-  btn.innerText = "Data ditemukan";
 
 }
   
