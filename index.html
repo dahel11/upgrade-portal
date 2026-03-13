@@ -119,6 +119,10 @@
   Bisa memilih lebih dari satu
   </div>
 
+  <div id="autoUpgradeText" style="display:none;margin-top:8px;font-size:14px">
+    IPA (1x per minggu)
+  </div>
+
   <div style="margin-top:10px">
 
     <label id="optIPA" style="display:none;">
@@ -244,14 +248,16 @@ document.getElementById("kelas").onchange = function() {
   if(["7","8","9"].includes(kelas)){
 
     upgradeSection.style.display = "block";
-
+  
     document.getElementById("optIPA").style.display = "none";
     document.getElementById("optFisika").style.display = "none";
     document.getElementById("optKimia").style.display = "none";
     document.getElementById("optMTK").style.display = "none";
+  
+    document.getElementById("autoUpgradeText").style.display = "block";
 
   }
-
+  
   else if(kelas === "10" || kelas === "11"){
 
     upgradeSection.style.display = "block";
@@ -266,6 +272,8 @@ document.getElementById("kelas").onchange = function() {
       kelas === "11" ? "block" : "none";
 
     document.getElementById("optMTK").style.display = "flex";
+
+    document.getElementById("autoUpgradeText").style.display = "none";
 
   }
 
