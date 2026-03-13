@@ -115,8 +115,8 @@
 
   <b>Penambahan yang ingin dilakukan</b>
 
-  <div style="font-size:13px;color:#666;margin-top:4px">
-  Bisa memilih lebih dari satu
+  <div id="multiNote" style="font-size:13px;color:#666;margin-top:4px">
+    Bisa memilih lebih dari satu
   </div>
 
   <div id="autoUpgradeText" style="display:none;margin-top:8px;font-size:14px">
@@ -255,6 +255,7 @@ document.getElementById("kelas").onchange = function() {
     document.getElementById("optMTK").style.display = "none";
   
     document.getElementById("autoUpgradeText").style.display = "block";
+    document.getElementById("multiNote").style.display = "none";
 
   }
   
@@ -274,6 +275,7 @@ document.getElementById("kelas").onchange = function() {
     document.getElementById("optMTK").style.display = "flex";
 
     document.getElementById("autoUpgradeText").style.display = "none";
+    document.getElementById("multiNote").style.display = "block";
 
   }
 
