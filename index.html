@@ -350,12 +350,14 @@ async function lookupStudent(){
     document.getElementById("studentGrade").innerText=`Kelas: ${data.grade}`;
     document.getElementById("studentTenure").innerText=`Pembayaran: ${tenureMap[data.tenure]}`;
 
-    state.kelas=String(data.grade);
-    state.tenure=data.tenure;
-
-    const kelasSelect=document.getElementById("kelas");
-
-    kelasSelect.value=state.kelas;
+    state.kelas = String(data.grade);
+    state.tenure = data.tenure;
+    
+    kelas = state.kelas;   // ← TAMBAHKAN BARIS INI
+    
+    const kelasSelect = document.getElementById("kelas");
+    
+    kelasSelect.value = state.kelas;
     kelasSelect.dispatchEvent(new Event("change"));
 
     btn.innerText="Data ditemukan";
