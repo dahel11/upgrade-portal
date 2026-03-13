@@ -973,7 +973,7 @@ async function lookupStudent(){
   btn.disabled = true;
   btn.innerText = "Mengecek data...";
 
- // DATA PALSU UNTUK TEST
+  // DATA PALSU UNTUK TEST
   const data = {
     found: true,
     name: "Budi Santoso",
@@ -988,7 +988,7 @@ async function lookupStudent(){
     return;
   }
 
-    // tampilkan info murid
+  // tampilkan info murid
   document.getElementById("studentInfo").style.display = "block";
 
   document.getElementById("studentName").innerText =
@@ -1000,24 +1000,16 @@ async function lookupStudent(){
   document.getElementById("studentTenure").innerText =
     "Program: " + data.tenure;
 
-    // set grade otomatis ke portal
+  // set kelas otomatis ke portal
   kelas = String(data.grade);
 
   document.getElementById("kelas").value = kelas;
 
-    // trigger logic kelas yang sudah ada
-  document.getElementById("kelas").dispatchEvent(new Event("change"));
+  // trigger logic kelas yang sudah ada
+  document.getElementById("kelas")
+    .dispatchEvent(new Event("change"));
 
   btn.innerText = "Data ditemukan";
-
-  }catch(e){
-
-    alert("Gagal mengambil data murid");
-
-    btn.disabled = false;
-    btn.innerText = "Cek Data Murid";
-
-  }
 
 }
   
