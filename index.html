@@ -1,566 +1,293 @@
 <!DOCTYPE html>
-
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Formulir Penambahan Paket Belajar CoLearn</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <style>
-    *{
-      box-sizing:border-box;
-    }
-    body { font-family: Arial; background:#f5f5f5; padding:20px; max-width:700px; margin:auto; }
-    .card { background:white; padding:16px; border-radius:12px; margin-bottom:16px; }
-    select, input, textarea, button { width:100%; padding:10px; margin-top:8px; }
-    input[type="checkbox"]{
-      width:auto;
-      margin-right:8px;
-      margin-top:3px;
-    }
-    input, textarea, select{
-      border:1px solid #e5e7eb;
-      border-radius:8px;
-    }
-    button { background:#2563eb; color:white; border:none; border-radius:8px; }
-    .slot { border:1px solid #eee; padding:10px; border-radius:8px; margin-top:8px; }
-    button:disabled{
-      background:#cbd5e1;
-      cursor:not-allowed;
-      opacity:0.8;
-    }
-    #successMessage{
-      position:fixed;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      background:white;
-      display:none;
-      justify-content:center;
-      align-items:center;
-      text-align:center;
-      padding:20px;
-    }
+<meta charset="UTF-8">
+<title>Formulir Penambahan Paket Belajar CoLearn</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    .successBox h2{
-      font-size:24px;
-      margin-bottom:16px;
-    }
+<style>
 
-    .successBox p{
-      font-size:16px;
-      line-height:1.6;
-      margin-bottom:24px;
-    }
+body{
+font-family:Arial;
+background:#f5f5f5;
+padding:20px;
+max-width:700px;
+margin:auto;
+}
 
-    .successBox button{
-      background:#2563eb;
-      color:white;
-      border:none;
-      border-radius:8px;
-      padding:12px 20px;
-      font-size:16px;
-    }
-    #upgradeSection label{
-      display:flex;
-      align-items:flex-start;
-      gap:8px;
-      margin-top:6px;
-    }
+.card{
+background:white;
+padding:16px;
+border-radius:12px;
+margin-bottom:16px;
+}
 
-    #upgradeSection input[type="checkbox"]{
-      width:auto;
-      padding:0;
-      margin-top:4px;
-    }
+select,input,textarea,button{
+width:100%;
+padding:10px;
+margin-top:8px;
+}
 
-    .upgradeText{
-      display:block;
-    }
+button{
+background:#2563eb;
+color:white;
+border:none;
+border-radius:8px;
+}
 
-    .upgradeNote{
-      font-size:13px;
-      margin-top:4px;
-    }
-  </style>
+button:disabled{
+background:#cbd5e1;
+}
+
+.slot{
+border:1px solid #eee;
+padding:10px;
+border-radius:8px;
+margin-top:8px;
+}
+
+</style>
 
 </head>
 
 <body>
 
-<div style="text-align:center;margin-bottom:12px">
-  <a href="https://colearn.id" target="_blank">
-    <img src="CoLearn Logo Blue.png" style="height:40px">
-  </a>
+<div style="text-align:center;margin-bottom:20px">
+<img src="CoLearn Logo Blue.png" style="height:40px">
 </div>
-  
-<h2 style="text-align:center; margin-bottom:24px;">
-  Formulir Penambahan Paket Belajar CoLearn
+
+<h2 style="text-align:center">
+Formulir Penambahan Paket Belajar CoLearn
 </h2>
 
-<div class="card" id="lookupSection">
+<div class="card">
 
-  <b>Masukkan nomor murid yang terdaftar di CoLearn</b>
+<b>Masukkan nomor murid yang terdaftar di CoLearn</b>
 
-  <input 
-    id="lookupPhone"
-    type="tel"
-    placeholder="Nomor yang terdaftar di aplikasi"
-  >
+<input id="lookupPhone" placeholder="Nomor yang terdaftar">
 
-  <button onclick="lookupStudent()" id="lookupBtn">
-    Cek Data Murid
-  </button>
+<button id="lookupBtn" onclick="lookupStudent()">
+Cek Data Murid
+</button>
 
 </div>
 
 <div class="card" id="studentInfo" style="display:none">
 
-  <b style="display:block;margin-bottom:8px">
-    Data murid ditemukan
-  </b>
+<b>Data murid ditemukan</b>
 
-  <div id="studentName"></div>
-  <div id="studentGrade"></div>
-  <div id="studentTenure"></div>
+<div id="studentName"></div>
+<div id="studentGrade"></div>
+<div id="studentTenure"></div>
 
 </div>
-  
+
 <div class="card">
-  <b>Pilih kelas</b>
-  <select id="kelas">
-    <option value="">Pilih kelas</option>
-    <option value="7">7</option>
-    <option value="8">8</option>
-    <option value="9">9</option>
-    <option value="10">10</option>
-    <option value="11">11</option>
-  </select>
-</div>
 
-<div id="upgradeSection" class="card" style="display:none">
+<b>Pilih kelas</b>
 
-  <b>Penambahan yang ingin dilakukan</b>
+<select id="kelas">
 
-  <div id="multiNote" style="font-size:13px;color:#666;margin-top:4px">
-    Bisa memilih lebih dari satu
-  </div>
+<option value="">Pilih kelas</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+<option value="10">10</option>
+<option value="11">11</option>
 
-  <div id="autoUpgradeText" style="display:none;margin-top:8px;font-size:14px">
-    IPA (1x per minggu)
-  </div>
-
-  <div style="margin-top:10px">
-
-    <label id="optIPA" style="display:none;">
-      <input type="checkbox" id="checkIPA">
-      <span>IPA (1x/Minggu)</span>
-    </label>
-
-    <label id="optFisika" style="display:none;">
-      <input type="checkbox" id="checkFisika">
-      <span>Fisika (1x/Minggu)</span>
-    </label>
-
-    <label id="optKimia" style="display:none;">
-      <input type="checkbox" id="checkKimia">
-      <span>Kimia (1x/Minggu)</span>
-    </label>
-
-    <label id="optMTK" style="display:none;">
-
-      <input type="checkbox" id="checkMTK">
-
-      <div class="upgradeText">
-        Frekuensi kelas Matematika (2x/Minggu)
-
-        <div class="upgradeNote">
-          Jika saat ini sudah 2x/Minggu, abaikan opsi ini
-        </div>
-
-      </div>
-
-    </label>
-
-  </div>
-
-  <button id="lihatBtn" style="margin-top:12px" onclick="lihatUpgrade()">
-    Lihat harga dan jadwal
-  </button>
-
-  <div id="updateHint"
-       style="font-size:13px;color:#555;margin-top:6px;display:none">
-    Klik "Lihat harga dan jadwal"
-  </div>
+</select>
 
 </div>
-<div id="mapelSection" class="card" style="display:none">
-  <b>Pilih mapel tambahan</b>
-  <select id="mapel">
-    <option value="">Pilih mapel</option>
-    <option value="Fisika">Fisika</option>
-    <option value="Kimia">Kimia</option>
-    <option value="FisikaKimia">Fisika + Kimia</option>
-  </select>
+
+<div class="card" id="upgradeSection" style="display:none">
+
+<b>Penambahan yang ingin dilakukan</b>
+
+<label>
+<input type="checkbox" id="checkIPA">
+IPA (1x/Minggu)
+</label>
+
+<label>
+<input type="checkbox" id="checkFisika">
+Fisika (1x/Minggu)
+</label>
+
+<label>
+<input type="checkbox" id="checkKimia">
+Kimia (1x/Minggu)
+</label>
+
+<label>
+<input type="checkbox" id="checkMTK">
+Frekuensi Matematika (2x/Minggu)
+</label>
+
+<button id="lihatBtn" onclick="lihatUpgrade()">
+Lihat harga dan jadwal
+</button>
+
 </div>
 
 <div id="priceBox" class="card" style="display:none"></div>
 
-<div id="materiBox" class="card" style="display:none"></div>
-  
 <div id="schedule" class="card" style="display:none"></div>
 
-<div id="formSection" class="card" style="display:none">
-  <input id="nama" placeholder="Nama murid"/>
-  <input id="nomor" type="tel" placeholder="Nomor HP murid yang terdaftar di aplikasi CoLearn"/> 
-  <textarea id="preferensi" rows="3" placeholder="Pilihan jadwal"></textarea>
-  <div style="font-size:13px; color:#555; margin-top:10px; line-height:1.5">
-  Jumlah sesi mata pelajaran tambahan akan menyesuaikan hingga tanggal jatuh tempo.<br>
-  Pada bulan berikutnya, pembayaran seluruh mata pelajaran akan digabung dan dibayarkan sesuai tanggal jatuh tempo.
-</div>
-  <button id="submitBtn" onclick="submitForm()" disabled>
-    Kirim Formulir
-  </button>
-</div>
+<div id="materiBox" class="card" style="display:none"></div>
 
-<div id="successMessage" style="display:none;">
-  <div class="successBox">
-    <h2>Formulir berhasil terkirim</h2>
-
-    <p>
-      Terima kasih. Permintaan sedang diproses.<br>
-      Kakak Siaga akan segera menghubungi melalui WhatsApp.
-    </p>
-
-    <button onclick="location.reload()">
-      Kembali ke halaman utama
-    </button>
-  </div>
-</div>
-  
 <script>
 
-const GAS_LOOKUP =
-"https://script.google.com/macros/s/AKfycbwyD-MHGQfSzcAQ39tOi-Y8jHfSrTdHaiNdw8pxzCEMJtdwojNcoSvmiRscLTatmmkP/exec";
+let kelas=""
+let studentTenure=""
 
-const GAS_SCHEDULE =
-"https://script.google.com/macros/s/AKfycbyxrEj7vkND7YmfFt41ACKRVrAEKWD9goEpv0z10Qo62i7-4sd2tGqDGiZKEjrskVsRmA/exec";
-
-
-const semesterEndMap = {
-  "7":"2026-06-14",
-  "8":"2026-06-14",
-  "9":"2026-05-03",
-  "10":"2026-06-14",
-  "11":"2026-06-14"
-};
-
-
-let state = {
-  kelas:"",
-  tenure:"",
-  selectedSchedule:{},
-  jadwalText:{}
-};
-
-
-
-// ============================
-// RESET PORTAL
-// ============================
-
-function resetPortal(){
-
-  document.getElementById("checkIPA").checked = false;
-  document.getElementById("checkFisika").checked = false;
-  document.getElementById("checkKimia").checked = false;
-  document.getElementById("checkMTK").checked = false;
-
-  const priceBox = document.getElementById("priceBox");
-  priceBox.style.display = "none";
-  priceBox.innerHTML = "";
-
-  const scheduleBox = document.getElementById("schedule");
-  scheduleBox.style.display = "none";
-  scheduleBox.innerHTML = "";
-
-  const materiBox = document.getElementById("materiBox");
-  materiBox.style.display = "none";
-  materiBox.innerHTML = "";
-
-  document.getElementById("preferensi").value = "";
-  document.getElementById("submitBtn").disabled = true;
-
-  selectedSchedule = {};
-  jadwalText = {};
-
-  const btn = document.getElementById("lihatBtn");
-  btn.disabled = true;
-  btn.style.background = "#2563eb";
-  btn.innerText = "Lihat harga dan jadwal";
-
-  document.getElementById("updateHint").style.display = "none";
-  document.getElementById("upgradeSection").style.display = "none";
-
+const semesterEndMap={
+"7":"2026-06-14",
+"8":"2026-06-14",
+"9":"2026-05-03",
+"10":"2026-06-14",
+"11":"2026-06-14"
 }
 
+const GAS_LOOKUP="https://script.google.com/macros/s/AKfycbwyD-MHGQfSzcAQ39tOi-Y8jHfSrTdHaiNdw8pxzCEMJtdwojNcoSvmiRscLTatmmkP/exec"
 
+document.getElementById("kelas").onchange=function(){
 
-// ============================
-// LOOKUP STUDENT
-// ============================
+kelas=this.value
+
+if(!kelas)return
+
+document.getElementById("upgradeSection").style.display="block"
+
+}
 
 async function lookupStudent(){
 
-  const phone=document.getElementById("lookupPhone").value.trim();
+const phone=document.getElementById("lookupPhone").value.trim()
 
-  if(!phone){
-    alert("Masukkan nomor HP terlebih dahulu");
-    return;
-  }
+if(!phone){
 
-  const btn=document.getElementById("lookupBtn");
-
-  btn.disabled=true;
-  btn.innerText="Mengecek data...";
-
-  try{
-
-    const res=await fetch(`${GAS_LOOKUP}?type=studentLookup&phone=${phone}`);
-    const data=await res.json();
-
-    if(!data.found){
-      alert("Nomor tidak ditemukan");
-      btn.disabled=false;
-      btn.innerText="Cek Data Murid";
-      return;
-    }
-
-    resetPortal();
-
-    const tenureMap={
-      monthly:"per bulan",
-      semesterly:"per semester"
-    };
-
-    document.getElementById("studentInfo").style.display="block";
-
-    document.getElementById("studentName").innerText=`Nama: ${data.name}`;
-    document.getElementById("studentGrade").innerText=`Kelas: ${data.grade}`;
-    document.getElementById("studentTenure").innerText=`Pembayaran: ${tenureMap[data.tenure]}`;
-
-    state.kelas = String(data.grade);
-    state.tenure = data.tenure;
-    
-    kelas = state.kelas;   // ← TAMBAHKAN BARIS INI
-    
-    const kelasSelect = document.getElementById("kelas");
-    
-    kelasSelect.value = state.kelas;
-    kelasSelect.dispatchEvent(new Event("change"));
-
-    document.getElementById("upgradeSection").style.display = "block";
-
-    btn.innerText="Data ditemukan";
-
-  }catch{
-
-    alert("Gagal mengambil data murid");
-
-    btn.disabled=false;
-    btn.innerText="Cek Data Murid";
-
-  }
+alert("Masukkan nomor terlebih dahulu")
+return
 
 }
 
+const btn=document.getElementById("lookupBtn")
 
+btn.disabled=true
+btn.innerText="Mengecek..."
 
-// ============================
-// HITUNG PRICE
-// ============================
+try{
+
+const res=await fetch(`${GAS_LOOKUP}?type=studentLookup&phone=${phone}`)
+const data=await res.json()
+
+if(!data.found){
+
+alert("Nomor tidak ditemukan")
+
+btn.disabled=false
+btn.innerText="Cek Data Murid"
+
+return
+
+}
+
+document.getElementById("studentInfo").style.display="block"
+
+document.getElementById("studentName").innerText="Nama: "+data.name
+document.getElementById("studentGrade").innerText="Kelas: "+data.grade
+document.getElementById("studentTenure").innerText="Pembayaran: "+data.tenure
+
+studentTenure=data.tenure
+kelas=String(data.grade)
+
+document.getElementById("kelas").value=kelas
+document.getElementById("upgradeSection").style.display="block"
+
+btn.innerText="Data ditemukan"
+
+}catch{
+
+alert("Gagal mengambil data")
+
+btn.disabled=false
+btn.innerText="Cek Data Murid"
+
+}
+
+}
 
 function getUpgradePrice(){
 
-  let price=0;
+let price=0
 
-  const IPA=document.getElementById("checkIPA")?.checked;
-  const Fisika=document.getElementById("checkFisika")?.checked;
-  const Kimia=document.getElementById("checkKimia")?.checked;
-  const MTK=document.getElementById("checkMTK")?.checked;
+if(["7","8","9"].includes(kelas)) price+=49000
 
+if(document.getElementById("checkIPA").checked) price+=49000
 
-  if(["7","8","9"].includes(state.kelas)){
-    price+=49000;
-  }
+if(document.getElementById("checkFisika").checked && document.getElementById("checkKimia").checked){
 
-  if(IPA) price+=49000;
+price+=79000
 
-  if(Fisika && Kimia) price+=79000;
-  else{
-    if(Fisika) price+=49000;
-    if(Kimia) price+=49000;
-  }
+}else{
 
-  if(MTK) price+=25000;
-
-  return price;
+if(document.getElementById("checkFisika").checked) price+=49000
+if(document.getElementById("checkKimia").checked) price+=49000
 
 }
 
+if(document.getElementById("checkMTK").checked) price+=25000
 
-
-// ============================
-// LIHAT UPGRADE
-// ============================
-
-async function lihatUpgrade(){
-
-  const btn=document.getElementById("lihatBtn");
-
-  btn.disabled=true;
-  btn.innerText="Memuat jadwal...";
-
-  const price=getUpgradePrice();
-
-  if(price===0){
-    alert("Silakan pilih penambahan terlebih dahulu.");
-    btn.disabled=false;
-    btn.innerText="Lihat harga dan jadwal";
-    return;
-  }
-
-
-  let total=price;
-
-  if(state.tenure==="semesterly"){
-
-    total=calculateSemesterUpgrade(
-      new Date(),
-      semesterEndMap[state.kelas],
-      price,
-      "2026-03-16",
-      "2026-03-29"
-    );
-
-  }
-
-
-  const priceBox=document.getElementById("priceBox");
-
-  priceBox.style.display="block";
-
-  if(state.tenure==="monthly"){
-
-    priceBox.innerHTML=
-    `Biaya penambahan: <b>Rp ${price.toLocaleString()}</b>
-
-    <div style="margin-top:8px;color:#666">
-    Total per bulan: biaya per bulan saat ini + penambahan
-    </div>`;
-
-  }
-
-  else{
-
-    priceBox.innerHTML=
-    `Biaya upgrade hingga akhir semester:
-    <b>Rp ${total.toLocaleString()}</b>
-
-    <div style="margin-top:6px;color:#666;font-size:13px">
-    Harga dihitung hingga akhir semester (${formatTanggal(semesterEndMap[state.kelas])})
-    </div>`;
-
-  }
-
-  await loadSchedules();
-
-  btn.innerText="Harga dan jadwal sudah diperbarui";
+return price
 
 }
 
+function lihatUpgrade(){
 
+const price=getUpgradePrice()
 
-// ============================
-// LOAD SCHEDULE
-// ============================
+if(price===0){
 
-async function loadSchedules(){
-
-  const box=document.getElementById("schedule");
-
-  box.style.display="block";
-  box.innerHTML="Memuat jadwal...";
-
-  const subjects=[];
-
-  if(["7","8","9"].includes(state.kelas)){
-    subjects.push("IPA");
-  }
-
-  if(document.getElementById("checkIPA")?.checked){
-    subjects.push("IPA");
-  }
-
-  if(document.getElementById("checkFisika")?.checked){
-    subjects.push("Fisika");
-  }
-
-  if(document.getElementById("checkKimia")?.checked){
-    subjects.push("Kimia");
-  }
-
-  if(document.getElementById("checkMTK")?.checked){
-    subjects.push("Matematika");
-  }
-
-  box.innerHTML="";
-
-  for(const s of subjects){
-
-    const res=await fetch(`${GAS_SCHEDULE}?kelas=${state.kelas}&subject=${s}`);
-    const data=await res.json();
-
-    if(!data.length) continue;
-
-    box.innerHTML+=`
-      <div style="margin-top:16px">
-      <b>Pilihan jadwal ${s}</b>
-      </div>
-    `;
-
-    box.innerHTML+=data.slice(0,10).map(d=>`
-      <div class="slot">
-        <b>${d.days} • ${d.time}</b><br>
-        ${d.teacher}
-      </div>
-    `).join("");
-
-  }
+alert("Pilih penambahan terlebih dahulu")
+return
 
 }
 
+const priceBox=document.getElementById("priceBox")
 
+priceBox.style.display="block"
 
-// ============================
-// FORMAT TANGGAL
-// ============================
+if(studentTenure==="monthly"){
 
-function formatTanggal(dateStr){
+priceBox.innerHTML=
 
-  const d=new Date(dateStr);
+`Biaya penambahan: <b>Rp ${price.toLocaleString()}</b>
 
-  return d.toLocaleDateString("id-ID",{
-    day:"numeric",
-    month:"long",
-    year:"numeric"
-  });
+<div style="margin-top:8px;color:#666">
+
+Total per bulan: biaya per bulan saat ini + penambahan
+
+</div>`
+
+}else{
+
+priceBox.innerHTML=
+
+`Biaya upgrade hingga akhir semester:
+
+<b>Rp ${price.toLocaleString()}</b>
+
+<div style="margin-top:6px;color:#666">
+
+Harga dihitung hingga akhir semester (${semesterEndMap[kelas]})
+
+</div>`
 
 }
 
-</script>
-  
+}
+
 </script>
 
 </body>
