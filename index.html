@@ -155,17 +155,17 @@
 
     <label id="optIPA" style="display:none;">
       <input type="checkbox" id="checkIPA">
-      <span>IPA</span>
+      <span>IPA (1x/Minggu)</span>
     </label>
 
     <label id="optFisika" style="display:none;">
       <input type="checkbox" id="checkFisika">
-      <span>Fisika</span>
+      <span>Fisika (1x/Minggu)</span>
     </label>
 
     <label id="optKimia" style="display:none;">
       <input type="checkbox" id="checkKimia">
-      <span>Kimia</span>
+      <span>Kimia (1x/Minggu)</span>
     </label>
 
     <label id="optMTK" style="display:none;">
@@ -846,7 +846,6 @@ async function lihatUpgrade(){
 
     priceBox.innerHTML =
     `Biaya penambahan: <b>Rp ${priceUpgrade.toLocaleString()}</b>
-    <span style="font-size:14px">(1x kelas IPA per minggu)</span>
   
     <div style="margin-top:8px;color:#666;font-size:14px">
     Total per bulan: biaya per bulan saat ini + penambahan
@@ -1124,6 +1123,15 @@ function resetPortal(){
 
   document.getElementById("updateHint").style.display = "none";
 
+  document.getElementById("upgradeSection").style.display = "none";
+
+  document.getElementById("mapelSection").innerHTML = "";
+
+  const btn = document.getElementById("lihatBtn");
+
+  btn.disabled = true;
+  btn.innerText = "Lihat harga dan jadwal";
+
 }
 
 document.getElementById("lookupPhone").addEventListener("input",function(){
@@ -1141,12 +1149,22 @@ document.getElementById("lookupPhone").addEventListener("input",function(){
 
 document.getElementById("lookupPhone").addEventListener("input",function(){
 
+  const phone = this.value.trim();
+
   const btn = document.getElementById("lookupBtn");
 
   btn.disabled = false;
   btn.innerText = "Cek Data Murid";
 
   document.getElementById("studentInfo").style.display = "none";
+
+  resetPortal();
+
+  // reset kelas jika nomor kosong
+  if(!phone){
+    document.getElementById("kelas").value = "";
+    kelas = "";
+  }
 
 });
   
