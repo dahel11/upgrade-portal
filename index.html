@@ -117,7 +117,9 @@
 
 <div class="card" id="studentInfo" style="display:none">
 
-  <b>Data murid ditemukan</b><br>
+  <b style="display:block;margin-bottom:8px">
+    Data murid ditemukan
+  </b>
 
   <div id="studentName"></div>
   <div id="studentGrade"></div>
@@ -1021,6 +1023,17 @@ async function lookupStudent(){
   }
 
 }
+
+document.getElementById("lookupPhone").addEventListener("input",function(){
+
+  const btn = document.getElementById("lookupBtn");
+
+  btn.disabled = false;
+  btn.innerText = "Cek Data Murid";
+
+  document.getElementById("studentInfo").style.display = "none";
+
+});
   
 </script>
 
