@@ -845,7 +845,12 @@ async function lihatUpgrade(){
   if(studentTenure === "monthly"){
 
     priceBox.innerHTML =
-    `Biaya penambahan: <b>Rp ${priceUpgrade.toLocaleString()}</b>`;
+    `Biaya penambahan: <b>Rp ${priceUpgrade.toLocaleString()}</b>
+    <span style="font-size:14px">(1x kelas IPA per minggu)</span>
+  
+    <div style="margin-top:8px;color:#666;font-size:14px">
+    Total per bulan: biaya per bulan saat ini + penambahan
+    </div>`;
 
   }
 
@@ -1035,6 +1040,8 @@ async function lookupStudent(){
       return;
     }
 
+    resetPortal();
+
     document.getElementById("studentInfo").style.display="block";
 
     document.getElementById("studentName").innerText =
@@ -1077,6 +1084,60 @@ function formatTanggal(dateStr){
   });
 
 }
+
+function resetPortal(){
+
+  // reset upgrade checkbox
+  document.getElementById("checkIPA").checked = false;
+  document.getElementById("checkFisika").checked = false;
+  document.getElementById("checkKimia").checked = false;
+  document.getElementById("checkMTK").checked = false;
+
+  // reset price
+  const priceBox = document.getElementById("priceBox");
+  priceBox.style.display = "none";
+  priceBox.innerHTML = "";
+
+  // reset schedule
+  const scheduleBox = document.getElementById("schedule");
+  scheduleBox.style.display = "none";
+  scheduleBox.innerHTML = "";
+
+  // reset materi
+  const materiBox = document.getElementById("materiBox");
+  materiBox.style.display = "none";
+  materiBox.innerHTML = "";
+
+  // reset form
+  document.getElementById("preferensi").value = "";
+  document.getElementById("submitBtn").disabled = true;
+
+  // reset selected schedule
+  selectedSchedule = {};
+  jadwalText = {};
+
+  // reset button lihat jadwal
+  const btn = document.getElementById("lihatBtn");
+  btn.disabled = false;
+  btn.style.background = "#2563eb";
+  btn.innerText = "Lihat harga dan jadwal";
+
+  document.getElementById("updateHint").style.display = "none";
+
+}
+
+document.getElementById("lookupPhone").addEventListener("input",function(){
+
+  const btn = document.getElementById("lookupBtn");
+
+  btn.disabled = false;
+  btn.innerText = "Cek Data Murid";
+
+  document.getElementById("studentInfo").style.display = "none";
+
+  resetPortal();
+
+});
 
 document.getElementById("lookupPhone").addEventListener("input",function(){
 
