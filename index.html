@@ -99,6 +99,32 @@
   Formulir Penambahan Paket Belajar CoLearn
 </h2>
 
+<div class="card" id="lookupSection">
+
+  <b>Masukkan nomor WhatsApp murid yang terdaftar di CoLearn</b>
+
+  <input 
+    id="lookupPhone"
+    type="tel"
+    placeholder="Nomor yang terdaftar di aplikasi"
+  >
+
+  <button onclick="lookupStudent()" id="lookupBtn">
+    Cek Data Murid
+  </button>
+
+</div>
+
+<div class="card" id="studentInfo" style="display:none">
+
+  <b>Data murid ditemukan</b>
+
+  <div id="studentName"></div>
+  <div id="studentGrade"></div>
+  <div id="studentTenure"></div>
+
+</div>
+  
 <div class="card">
   <b>Pilih kelas</b>
   <select id="kelas">
@@ -930,6 +956,69 @@ function calculateSemesterUpgrade(startDate,endDate,priceUpgrade,breakStart,brea
   const total = Math.round(costFullMonth+prorateCost-breakCost);
 
   return total;
+}
+
+async function lookupStudent(){
+
+  const btn = document.getElementById("lookupBtn");
+  const phoneInput = document.getElementById("lookupPhone");
+
+  let phone = phoneInput.value.trim();
+
+  if(!phone){
+    alert("Masukkan nomor HP terlebih dahulu");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerText = "Mengecek data...";
+
+ // DATA PALSU UNTUK TEST
+  const data = {
+    found: true,
+    name: "Budi Santoso",
+    grade: 10,
+    tenure: "monthly"
+  };
+
+  if(!data.found){
+    alert("Nomor tidak ditemukan");
+    btn.disabled = false;
+    btn.innerText = "Cek Data Murid";
+    return;
+  }
+
+    // tampilkan info murid
+  document.getElementById("studentInfo").style.display = "block";
+
+  document.getElementById("studentName").innerText =
+    "Nama: " + data.name;
+
+  document.getElementById("studentGrade").innerText =
+    "Kelas: " + data.grade;
+
+  document.getElementById("studentTenure").innerText =
+    "Program: " + data.tenure;
+
+    // set grade otomatis ke portal
+  kelas = String(data.grade);
+
+  document.getElementById("kelas").value = kelas;
+
+    // trigger logic kelas yang sudah ada
+  document.getElementById("kelas").dispatchEvent(new Event("change"));
+
+  btn.innerText = "Data ditemukan";
+
+  }catch(e){
+
+    alert("Gagal mengambil data murid");
+
+    btn.disabled = false;
+    btn.innerText = "Cek Data Murid";
+
+  }
+
 }
   
 </script>
