@@ -735,24 +735,23 @@ async function lihatUpgrade(){
   const pilihKimia = document.getElementById("checkKimia")?.checked;
   const pilihMTK = document.getElementById("checkMTK")?.checked;
 
+  // hitung harga upgrade
   if(["7","8","9"].includes(kelas)){
     priceUpgrade += 49000;
   }
 
-  if(pilihIPA){
-    priceUpgrade += 49000;
-  }
+  if(pilihIPA) priceUpgrade += 49000;
+  if(pilihFisika) priceUpgrade += 49000;
+  if(pilihKimia) priceUpgrade += 49000;
+  if(pilihMTK) priceUpgrade += 25000;
 
-  if(pilihFisika){
-    priceUpgrade += 49000;
-  }
-  
-  if(pilihKimia){
-    priceUpgrade += 49000;
-  }
-  
-  if(pilihMTK){
-    priceUpgrade += 25000;
+  // kalau tidak ada pilihan
+  if(priceUpgrade === 0){
+    alert("Silakan pilih penambahan terlebih dahulu.");
+    btn.disabled = false;
+    btn.style.background = "#2563eb";
+    btn.innerText = "Lihat harga dan jadwal";
+    return;
   }
 
   const totalUpgrade = calculateSemesterUpgrade(
@@ -766,7 +765,6 @@ async function lihatUpgrade(){
   const priceBox = document.getElementById("priceBox");
 
   priceBox.style.display = "block";
-
   priceBox.innerHTML =
   `Biaya upgrade hingga akhir semester: 
   <b>Rp ${totalUpgrade.toLocaleString()}</b>
@@ -783,6 +781,7 @@ async function lihatUpgrade(){
   scheduleBox.style.display = "block";
   materiBox.style.display = "block";
 
+  // load jadwal
   if(["7","8","9"].includes(kelas)){
     await loadScheduleBySubject("IPA");
     await loadMateriBySubject("IPA");
@@ -810,10 +809,10 @@ async function lihatUpgrade(){
 
   document.getElementById("formSection").style.display = "block";
 
-  btn.style.background="#cbd5e1";
-  btn.innerText="Harga dan jadwal sudah diperbarui";
+  btn.style.background = "#cbd5e1";
+  btn.innerText = "Harga dan jadwal sudah diperbarui";
 
-  document.getElementById("updateHint").style.display="none";
+  document.getElementById("updateHint").style.display = "none";
 
   document.getElementById("schedule").scrollIntoView({
     behavior: "smooth",
