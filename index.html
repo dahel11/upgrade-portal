@@ -1052,7 +1052,7 @@ async function lookupStudent(){
   try{
 
     const res = await fetch(
-      `https://script.google.com/macros/s/AKfycbxh4RFUxyS8mp9Zt3jcn5W3lYbYILAKQOXb6a1Rv9FxcPAZkqRyIKJ0NJM3qVHYdmVi/exec?type=studentLookup&phone=${phone}`
+      `https://script.google.com/macros/s/AKfycbxtuKPaS4OF0ZqYT2g9s8GLQsl7X0hgmvPG2yfPtPt7ZXO0kls9AF-EHvs7QFKDDcR3/exec?type=studentLookup&phone=${phone}`
     );
 
     const data = await res.json();
@@ -1085,7 +1085,7 @@ async function lookupStudent(){
       "Kelas: " + data.grade;
 
     document.getElementById("studentTenure").innerText =
-      "Pembayaran: " + (tenureMap[data.tenure] || data.tenure);
+      "Pembayaran terakhir: " + (tenureMap[data.tenure] || data.tenure);
 
     studentTenure = data.tenure;
     currentMonthlyPrice = data.currentPrice;
