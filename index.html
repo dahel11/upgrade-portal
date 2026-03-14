@@ -1083,6 +1083,8 @@ async function lookupStudent(){
     document.getElementById("kelas").dispatchEvent(new Event("change"));
 
     btn.innerText = "Data ditemukan";
+    btn.style.background = "#cbd5e1";
+    btn.disabled = true;
 
   }catch(e){
 
