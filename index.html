@@ -1127,25 +1127,7 @@ function resetPortal(){
 
   document.getElementById("mapelSection").innerHTML = "";
 
-  const btn = document.getElementById("lihatBtn");
-
-  btn.disabled = true;
-  btn.innerText = "Lihat harga dan jadwal";
-
 }
-
-document.getElementById("lookupPhone").addEventListener("input",function(){
-
-  const btn = document.getElementById("lookupBtn");
-
-  btn.disabled = false;
-  btn.innerText = "Cek Data Murid";
-
-  document.getElementById("studentInfo").style.display = "none";
-
-  resetPortal();
-
-});
 
 document.getElementById("lookupPhone").addEventListener("input",function(){
 
