@@ -141,7 +141,7 @@
 
 <div id="upgradeSection" class="card" style="display:none">
 
-  <b>Penambahan yang ingin dilakukan</b>
+  <b>Penambahan yang tersedia</b>
 
   <div id="multiNote" style="font-size:13px;color:#666;margin-top:4px">
     Bisa memilih lebih dari satu
@@ -330,6 +330,32 @@ document.getElementById("kelas").onchange = function() {
   
     document.getElementById("autoUpgradeText").style.display = "none";
     document.getElementById("multiNote").style.display = "block";
+
+    const visibleOptions = ["optIPA","optFisika","optKimia","optMTK"]
+      .map(id => document.getElementById(id))
+      .filter(el => el && el.style.display !== "none");
+    
+    if(visibleOptions.length === 1){
+      const checkbox = visibleOptions[0].querySelector("input");
+      checkbox.checked = true;
+      checkbox.style.display = "none";
+      document.getElementById("multiNote").style.display = "none";
+    }
+    
+    if(visibleOptions.length === 0){
+
+      document.getElementById("lihatBtn").style.display = "none";
+      document.getElementById("multiNote").style.display = "none";
+  
+      document.getElementById("upgradeSection").insertAdjacentHTML(
+        "beforeend",
+        `<div class="upgradeInfo" style="margin-top:12px;font-size:14px;color:#555">
+          Paket belajar saat ini sudah merupakan paket lengkap.<br>
+          Tidak ada penambahan yang tersedia.
+        </div>`
+      );
+  
+    }
   
   }
 
@@ -1143,6 +1169,9 @@ function formatTanggal(dateStr){
 
 function resetPortal(){
 
+  // hapus pesan upgrade info jika ada
+  document.querySelectorAll(".upgradeInfo").forEach(el => el.remove());
+  
   // reset upgrade checkbox
   document.getElementById("checkIPA").checked = false;
   document.getElementById("checkFisika").checked = false;
