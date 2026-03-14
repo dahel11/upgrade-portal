@@ -253,6 +253,8 @@ let upgradeDirty = false;
 let studentTenure = "";
 let currentMonthlyPrice = 0;
 
+let currentPackage = "";
+
 const semesterEndMap = {
   "7": "2026-06-14",
   "8": "2026-06-14",
@@ -302,21 +304,38 @@ document.getElementById("kelas").onchange = function() {
   else if(kelas === "10" || kelas === "11"){
 
     upgradeSection.style.display = "block";
-
-    document.getElementById("optIPA").style.display =
-      kelas === "10" ? "block" : "none";
-
-    document.getElementById("optFisika").style.display =
-      kelas === "11" ? "block" : "none";
-
-    document.getElementById("optKimia").style.display =
-      kelas === "11" ? "block" : "none";
-
-    document.getElementById("optMTK").style.display = "flex";
-
+  
+    if(kelas === "10"){
+  
+      document.getElementById("optIPA").style.display =
+        currentPackage.includes("IPA") ? "none" : "block";
+  
+      document.getElementById("optMTK").style.display =
+        currentPackage.includes("2x") ? "none" : "flex";
+  
+      document.getElementById("optFisika").style.display = "none";
+      document.getElementById("optKimia").style.display = "none";
+  
+    }
+  
+    if(kelas === "11"){
+  
+      document.getElementById("optFisika").style.display =
+        currentPackage.includes("Fisika") ? "none" : "block";
+  
+      document.getElementById("optKimia").style.display =
+        currentPackage.includes("Kimia") ? "none" : "block";
+  
+      document.getElementById("optMTK").style.display =
+        currentPackage.includes("2x") ? "none" : "flex";
+  
+      document.getElementById("optIPA").style.display = "none";
+  
+    }
+  
     document.getElementById("autoUpgradeText").style.display = "none";
     document.getElementById("multiNote").style.display = "block";
-
+  
   }
 
   else{
@@ -1057,6 +1076,7 @@ async function lookupStudent(){
 
     const data = await res.json();
 
+    currentPackage = data.package || "";
     currentMonthlyPrice = data.currentPrice;
 
     const tenureMap = {
@@ -1110,6 +1130,10 @@ async function lookupStudent(){
 
 }
 
+function packageHas(keyword){
+  return currentPackage.includes(keyword);
+}  
+  
 function formatTanggal(dateStr){
 
   const d = new Date(dateStr);
