@@ -251,6 +251,7 @@ let prevSelected = [];
 let upgradeDirty = false;
 
 let studentTenure = "";
+let currentMonthlyPrice = 0;
 
 const semesterEndMap = {
   "7": "2026-06-14",
@@ -844,13 +845,22 @@ async function lihatUpgrade(){
 
   if(studentTenure === "monthly"){
 
+    const totalMonthly = currentMonthlyPrice + priceUpgrade;
+  
     priceBox.innerHTML =
     `Biaya penambahan: <b>Rp ${priceUpgrade.toLocaleString()}</b>
   
     <div style="margin-top:8px;color:#666;font-size:14px">
-    Total per bulan: biaya per bulan saat ini + penambahan
+    Total per bulan: 
+    <b>
+    Rp ${currentMonthlyPrice.toLocaleString()} 
+    + 
+    Rp ${priceUpgrade.toLocaleString()}
+    = 
+    Rp ${totalMonthly.toLocaleString()}
+    </b>
     </div>`;
-
+  
   }
 
   const scheduleBox = document.getElementById("schedule");
@@ -1042,10 +1052,12 @@ async function lookupStudent(){
   try{
 
     const res = await fetch(
-      `https://script.google.com/macros/s/AKfycbwyD-MHGQfSzcAQ39tOi-Y8jHfSrTdHaiNdw8pxzCEMJtdwojNcoSvmiRscLTatmmkP/exec?type=studentLookup&phone=${phone}`
+      `https://script.google.com/macros/s/AKfycbxh4RFUxyS8mp9Zt3jcn5W3lYbYILAKQOXb6a1Rv9FxcPAZkqRyIKJ0NJM3qVHYdmVi/exec?type=studentLookup&phone=${phone}`
     );
 
     const data = await res.json();
+
+    currentMonthlyPrice = data.currentPrice;
 
     const tenureMap = {
       monthly: "per bulan",
@@ -1076,6 +1088,7 @@ async function lookupStudent(){
       "Pembayaran: " + (tenureMap[data.tenure] || data.tenure);
 
     studentTenure = data.tenure;
+    currentMonthlyPrice = data.currentPrice;
 
     kelas = String(data.grade);
 
