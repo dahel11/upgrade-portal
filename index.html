@@ -123,6 +123,7 @@
 
   <div id="studentName"></div>
   <div id="studentGrade"></div>
+  <div id="studentPackage"></div>
   <div id="studentTenure"></div>
 
 </div>
@@ -286,15 +287,40 @@ document.getElementById("kelas").onchange = function() {
 
     upgradeSection.style.display = "block";
   
-    document.getElementById("optIPA").style.display = "none";
-    document.getElementById("optFisika").style.display = "none";
-    document.getElementById("optKimia").style.display = "none";
-    document.getElementById("optMTK").style.display = "none";
+    const paketLengkap =
+      currentPackage.includes("MTK") &&
+      currentPackage.includes("IPA");
   
-    document.getElementById("autoUpgradeText").style.display = "block";
-    document.getElementById("multiNote").style.display = "none";
+    if(paketLengkap){
+  
+      document.getElementById("lihatBtn").style.display = "none";
+      document.getElementById("multiNote").style.display = "none";
+  
+      document.getElementById("upgradeSection").insertAdjacentHTML(
+        "beforeend",
+        `<div class="upgradeInfo" style="margin-top:12px;font-size:14px;color:#555">
+          Paket belajar saat ini sudah merupakan paket lengkap.<br>
+          Tidak ada penambahan yang tersedia.
+        </div>`
+      );
+  
+    }
+  
+    else{
+  
+      document.getElementById("optIPA").style.display = "none";
+      document.getElementById("optFisika").style.display = "none";
+      document.getElementById("optKimia").style.display = "none";
+      document.getElementById("optMTK").style.display = "none";
+  
+      document.getElementById("autoUpgradeText").style.display = "block";
+      document.getElementById("multiNote").style.display = "none";
+  
+      document.getElementById("lihatBtn").style.display = "block";
+  
+    }
 
-  }
+}
   
   else if(kelas === "10" || kelas === "11"){
 
@@ -1124,6 +1150,9 @@ async function lookupStudent(){
 
     document.getElementById("studentGrade").innerText =
       "Kelas: " + data.grade;
+
+    document.getElementById("studentPackage").innerText =
+      "Paket belajar saat ini: " + (data.package || "-");
 
     document.getElementById("studentTenure").innerText =
       "Pembayaran terakhir: " + (tenureMap[data.tenure] || data.tenure);
