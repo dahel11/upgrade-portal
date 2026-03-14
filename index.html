@@ -929,6 +929,25 @@ upgradeCheckboxes.forEach(id=>{
         if(icon) icon.style.opacity = 0;
       });
 
+      // reset price
+      const priceBox = document.getElementById("priceBox");
+      priceBox.style.display = "none";
+      priceBox.innerHTML = "";
+      
+      // reset materi
+      const materiBox = document.getElementById("materiBox");
+      materiBox.style.display = "none";
+      materiBox.innerHTML = "";
+      
+      // reset schedule
+      const scheduleBox = document.getElementById("schedule");
+      scheduleBox.style.display = "none";
+      scheduleBox.innerHTML = "";
+      
+      // reset form
+      document.getElementById("formSection").style.display = "none";
+      document.getElementById("submitBtn").disabled = true;
+      
       btn.disabled = false;
       btn.style.background = "#2563eb";
       btn.innerText = "Lihat harga dan jadwal";
