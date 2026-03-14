@@ -1121,6 +1121,15 @@ function resetPortal(){
   btn.style.background = "#2563eb";
   btn.innerText = "Lihat harga dan jadwal";
 
+  // reset form submission box
+  document.getElementById("formSection").style.display = "none";
+
+  document.getElementById("nama").value = "";
+  document.getElementById("nomor").value = "";
+  document.getElementById("preferensi").value = "";
+  
+  document.getElementById("submitBtn").disabled = true;
+
   document.getElementById("updateHint").style.display = "none";
 
   document.getElementById("upgradeSection").style.display = "none";
