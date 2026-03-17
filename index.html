@@ -65,8 +65,8 @@
     #upgradeSection label{
       display:flex;
       align-items:flex-start;
-      gap:8px;
-      margin-top:6px;
+      gap:6px;
+      margin-top:10px;
     }
 
     #upgradeSection input[type="checkbox"]{
@@ -115,36 +115,32 @@
 
   <b>Penambahan yang ingin dilakukan</b>
 
-  <div style="font-size:13px;color:#666;margin-top:4px">
-  Bisa memilih lebih dari satu
-  </div>
-
   <div style="margin-top:10px">
 
-    <label id="optIPA" style="display:none;">
-      <input type="checkbox" id="checkIPA">
-      <span>IPA</span>
+    <label id="optIPA" style="display:none; display:flex; align-items:flex-start; gap:8px;">
+      <input type="checkbox" id="checkIPA" style="margin-top:3px;">
+      <span>Mata pelajaran IPA</span>
     </label>
 
-    <label id="optFisika" style="display:none;">
-      <input type="checkbox" id="checkFisika">
+    <label id="optFisika" style="display:none; display:flex; align-items:flex-start; gap:8px;">
+      <input type="checkbox" id="checkFisika" style="margin-top:3px;">
       <span>Fisika</span>
     </label>
 
-    <label id="optKimia" style="display:none;">
-      <input type="checkbox" id="checkKimia">
+    <label id="optKimia" style="display:none; display:flex; align-items:flex-start; gap:8px;">
+      <input type="checkbox" id="checkKimia" style="margin-top:3px;">
       <span>Kimia</span>
     </label>
 
-    <label id="optMTK" style="display:none;">
+    <label id="optMTK" style="display:none; align-items:flex-start; gap:8px;">
 
       <input type="checkbox" id="checkMTK">
 
       <div class="upgradeText">
-        Frekuensi kelas Matematika (2x/Minggu)
+        Frekuensi kelas Matematika (2x per minggu)
 
         <div class="upgradeNote">
-          Jika saat ini sudah 2x/Minggu, abaikan opsi ini
+          Jika saat ini sudah 2x per minggu, opsi ini dapat diabaikan.
         </div>
 
       </div>
@@ -156,11 +152,6 @@
   <button id="lihatBtn" style="margin-top:12px" onclick="lihatUpgrade()">
     Lihat harga dan jadwal
   </button>
-
-  <div id="updateHint"
-       style="font-size:13px;color:#555;margin-top:6px;display:none">
-    Klik "Lihat harga dan jadwal"
-  </div>
 
 </div>
 <div id="mapelSection" class="card" style="display:none">
@@ -182,7 +173,7 @@
 <div id="formSection" class="card" style="display:none">
   <input id="nama" placeholder="Nama murid"/>
   <input id="nomor" type="tel" placeholder="Nomor HP murid yang terdaftar di aplikasi CoLearn"/> 
-  <textarea id="preferensi" rows="3" placeholder="Pilihan jadwal"></textarea>
+  <textarea id="preferensi" placeholder="Pilihan jadwal"></textarea>
   <div style="font-size:13px; color:#555; margin-top:10px; line-height:1.5">
   Jumlah sesi mata pelajaran tambahan akan menyesuaikan hingga tanggal jatuh tempo.<br>
   Pada bulan berikutnya, pembayaran seluruh mata pelajaran akan digabung dan dibayarkan sesuai tanggal jatuh tempo.
@@ -211,24 +202,12 @@
 
 let kelas = "";
 let mapel = "";
-
-let selectedSchedule = {};
-let jadwalText = {};
-  
-let prevSelected = [];
-let upgradeDirty = false;
+let jadwalFisika = "";
+let jadwalKimia = "";
 
 document.getElementById("kelas").onchange = function() {
   kelas = this.value;
 
-  document.getElementById("checkIPA").checked = false;
-  document.getElementById("checkFisika").checked = false;
-  document.getElementById("checkKimia").checked = false;
-  document.getElementById("checkMTK").checked = false;
-
-  selectedSchedule = {};
-  jadwalText = {};
-  
   document.getElementById("preferensi").value = "";  
   document.getElementById("submitBtn").disabled = true;
 
@@ -263,7 +242,7 @@ document.getElementById("kelas").onchange = function() {
   
   const priceBox = document.getElementById("priceBox");
 
-  if(["7","8","9"].includes(kelas)){
+  if(["7","8","9","10"].includes(kelas)){
     priceBox.style.display = "block";
     priceBox.innerHTML = `
       Biaya penambahan: <b>Rp 49.000</b> 
@@ -276,26 +255,6 @@ document.getElementById("kelas").onchange = function() {
       </div>
     `;
   }
-  else if(kelas === "10"){
-    priceBox.style.display = "block";
-    priceBox.innerHTML = `
-      <div>
-        Biaya penambahan:<br>
-
-        • IPA: <b>Rp 49.000</b>
-        <span style="font-size:14px">
-          (kelas IPA 1x per minggu)
-        </span>
-        <br>
-
-        • Matematika 2x/Minggu: <b>Rp 25.000</b>
-      </div>
-
-      <div style="margin-top:6px;color:#666;font-size:14px">
-        Total biaya per bulan: paket Matematika + penambahan
-      </div>
-    `;
-  }
   else if(kelas === "11"){
     priceBox.style.display = "block";
     priceBox.innerHTML = `
@@ -303,59 +262,38 @@ document.getElementById("kelas").onchange = function() {
         Biaya penambahan:<br>
 
         • Fisika atau Kimia: <b>Rp 49.000</b>
-        <span style="font-size:14px">
+        <span style="font-size:14px;margin-left:4px">
           (1x kelas Fisika/Kimia per minggu)
         </span>
         <br>
 
         • Fisika + Kimia: <b>Rp 79.000</b>
-        <span style="font-size:14px">
+        <span style="font-size:14px;margin-left:4px">
           (2x kelas per minggu — Fisika 1x & Kimia 1x)
         </span>
-        <br>
-
-        • Matematika 2x/Minggu: <b>Rp 25.000</b>
       </div>
 
       <div style="margin-top:6px;color:#666;font-size:14px">
-        Total biaya per bulan: paket Matematika + penambahan
+        Total biaya per bulan: paket Matematika + mapel tambahan
       </div>
     `;
   } else {
     priceBox.style.display = "none";
   }
   
-  if(["7","8","9"].includes(kelas)){
+  if(["7","8","9","10"].includes(kelas)){
     mapel = "IPA";
     document.getElementById("mapelSection").style.display="none";
     loadSchedule();
     loadMateri();
-  } 
-  
-  else if(kelas === "10" || kelas === "11"){
-
+  } else {
     mapel = "";
-
-    document.getElementById("mapelSection").style.display="none";
-    document.getElementById("upgradeSection").style.display="block";
+    document.getElementById("mapelSection").style.display="block";
 
     document.getElementById("schedule").style.display = "none";
     document.getElementById("materiBox").style.display = "none";
-
     document.getElementById("schedule").innerHTML = "";
     document.getElementById("materiBox").innerHTML = "";
-
-  }
-
-  else{
-
-    mapel = "";
-
-    document.getElementById("upgradeSection").style.display="none";
-
-    document.getElementById("schedule").style.display = "none";
-    document.getElementById("materiBox").style.display = "none";
-
   }
 };
 
@@ -364,7 +302,6 @@ document.getElementById("mapel").onchange = function(){
 
   jadwalFisika = "";
   jadwalKimia = "";
-  jadwalMTK = "";
 
   document.getElementById("preferensi").value = "";  
   document.getElementById("submitBtn").disabled = true;
@@ -380,38 +317,27 @@ document.getElementById("mapel").onchange = function(){
   loadMateri();
 }
 
-function formatTime(time){
-  return `${time} WIB`;
-}
-
-const dayOrder = {
-  "Senin":1,
-  "Selasa":2,
-  "Rabu":3,
-  "Kamis":4,
-  "Jumat":5,
-  "Sabtu":6,
-  "Minggu":7
+const ramadanMap = {
+  "16:00-17:00": "15:00-16:00",
+  "17:15-18:15": "16:15-17:15",
+  "19:00-20:00": "19:30-20:30"
 };
 
-function sortSchedule(data){
-
-  return data.sort((a,b)=>{
-
-    const dayA = a.days.split(",")[0].trim();
-    const dayB = b.days.split(",")[0].trim();
-
-    if(dayOrder[dayA] !== dayOrder[dayB]){
-      return dayOrder[dayA] - dayOrder[dayB];
-    }
-
-    const timeA = a.time.split(":")[0]*60 + a.time.split(":")[1].split("-")[0]*1;
-    const timeB = b.time.split(":")[0]*60 + b.time.split(":")[1].split("-")[0]*1;
-
-    return timeA - timeB;
-
-  });
-
+function formatTime(time){
+  if(ramadanMap[time]){
+    return `
+      <span style="text-decoration:line-through;color:#9ca3af">
+        ${time}
+      </span>
+      <span style="margin-left:6px;font-weight:600">
+        ${ramadanMap[time]} WIB
+      </span>
+      <div style="font-size:12px;color:#f59e0b">
+        Jadwal selama Ramadan
+      </div>
+    `;
+  }
+  return `${time} WIB`;
 }
   
 async function loadSchedule(){
@@ -431,17 +357,9 @@ async function loadSchedule(){
       return;
     }
 
-    let freqParam = "";
-
-    if(mapel === "Matematika"){
-      freqParam = "&frequency=2x";
-    }
-    
-    let res = await fetch(`https://script.google.com/macros/s/AKfycbyxrEj7vkND7YmfFt41ACKRVrAEKWD9goEpv0z10Qo62i7-4sd2tGqDGiZKEjrskVsRmA/exec?kelas=${kelas}&subject=${encodeURIComponent(mapel)}${freqParam}`);
+    let res = await fetch(`https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?kelas=${kelas}&subject=${encodeURIComponent(mapel)}`);
 
     let data = await res.json();
-
-    data = sortSchedule(data);
 
     if(!data.length){
       document.getElementById("schedule").innerHTML="Slot penuh. Silakan tulis preferensi jadwal.";
@@ -450,12 +368,12 @@ async function loadSchedule(){
 
     document.getElementById("schedule").innerHTML =
       "<b>Pilihan jadwal " + mapel + " tersedia</b><br>" +
-      "<div style='font-size:13px;color:#666;margin-top:2px'>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</div>" +
-      data.slice(0,10).map(s => `
+      "<div style='font-size:13px;color:#666;margin-top:2px'><b>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</b></div>" +
+      data.slice(0,6).map(s => `
         <div class='slot' data-mapel="${mapel}" onclick="pickSlot('${mapel}','${s.days}','${s.time}','${s.teacher}',event)">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div>
-              <b>${s.days} • ${formatTime(s.time)}</b>
+              <b>${s.days} • ${formatTime(s.time)}</b><br>
               ${s.teacher}<br>
               Sisa kursi: ${s.seatsLeft}
             </div>
@@ -477,19 +395,11 @@ async function loadScheduleBySubject(subject){
     box.innerHTML = "";
   }
   
-  let freqParam = "";
-
-  if(subject === "Matematika"){
-    freqParam = "&frequency=2x";
-  }
-  
   let res = await fetch(
-    `https://script.google.com/macros/s/AKfycbyxrEj7vkND7YmfFt41ACKRVrAEKWD9goEpv0z10Qo62i7-4sd2tGqDGiZKEjrskVsRmA/exec?kelas=${kelas}&subject=${subject}${freqParam}`
+    `https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?kelas=${kelas}&subject=${subject}`
   );
 
   let data = await res.json();
-
-  data = sortSchedule(data);
 
   if(!data.length){
     return;
@@ -499,14 +409,14 @@ async function loadScheduleBySubject(subject){
 
   box.innerHTML +=
     "<div style='margin-top:"+marginTop+";margin-bottom:6px'><b>Pilihan jadwal " + subject + " tersedia</b></div>" +
-    "<div style='font-size:13px;color:#666;margin-bottom:8px'>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</div>";
+    "<div style='font-size:13px;color:#666;margin-bottom:8px'><b>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</b></div>";
 
   box.innerHTML +=
-    data.slice(0,10).map(s => `
+    data.slice(0,6).map(s => `
       <div class='slot' data-mapel="${subject}" onclick="pickSlot('${subject}','${s.days}','${s.time}','${s.teacher}',event)">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <b>${s.days} • ${formatTime(s.time)}</b>
+            <b>${s.days} • ${formatTime(s.time)}</b><br>
             ${s.teacher}<br>
             Sisa kursi: ${s.seatsLeft}
           </div>
@@ -533,7 +443,7 @@ async function loadMateri(){
   }
   
   const res = await fetch(
-  `https://script.google.com/macros/s/AKfycbyxrEj7vkND7YmfFt41ACKRVrAEKWD9goEpv0z10Qo62i7-4sd2tGqDGiZKEjrskVsRmA/exec?type=materi&kelas=${kelas}&mapel=${encodeURIComponent(mapel)}`
+  `https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?type=materi&kelas=${kelas}&mapel=${encodeURIComponent(mapel)}`
   );
 
   const data = await res.json();
@@ -578,7 +488,7 @@ async function loadMateriBySubject(subject){
   const box = document.getElementById("materiBox");
 
   const res = await fetch(
-  `https://script.google.com/macros/s/AKfycbyxrEj7vkND7YmfFt41ACKRVrAEKWD9goEpv0z10Qo62i7-4sd2tGqDGiZKEjrskVsRmA/exec?type=materi&kelas=${kelas}&mapel=${subject}`
+  `https://script.google.com/macros/s/AKfycbyNHLybS79wm2VckkUPXDWL1Ped3EZCvyUXKlFLP_a5GRBU6edTFKSRcdipR8rWzTi1YA/exec?type=materi&kelas=${kelas}&mapel=${subject}`
   );
 
   const data = await res.json();
@@ -627,47 +537,13 @@ async function submitForm(){
 }
 
 function getDisplayTime(time){
-  return time;
-}
-
-function hasConflict(mapelSlot,days,time){
-
-  for(const mapel in selectedSchedule){
-
-    if(mapel === mapelSlot) continue;
-
-    const sched = selectedSchedule[mapel];
-
-    if(!sched) continue;
-
-    if(sched.time !== time) continue;
-
-    const overlap = sched.days.some(d => days.includes(d));
-
-    if(overlap){
-      return mapel;
-    }
-
+  if(ramadanMap[time]){
+    return ramadanMap[time];
   }
-
-  return null;
+  return time;
 }
   
 function pickSlot(mapelSlot,day,time,teacher,event){
-
-  const days = day.split(",").map(d => d.trim());
-
-  const conflict = hasConflict(mapelSlot,days,time);
-
-  if(conflict){
-    alert("Jadwal bentrok dengan " + conflict);
-    return;
-  }
-
-  selectedSchedule[mapelSlot] = {
-    days: days,
-    time: time
-  };
 
   document.querySelectorAll(".slot[data-mapel='"+mapelSlot+"']").forEach(slot=>{
     slot.style.borderColor="#eee";
@@ -688,10 +564,28 @@ function pickSlot(mapelSlot,day,time,teacher,event){
   const text =
     mapelSlot + " - " + day + " " + displayTime + " WIB " + teacher;
 
-  jadwalText[mapelSlot] = text;
+  if(mapelSlot === "IPA"){
+    document.getElementById("preferensi").value = text;
+  }
+  
+  if(mapelSlot === "Fisika"){
+    jadwalFisika = text;
+  }
+
+  if(mapelSlot === "Kimia"){
+    jadwalKimia = text;
+  }
 
   document.getElementById("preferensi").value =
-    Object.values(jadwalText).join("\n");
+    mapelSlot === "IPA"
+      ? text
+      : [jadwalFisika, jadwalKimia].filter(Boolean).join("\n");
+
+  document.getElementById("submitBtn").disabled = false;
+
+  document.getElementById("formSection").scrollIntoView({
+    behavior:"smooth"
+  });
 
   validateForm();
 }
@@ -701,28 +595,21 @@ function validateForm(){
   const nama = document.getElementById("nama").value.trim();
   const nomor = document.getElementById("nomor").value.trim();
 
-  const nomorValid = /^8[1-9][0-9]{7,10}$/.test(nomor);
+  const nomorValid = nomor.length >= 9 && nomor.length <= 12;
 
   let jadwalValid = false;
-
-  const pilihIPA = document.getElementById("checkIPA")?.checked;
-  const pilihFisika = document.getElementById("checkFisika")?.checked;
-  const pilihKimia = document.getElementById("checkKimia")?.checked;
-  const pilihMTK = document.getElementById("checkMTK")?.checked;
 
   if(mapel === "IPA"){
     jadwalValid = !!document.getElementById("preferensi").value.trim();
   }
-
-  let required = [];
-
-  if(pilihIPA) required.push("IPA");
-  if(pilihFisika) required.push("Fisika");
-  if(pilihKimia) required.push("Kimia");
-  if(pilihMTK) required.push("Matematika");
-
-  if(required.length){
-    jadwalValid = required.every(m => selectedSchedule[m]);
+  if(mapel === "Fisika"){
+    jadwalValid = !!jadwalFisika;
+  }
+  else if(mapel === "Kimia"){
+    jadwalValid = !!jadwalKimia;
+  }
+  else if(mapel === "FisikaKimia"){
+    jadwalValid = jadwalFisika && jadwalKimia;
   }
 
   const isValid = nama && nomorValid && jadwalValid;
@@ -731,105 +618,34 @@ function validateForm(){
 
 }
 
-async function lihatUpgrade(){
+function lihatUpgrade(){
 
-  const btn = document.getElementById("lihatBtn");
-
-  btn.disabled = true;
-  btn.style.background = "#60a5fa";
-  btn.innerText = "Memuat jadwal...";
-  
-  const pilihIPA = document.getElementById("checkIPA").checked;
-  const pilihFisika = document.getElementById("checkFisika").checked;
-  const pilihKimia = document.getElementById("checkKimia").checked;
-  const pilihMTK = document.getElementById("checkMTK").checked;
-
-  const scheduleBox = document.getElementById("schedule");
-  const materiBox = document.getElementById("materiBox");
-
-  scheduleBox.innerHTML = "Memuat jadwal...";
-  materiBox.innerHTML = "";
-
-  scheduleBox.style.display = "block";
-  materiBox.style.display = "block";
-
-  if(pilihIPA){
-    await loadScheduleBySubject("IPA");
-    await loadMateriBySubject("IPA");
+  if(document.getElementById("checkIPA").checked){
+    mapel = "IPA";
+    loadMateri();
+    loadSchedule();
   }
 
-  if(pilihFisika){
-    await loadScheduleBySubject("Fisika");
-    await loadMateriBySubject("Fisika");
+  if(document.getElementById("checkFisika").checked){
+    mapel = "Fisika";
+    loadMateri();
+    loadSchedule();
   }
 
-  if(pilihKimia){
-    await loadScheduleBySubject("Kimia");
-    await loadMateriBySubject("Kimia");
+  if(document.getElementById("checkKimia").checked){
+    mapel = "Kimia";
+    loadMateri();
+    loadSchedule();
   }
-
-  if(pilihMTK){
-    await loadScheduleBySubject("Matematika");
-    await loadMateriBySubject("Matematika");
-  }
-
-  document.getElementById("formSection").style.display = "block";
-
-  btn.style.background="#cbd5e1";
-  btn.innerText="Harga dan jadwal sudah diperbarui";
-
-  document.getElementById("updateHint").style.display="none";
-
-  document.getElementById("schedule").scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
 
 }
-
-const upgradeCheckboxes = [
-  "checkIPA",
-  "checkFisika",
-  "checkKimia",
-  "checkMTK"
-];
-
-upgradeCheckboxes.forEach(id=>{
-  const el = document.getElementById(id);
-
-  if(el){
-    el.addEventListener("change",function(){
-
-      const btn = document.getElementById("lihatBtn");
-
-      selectedSchedule = {};
-      jadwalText = {};
-
-      document.getElementById("preferensi").value = "";
-
-      document.querySelectorAll(".slot").forEach(s=>{
-        s.style.borderColor="#eee";
-        s.style.background="white";
-        const icon = s.querySelector(".checkIcon");
-        if(icon) icon.style.opacity = 0;
-      });
-
-      btn.disabled = false;
-      btn.style.background = "#2563eb";
-      btn.innerText = "Lihat harga dan jadwal";
-
-      document.getElementById("updateHint").style.display = "block";
-
-    });
-  }
-});
   
 document.getElementById("nama").oninput = validateForm;
 document.getElementById("nomor").oninput = validateForm;
 
 document.getElementById("nomor").addEventListener("input", function(){
 
-  let val = this.value.replace(/\D/g,""); 
+  let val = this.value.replace(/\D/g,""); // hapus non angka
 
   if(val.startsWith("62")){
     val = val.slice(2);
