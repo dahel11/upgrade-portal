@@ -211,6 +211,7 @@
   <input id="nama" placeholder="Nama murid" readonly>
   <input id="nomor" type="tel" placeholder="Nomor HP murid" readonly>
   <textarea id="preferensi" rows="3" placeholder="Pilihan jadwal"></textarea>
+  <input id="biayaInput" placeholder="Biaya upgrade" readonly>
   <div style="font-size:13px; color:#555; margin-top:10px; line-height:1.5">
   Jumlah sesi mata pelajaran tambahan akan menyesuaikan hingga tanggal jatuh tempo.<br>
   Khusus per bulan, pembayaran bulan berikutnya seluruh mata pelajaran akan digabung dan dibayarkan sesuai tanggal jatuh tempo.
@@ -248,6 +249,7 @@ let upgradeDirty = false;
 
 let studentTenure = "";
 let currentMonthlyPrice = 0;
+let biayaUpgrade = 0;
 
 let currentPackage = "";
 
@@ -682,6 +684,7 @@ async function submitForm(){
   formData.append("entry.1265930966", document.getElementById("nomor").value);
   formData.append("entry.2132303950", kelas);
   formData.append("entry.1375621433", document.getElementById("preferensi").value);
+  formData.append("entry.754072172", document.getElementById("biayaInput").value);
 
   await fetch("https://docs.google.com/forms/d/e/1FAIpQLSdeu8mdcvTxVzQXm3A2mla9hhO-i4T3erD-dFJhYo_r1qdbhQ/formResponse",{
     method:"POST",
@@ -878,6 +881,8 @@ async function lihatUpgrade(){
   priceBox.style.display = "block";
   if(studentTenure === "semesterly"){
 
+    biayaUpgrade = totalUpgrade;
+
     priceBox.innerHTML =
     `Biaya upgrade hingga akhir semester: 
     <b>Rp ${totalUpgrade.toLocaleString()}</b>
@@ -889,6 +894,7 @@ async function lihatUpgrade(){
 
   if(studentTenure === "monthly"){
 
+    biayaUpgrade = priceUpgrade;
     const totalMonthly = currentMonthlyPrice + priceUpgrade;
   
     priceBox.innerHTML =
@@ -943,6 +949,7 @@ async function lihatUpgrade(){
   }
 
   document.getElementById("formSection").style.display = "block";
+  document.getElementById("biayaInput").value = biayaUpgrade.toLocaleString("id-ID");
 
   btn.style.background = "#cbd5e1";
   btn.innerText = "Harga dan jadwal sudah diperbarui";
