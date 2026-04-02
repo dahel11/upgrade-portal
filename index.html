@@ -1198,6 +1198,11 @@ function resetPortal(){
   document.getElementById("checkKimia").checked = false;
   document.getElementById("checkMTK").checked = false;
 
+  // reset checkbox visibility (bisa di-hide kalau visibleOptions === 1)
+  ["checkIPA","checkFisika","checkKimia","checkMTK"].forEach(id => {
+    document.getElementById(id).style.display = "";
+  });
+
   // reset price
   const priceBox = document.getElementById("priceBox");
   priceBox.style.display = "none";
@@ -1225,6 +1230,7 @@ function resetPortal(){
   const btn = document.getElementById("lihatBtn");
   btn.disabled = false;
   btn.style.background = "#2563eb";
+  btn.style.display = "block";
   btn.innerText = "Lihat harga dan jadwal";
 
   // reset form submission box
