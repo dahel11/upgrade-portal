@@ -1124,6 +1124,7 @@ async function lookupStudent(){
     if(!data.found){
       alert("Nomor tidak ditemukan");
       btn.disabled = false;
+      btn.style.background = "#2563eb";
       btn.innerText = "Cek Data Murid";
       return;
     }
