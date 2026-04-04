@@ -1268,6 +1268,7 @@ function resetPortal(){
 
 document.getElementById("lookupPhone").addEventListener("input",function(){
 
+  const btn = document.getElementById("lookupBtn");
   let val = this.value;
 
   // strip semua karakter non-digit kecuali + di awal
@@ -1291,7 +1292,7 @@ document.getElementById("lookupPhone").addEventListener("input",function(){
   resetPortal();
 
   // reset kelas jika nomor kosong
-  if(!phone){
+  if(!val){
     document.getElementById("kelas").value = "";
     kelas = "";
   }
