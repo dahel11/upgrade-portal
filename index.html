@@ -1101,6 +1101,11 @@ async function lookupStudent(){
     return;
   }
 
+  if(!phone.startsWith("8")){
+    alert("Nomor tidak valid. Pastikan nomor HP Indonesia yang digunakan (diawali 8).");
+    return;
+  }
+
   btn.disabled = true;
   btn.innerText = "Mengecek data...";
   btn.style.background = "#75abfb";
@@ -1123,6 +1128,18 @@ async function lookupStudent(){
 
     if(!data.found){
       alert("Nomor tidak ditemukan");
+      btn.disabled = false;
+      btn.style.background = "#2563eb";
+      btn.innerText = "Cek Data Murid";
+      return;
+    }
+
+    if(!data.tenure || data.tenure === "Tidak ada data"){
+      alert(
+        "Data pembayaran murid ini belum tersedia.\n\n" +
+        "Kemungkinan pembayaran baru dilakukan dalam 24 jam terakhir. " +
+        "Silakan coba kembali besok atau hubungi tim internal."
+      );
       btn.disabled = false;
       btn.style.background = "#2563eb";
       btn.innerText = "Cek Data Murid";
@@ -1252,9 +1269,19 @@ function resetPortal(){
 
 document.getElementById("lookupPhone").addEventListener("input",function(){
 
-  const phone = this.value.trim();
+  let val = this.value;
 
-  const btn = document.getElementById("lookupBtn");
+  // strip semua karakter non-digit kecuali + di awal
+  val = val.replace(/[^\d+]/g, "");
+
+  // hapus semua non-digit sekarang (termasuk +)
+  val = val.replace(/\D/g, "");
+
+  // buang awalan 62 atau 0
+  if(val.startsWith("62")) val = val.slice(2);
+  else if(val.startsWith("0")) val = val.slice(1);
+
+  this.value = val;
 
   btn.disabled = false;
   btn.innerText = "Cek Data Murid";
