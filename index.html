@@ -1102,7 +1102,7 @@ async function lookupStudent(){
   }
 
   if(!phone.startsWith("8")){
-    alert("Nomor tidak valid. Pastikan nomor HP Indonesia yang digunakan (diawali 8).");
+    alert("Nomor tidak valid. Pastikan nomor HP Indonesia yang digunakan (diawali 8)");
     return;
   }
 
@@ -1137,8 +1137,7 @@ async function lookupStudent(){
     if(!data.tenure || data.tenure === "Tidak ada data"){
       alert(
         "Data pembayaran murid ini belum tersedia.\n\n" +
-        "Kemungkinan pembayaran baru dilakukan dalam 24 jam terakhir. " +
-        "Silakan coba kembali besok atau hubungi tim internal."
+        "Silakan hubungi Kakak Siaga."
       );
       btn.disabled = false;
       btn.style.background = "#2563eb";
