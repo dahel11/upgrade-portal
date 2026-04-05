@@ -951,6 +951,11 @@ async function lihatUpgrade(){
     await loadMateriBySubject("Matematika");
   }
 
+  // sembunyikan materiBox kalau tidak ada konten (misal hanya pilih MTK)
+  if(materiBox.innerHTML.trim() === ""){
+    materiBox.style.display = "none";
+  }
+
   document.getElementById("formSection").style.display = "block";
   document.getElementById("biayaInput").value = biayaUpgrade;
   document.getElementById("tenureInput").value = studentTenure;
