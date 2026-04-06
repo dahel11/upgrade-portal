@@ -540,40 +540,24 @@ async function loadSchedule(){
   }
 }
 
-async function loadScheduleBySubject(subject){
+// Fetch jadwal subject → return HTML string (kosong jika tidak ada data)
+async function fetchScheduleHTML(subject){
 
-  const box = document.getElementById("schedule");
+  const freqParam = subject === "Matematika" ? "&frequency=2x" : "";
 
-  if(box.innerHTML.includes("Sedang memuat...")){
-    box.innerHTML = "";
-  }
-  
-  let freqParam = "";
-
-  if(subject === "Matematika"){
-    freqParam = "&frequency=2x";
-  }
-  
-  let res = await fetch(
+  const res = await fetch(
     `https://script.google.com/macros/s/AKfycbyxrEj7vkND7YmfFt41ACKRVrAEKWD9goEpv0z10Qo62i7-4sd2tGqDGiZKEjrskVsRmA/exec?kelas=${kelas}&subject=${subject}${freqParam}`
   );
 
   let data = await res.json();
-
   data = sortSchedule(data);
 
-  if(!data.length){
-    return;
-  }
+  if(!data.length) return "";
 
-  let marginTop = box.innerHTML === "" ? "2px" : "24px";
-
-  box.innerHTML +=
-    "<div style='margin-top:"+marginTop+";margin-bottom:6px'><b>Pilihan jadwal " + subject + " tersedia</b></div>" +
-    "<div style='font-size:13px;color:#666;margin-bottom:8px'>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</div>";
-
-  box.innerHTML +=
-    data.slice(0,10).map(s => `
+  return `
+    <div style='margin-bottom:6px'><b>Pilihan jadwal ${subject} tersedia</b></div>
+    <div style='font-size:13px;color:#666;margin-bottom:8px'>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</div>
+    ${data.slice(0,10).map(s => `
       <div class='slot' data-mapel="${subject}" onclick="pickSlot('${subject}','${s.days}','${s.time}','${s.teacher}',event)">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
@@ -584,7 +568,25 @@ async function loadScheduleBySubject(subject){
           <div class="checkIcon" style="font-size:20px;opacity:0">✓</div>
         </div>
       </div>
-    `).join("");
+    `).join("")}
+  `;
+}
+
+// Wrapper untuk loadSchedule / FisikaKimia path (append ke DOM satu per satu)
+async function loadScheduleBySubject(subject){
+
+  const box = document.getElementById("schedule");
+
+  if(box.innerHTML.includes("Sedang memuat...")){
+    box.innerHTML = "";
+  }
+
+  const html = await fetchScheduleHTML(subject);
+
+  if(!html) return;
+
+  const marginTop = box.innerHTML.trim() === "" ? "2px" : "24px";
+  box.innerHTML += `<div style='margin-top:${marginTop}'>${html}</div>`;
 }
   
 async function loadMateri(){
@@ -644,38 +646,42 @@ async function loadMateri(){
   `;
 }
 
-async function loadMateriBySubject(subject){
-
-  const box = document.getElementById("materiBox");
+// Fetch materi subject → return HTML string (kosong jika tidak ada data)
+async function fetchMateriHTML(subject){
 
   const res = await fetch(
-  `https://script.google.com/macros/s/AKfycbyxrEj7vkND7YmfFt41ACKRVrAEKWD9goEpv0z10Qo62i7-4sd2tGqDGiZKEjrskVsRmA/exec?type=materi&kelas=${kelas}&mapel=${subject}`
+    `https://script.google.com/macros/s/AKfycbyxrEj7vkND7YmfFt41ACKRVrAEKWD9goEpv0z10Qo62i7-4sd2tGqDGiZKEjrskVsRmA/exec?type=materi&kelas=${kelas}&mapel=${subject}`
   );
 
   const data = await res.json();
 
-  if(!data.length) return;
+  if(!data.length) return "";
+
+  const slotsHTML = data.map(m => {
+    const lines = m.materi
+      .split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(l => l.length);
+    return `<div class="slot">${lines.map(l => `• ${l}`).join("<br>")}</div>`;
+  }).join("");
+
+  return `<b>Materi Pembelajaran ${subject}</b><br><br>${slotsHTML}<br>`;
+}
+
+// Wrapper untuk loadMateri / FisikaKimia path (append ke DOM satu per satu)
+async function loadMateriBySubject(subject){
+
+  const box = document.getElementById("materiBox");
+
+  const html = await fetchMateriHTML(subject);
+
+  if(!html) return;
 
   if(box.innerHTML === "Sedang memuat..."){
     box.innerHTML = "";
   }
 
-  box.innerHTML += `
-    <b>Materi Pembelajaran ${subject}</b><br><br>
-    ${data.map(m => {
-      const lines = m.materi
-        .split(/\r?\n/)
-        .map(l => l.trim())
-        .filter(l => l.length);
-
-      return `
-        <div class="slot">
-          ${lines.map(l => `• ${l}`).join("<br>")}
-        </div>
-      `;
-    }).join("")}
-    <br>
-  `;
+  box.innerHTML += html;
 }
   
 async function submitForm(){
@@ -920,40 +926,37 @@ async function lihatUpgrade(){
   const materiBox = document.getElementById("materiBox");
 
   scheduleBox.innerHTML = "Sedang memuat...";
-  materiBox.innerHTML = "";
-
   scheduleBox.style.display = "block";
-  materiBox.style.display = "block";
+  materiBox.innerHTML = "";
+  materiBox.style.display = "none";
 
-  // load jadwal
-  if(["7","8","9"].includes(kelas)){
-    await loadScheduleBySubject("IPA");
-    await loadMateriBySubject("IPA");
-  }
+  // kumpulkan subjects yang perlu di-fetch (tanpa duplikat)
+  const subjects = [];
+  if(["7","8","9"].includes(kelas)) subjects.push("IPA");
+  if(pilihIPA && !subjects.includes("IPA")) subjects.push("IPA");
+  if(pilihFisika) subjects.push("Fisika");
+  if(pilihKimia) subjects.push("Kimia");
+  if(pilihMTK) subjects.push("Matematika");
 
-  if(pilihIPA){
-    await loadScheduleBySubject("IPA");
-    await loadMateriBySubject("IPA");
-  }
+  // fetch semua jadwal & materi secara paralel
+  const [scheduleHTMLs, materiHTMLs] = await Promise.all([
+    Promise.all(subjects.map(s => fetchScheduleHTML(s))),
+    Promise.all(subjects.map(s => fetchMateriHTML(s)))
+  ]);
 
-  if(pilihFisika){
-    await loadScheduleBySubject("Fisika");
-    await loadMateriBySubject("Fisika");
-  }
+  // render jadwal
+  const scheduleContent = scheduleHTMLs
+    .map((html, i) => html
+      ? `<div style="margin-top:${i === 0 ? "2px" : "24px"}">${html}</div>`
+      : ""
+    ).join("");
+  scheduleBox.innerHTML = scheduleContent || "Tidak ada jadwal tersedia.";
 
-  if(pilihKimia){
-    await loadScheduleBySubject("Kimia");
-    await loadMateriBySubject("Kimia");
-  }
-
-  if(pilihMTK){
-    await loadScheduleBySubject("Matematika");
-    await loadMateriBySubject("Matematika");
-  }
-
-  // sembunyikan materiBox kalau tidak ada konten (misal hanya pilih MTK)
-  if(materiBox.innerHTML.trim() === ""){
-    materiBox.style.display = "none";
+  // render materi (skip yang kosong, misal Matematika)
+  const materiContent = materiHTMLs.filter(h => h).join("");
+  if(materiContent){
+    materiBox.innerHTML = materiContent;
+    materiBox.style.display = "block";
   }
 
   document.getElementById("formSection").style.display = "block";
