@@ -24,6 +24,15 @@
     }
     button { background:#2563eb; color:white; border:none; border-radius:8px; }
     .slot { border:1px solid #eee; padding:10px; border-radius:8px; margin-top:8px; }
+    .info-grid {
+      display:grid;
+      grid-template-columns:max-content 1fr;
+      column-gap:10px;
+      row-gap:6px;
+      margin-top:4px;
+    }
+    .info-grid .info-label { color:#666; display:flex; justify-content:space-between; gap:8px; }
+    .info-grid .info-label::after { content:":"; }
     button:disabled{
       background:#cbd5e1;
       cursor:not-allowed;
@@ -121,10 +130,12 @@
     Data murid ditemukan
   </b>
 
-  <div id="studentName"></div>
-  <div id="studentGrade"></div>
-  <div id="studentPackage"></div>
-  <div id="studentTenure"></div>
+  <div class="info-grid">
+    <div class="info-label">Nama</div><div id="studentName"></div>
+    <div class="info-label">Kelas</div><div id="studentGrade"></div>
+    <div class="info-label">Paket belajar saat ini</div><div id="studentPackage"></div>
+    <div class="info-label">Pembayaran terakhir</div><div id="studentTenure"></div>
+  </div>
 
 </div>
   
@@ -1267,16 +1278,16 @@ async function lookupStudent(){
     document.getElementById("studentInfo").style.display="block";
 
     document.getElementById("studentName").innerText =
-      "Nama: " + data.name;
+      data.name;
 
     document.getElementById("studentGrade").innerText =
-      "Kelas: " + data.grade;
+      data.grade;
 
     document.getElementById("studentPackage").innerText =
-      "Paket belajar saat ini: " + (data.package || "-");
+      (data.package || "-");
 
     document.getElementById("studentTenure").innerText =
-      "Pembayaran terakhir: " + (tenureMap[data.tenure] || data.tenure);
+      (tenureMap[data.tenure] || data.tenure);
 
     studentTenure = data.tenure;
     currentMonthlyPrice = data.currentPrice;
