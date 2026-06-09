@@ -827,7 +827,7 @@ async function lihatUpgrade(){
   const today = new Date();
   today.setHours(0,0,0,0);
 
-  const semStart = new Date("2026-05-01");  // <-- TES PRORATA. Aslinya: semesterStart ? new Date(semesterStart) : today
+  const semStart = semesterStart ? new Date(semesterStart) : today;
   semStart.setHours(0,0,0,0);
 
   const requestDate = today > semStart ? today : semStart;
@@ -865,6 +865,19 @@ async function lihatUpgrade(){
   if(pilihMTK){
     priceUpgrade += addonPrices.MTK2x;
   }
+
+  // Daftar subjek yang ditambahkan, untuk teks penjelas ke orang tua.
+  const tambahanList = [];
+  if(["7","8","9"].includes(kelas)) tambahanList.push("IPA");
+  if(pilihIPA) tambahanList.push("IPA");
+  if(pilihFisika) tambahanList.push("Fisika");
+  if(pilihKimia) tambahanList.push("Kimia");
+  if(pilihMTK) tambahanList.push("Matematika 2x/Minggu");
+
+  const tambahanLabel =
+    tambahanList.length <= 1
+      ? tambahanList.join("")
+      : tambahanList.slice(0,-1).join(", ") + " dan " + tambahanList[tambahanList.length-1];
 
   if(priceUpgrade === 0){
     alert("Silakan pilih penambahan terlebih dahulu.");
@@ -924,19 +937,21 @@ async function lihatUpgrade(){
     const totalMonthly = currentMonthlyPrice + priceUpgrade;  // tagihan penuh bulan berikutnya
     const prorata = totalUpgrade < priceUpgrade;       // benar2 prorata atau penuh?
 
-    const headerLine = prorata
-      ? `Biaya penambahan (prorata): <b>Rp ${totalUpgrade.toLocaleString()}</b>
-         <div style="margin-top:8px;color:#666;font-size:13px">
-         Dihitung dari ${formatTanggal(requestDate)} hingga tanggal jatuh tempo
-         ${latestDueDate ? "(" + formatTanggal(latestDueDate) + ")" : ""}.
-         </div>`
-      : `Biaya penambahan: <b>Rp ${totalUpgrade.toLocaleString()}</b>`;
+    // keterangan inline (hanya saat prorata): subjek + tanggal jatuh tempo
+    const keterangan = prorata
+      ? ` <span style="color:#666;font-size:13px">(untuk paket ${tambahanLabel} hingga ${latestDueDate ? formatTanggal(latestDueDate) : "jatuh tempo berikutnya"})</span>`
+      : "";
+
+    // baris kedua: prefix "Dari " hanya saat prorata
+    const labelPenuh = prorata
+      ? "Dari penambahan penuh per bulan"
+      : "Penambahan penuh per bulan";
 
     priceBox.innerHTML =
-    `${headerLine}
+    `Biaya penambahan: <b>Rp ${totalUpgrade.toLocaleString()}</b>${keterangan}
 
-    <div style="margin-top:8px;color:#666;font-size:14px">
-    Penambahan penuh per bulan: <b>Rp ${priceUpgrade.toLocaleString()}</b><br>
+    <div style="margin-top:8px;color:#666;font-size:13px">
+    ${labelPenuh}: <b>Rp ${priceUpgrade.toLocaleString()}</b><br>
     Total per bulan berikutnya:
     <b>
     Rp ${currentMonthlyPrice.toLocaleString()}
