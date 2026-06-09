@@ -833,6 +833,10 @@ async function lihatUpgrade(){
   const requestDate = today > semStart ? today : semStart;
   // semesterEnd, breakStart, breakEnd sudah diisi dari studentLookup
 
+  // Pra-semester = request <= awal semester. Saat ini monthly ditagih PENUH
+  // (tidak prorata); prorata hanya berlaku jika upgrade di tengah semester.
+  const isPreSemester = today.getTime() <= semStart.getTime();
+
   let priceUpgrade = 0;
 
   const pilihIPA = document.getElementById("checkIPA")?.checked;
@@ -886,11 +890,9 @@ async function lihatUpgrade(){
   
   if(studentTenure === "monthly"){
   
-    totalUpgrade = calculateMonthlyUpgrade(
-      requestDate,
-      latestDueDate,
-      priceUpgrade
-    );
+    totalUpgrade = isPreSemester
+      ? priceUpgrade                                          // <= awal semester: penuh
+      : calculateMonthlyUpgrade(requestDate, latestDueDate, priceUpgrade);  // tengah semester: prorate
   
   }
   
@@ -918,16 +920,20 @@ async function lihatUpgrade(){
 
   if(studentTenure === "monthly"){
 
-    biayaUpgrade = totalUpgrade;                       // yang ditagih sekarang (prorata)
+    biayaUpgrade = totalUpgrade;                       // yang ditagih sekarang
     const totalMonthly = currentMonthlyPrice + priceUpgrade;  // tagihan penuh bulan berikutnya
-  
+    const prorata = totalUpgrade < priceUpgrade;       // benar2 prorata atau penuh?
+
+    const headerLine = prorata
+      ? `Biaya penambahan (prorata): <b>Rp ${totalUpgrade.toLocaleString()}</b>
+         <div style="margin-top:8px;color:#666;font-size:13px">
+         Dihitung dari ${formatTanggal(requestDate)} hingga tanggal jatuh tempo
+         ${latestDueDate ? "(" + formatTanggal(latestDueDate) + ")" : ""}.
+         </div>`
+      : `Biaya penambahan: <b>Rp ${totalUpgrade.toLocaleString()}</b>`;
+
     priceBox.innerHTML =
-    `Biaya penambahan (prorata): <b>Rp ${totalUpgrade.toLocaleString()}</b>
-  
-    <div style="margin-top:8px;color:#666;font-size:13px">
-    Dihitung dari ${formatTanggal(requestDate)} hingga tanggal jatuh tempo
-    ${latestDueDate ? "(" + formatTanggal(latestDueDate) + ")" : ""}.
-    </div>
+    `${headerLine}
 
     <div style="margin-top:8px;color:#666;font-size:14px">
     Penambahan penuh per bulan: <b>Rp ${priceUpgrade.toLocaleString()}</b><br>
