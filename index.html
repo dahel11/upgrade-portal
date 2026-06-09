@@ -253,13 +253,17 @@ let biayaUpgrade = 0;
 
 let currentPackage = "";
 
-const semesterEndMap = {
-  "7": "2026-06-14",
-  "8": "2026-06-14",
-  "9": "2026-05-03",
-  "10": "2026-06-14",
-  "11": "2026-06-14",
-  "12": "2026-04-29"
+// --- Diisi dari studentLookup (sumber: spreadsheet) ---
+let semesterStart = null;     // StartDate semester utk grade murid
+let semesterEnd   = null;     // EndDate semester utk grade murid
+let breakStart    = null;     // HolidayPeriodFrom (null jika tidak ada break)
+let breakEnd      = null;     // HolidayPeriodTo
+let latestDueDate = null;     // tanggal jatuh tempo paket aktif (utk prorate monthly)
+
+let addonPrices = { IPA:0, Fisika:0, Kimia:0, MTK2x:0 };
+
+let currentFlags = {          // isi paket murid SAAT INI (dibaca dari Price_Table)
+  hasMTK:false, mtk2x:false, hasIPA:false, hasFisika:false, hasKimia:false
 };
 
 document.getElementById("kelas").onchange = function() {
@@ -290,8 +294,8 @@ document.getElementById("kelas").onchange = function() {
     upgradeSection.style.display = "block";
   
     const paketLengkap =
-      currentPackage.includes("MTK") &&
-      currentPackage.includes("IPA");
+      currentFlags.hasMTK &&
+      currentFlags.hasIPA;
   
     if(paketLengkap){
   
@@ -332,10 +336,10 @@ document.getElementById("kelas").onchange = function() {
     if(kelas === "10"){
   
       document.getElementById("optIPA").style.display =
-        currentPackage.includes("IPA") ? "none" : "block";
+        currentFlags.hasIPA ? "none" : "block";
   
       document.getElementById("optMTK").style.display =
-        currentPackage.includes("2x") ? "none" : "flex";
+        currentFlags.mtk2x ? "none" : "flex";
   
       document.getElementById("optFisika").style.display = "none";
       document.getElementById("optKimia").style.display = "none";
@@ -345,13 +349,13 @@ document.getElementById("kelas").onchange = function() {
     if(kelas === "11"){
   
       document.getElementById("optFisika").style.display =
-        currentPackage.includes("Fisika") ? "none" : "block";
+        currentFlags.hasFisika ? "none" : "block";
   
       document.getElementById("optKimia").style.display =
-        currentPackage.includes("Kimia") ? "none" : "block";
+        currentFlags.hasKimia ? "none" : "block";
   
       document.getElementById("optMTK").style.display =
-        currentPackage.includes("2x") ? "none" : "flex";
+        currentFlags.mtk2x ? "none" : "flex";
   
       document.getElementById("optIPA").style.display = "none";
   
@@ -817,11 +821,17 @@ async function lihatUpgrade(){
   btn.style.background = "#75abfb";
   btn.innerText = "Sedang memuat...";
 
+  // Anchor tanggal = max(hari ini, awal semester).
+  // Sebelum semester mulai -> semua dihitung seolah dari tanggal mulai semester.
+  // Setelah semester jalan -> dihitung dari hari ini.
   const today = new Date();
+  today.setHours(0,0,0,0);
 
-  const semesterEnd = semesterEndMap[kelas];
-  const breakStart = "2026-01-02";
-  const breakEnd = "2026-01-01";
+  const semStart = semesterStart ? new Date(semesterStart) : today;
+  semStart.setHours(0,0,0,0);
+
+  const requestDate = today > semStart ? today : semStart;
+  // semesterEnd, breakStart, breakEnd sudah diisi dari studentLookup
 
   let priceUpgrade = 0;
 
@@ -830,24 +840,26 @@ async function lihatUpgrade(){
   const pilihKimia = document.getElementById("checkKimia")?.checked;
   const pilihMTK = document.getElementById("checkMTK")?.checked;
   
+  // Harga penambahan ditarik dari Price_Table (per grade), tiap unit dijumlah.
+  // Tidak ada lagi diskon bundle Fisika+Kimia.
   if(["7","8","9"].includes(kelas)){
-    priceUpgrade += 49000;
+    priceUpgrade += addonPrices.IPA;   // IPA otomatis untuk 7/8/9
   }
-  
+
   if(pilihIPA){
-    priceUpgrade += 49000;
+    priceUpgrade += addonPrices.IPA;
   }
-  
-  if(pilihFisika && pilihKimia){
-    priceUpgrade += 79000;
+
+  if(pilihFisika){
+    priceUpgrade += addonPrices.Fisika;
   }
-  else{
-    if(pilihFisika) priceUpgrade += 49000;
-    if(pilihKimia) priceUpgrade += 49000;
+
+  if(pilihKimia){
+    priceUpgrade += addonPrices.Kimia;
   }
-  
+
   if(pilihMTK){
-    priceUpgrade += 25000;
+    priceUpgrade += addonPrices.MTK2x;
   }
 
   if(priceUpgrade === 0){
@@ -863,7 +875,7 @@ async function lihatUpgrade(){
   if(studentTenure === "semesterly"){
   
     totalUpgrade = calculateSemesterUpgrade(
-      today,
+      requestDate,
       semesterEnd,
       priceUpgrade,
       breakStart,
@@ -874,7 +886,11 @@ async function lihatUpgrade(){
   
   if(studentTenure === "monthly"){
   
-    totalUpgrade = priceUpgrade;
+    totalUpgrade = calculateMonthlyUpgrade(
+      requestDate,
+      latestDueDate,
+      priceUpgrade
+    );
   
   }
   
@@ -902,19 +918,25 @@ async function lihatUpgrade(){
 
   if(studentTenure === "monthly"){
 
-    biayaUpgrade = priceUpgrade;
-    const totalMonthly = currentMonthlyPrice + priceUpgrade;
+    biayaUpgrade = totalUpgrade;                       // yang ditagih sekarang (prorata)
+    const totalMonthly = currentMonthlyPrice + priceUpgrade;  // tagihan penuh bulan berikutnya
   
     priceBox.innerHTML =
-    `Biaya penambahan: <b>Rp ${priceUpgrade.toLocaleString()}</b>
+    `Biaya penambahan (prorata): <b>Rp ${totalUpgrade.toLocaleString()}</b>
   
+    <div style="margin-top:8px;color:#666;font-size:13px">
+    Dihitung dari ${formatTanggal(requestDate)} hingga tanggal jatuh tempo
+    ${latestDueDate ? "(" + formatTanggal(latestDueDate) + ")" : ""}.
+    </div>
+
     <div style="margin-top:8px;color:#666;font-size:14px">
-    Total per bulan: 
+    Penambahan penuh per bulan: <b>Rp ${priceUpgrade.toLocaleString()}</b><br>
+    Total per bulan berikutnya:
     <b>
-    Rp ${currentMonthlyPrice.toLocaleString()} 
-    + 
+    Rp ${currentMonthlyPrice.toLocaleString()}
+    +
     Rp ${priceUpgrade.toLocaleString()}
-    = 
+    =
     Rp ${totalMonthly.toLocaleString()}
     </b>
     </div>`;
@@ -1080,20 +1102,57 @@ function calculateSemesterUpgrade(startDate,endDate,priceUpgrade,breakStart,brea
 
   const prorateCost = priceUpgrade*(diffDays/daysInMonth);
 
-  const breakStartDate = new Date(breakStart);
-  const breakEndDate = new Date(breakEnd);
+  // Potongan break/libur. Jika tidak ada break (kolom kosong), breakCost = 0.
+  let breakCost = 0;
 
-  const breakDays =
-    Math.floor((breakEndDate-breakStartDate)/(1000*60*60*24))+1;
+  if(breakStart && breakEnd){
+    const breakStartDate = new Date(breakStart);
+    const breakEndDate = new Date(breakEnd);
 
-  const breakMonthDays =
-    new Date(breakEndDate.getFullYear(),breakEndDate.getMonth()+1,0).getDate();
+    const breakDays =
+      Math.floor((breakEndDate-breakStartDate)/(1000*60*60*24))+1;
 
-  const breakCost = (priceUpgrade/breakMonthDays)*breakDays;
+    if(breakDays > 0){
+      const breakMonthDays =
+        new Date(breakEndDate.getFullYear(),breakEndDate.getMonth()+1,0).getDate();
+
+      breakCost = (priceUpgrade/breakMonthDays)*breakDays;
+    }
+  }
 
   const total = Math.round(costFullMonth+prorateCost-breakCost);
 
   return total;
+}
+
+// Prorate untuk murid MONTHLY (sebelumnya flat).
+//   prorate_days = (due_date - request_date) + 1
+//   > 30 hari  -> tagih penuh selisih
+//   <= 30 hari -> ROUND(selisih * prorate_days / jumlah hari di bulan request_date)
+// request_date = anchor max(today, awal semester).
+function calculateMonthlyUpgrade(requestDate, dueDate, selisih){
+
+  const req = new Date(requestDate);
+  req.setHours(0,0,0,0);
+
+  // jika due date tidak tersedia, fallback ke harga penuh
+  if(!dueDate) return selisih;
+
+  const due = new Date(dueDate);
+  due.setHours(0,0,0,0);
+
+  const prorateDays =
+    Math.floor((due - req)/(1000*60*60*24)) + 1;
+
+  // due date sudah lewat anchor -> kasus ganjil, tagih penuh (cek manual)
+  if(prorateDays <= 0) return selisih;
+
+  if(prorateDays > 30) return selisih;
+
+  const daysInMonth =
+    new Date(req.getFullYear(), req.getMonth()+1, 0).getDate();
+
+  return Math.round(selisih * (prorateDays / daysInMonth));
 }
 
 async function lookupStudent(){
@@ -1127,6 +1186,18 @@ async function lookupStudent(){
 
     currentPackage = data.package || "";
     currentMonthlyPrice = data.currentPrice;
+
+    // --- nilai per-semester dari spreadsheet ---
+    semesterStart = data.semester ? data.semester.start : null;
+    semesterEnd   = data.semester ? data.semester.end   : null;
+    breakStart    = data.break ? data.break.start : null;
+    breakEnd      = data.break ? data.break.end   : null;
+    latestDueDate = data.latest_due_date || null;
+
+    addonPrices  = data.addonPrices || { IPA:0, Fisika:0, Kimia:0, MTK2x:0 };
+    currentFlags = data.current || {
+      hasMTK:false, mtk2x:false, hasIPA:false, hasFisika:false, hasKimia:false
+    };
 
     const tenureMap = {
       monthly: "per bulan",
@@ -1194,10 +1265,6 @@ async function lookupStudent(){
 
 }
 
-function packageHas(keyword){
-  return currentPackage.includes(keyword);
-}  
-  
 function formatTanggal(dateStr){
 
   const d = new Date(dateStr);
