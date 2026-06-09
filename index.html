@@ -13,9 +13,6 @@
     body { font-family: Arial; background:#f5f5f5; padding:20px; max-width:700px; margin:auto; }
     .card { background:white; padding:16px; border-radius:12px; margin-bottom:16px; }
     select, input, textarea, button { width:100%; padding:10px; margin-top:8px; }
-    /* Field nomor HP tetap 16px supaya iOS tidak auto-zoom saat di-tap.
-       Field lain read-only, jadi tidak memicu zoom dan boleh ikut default. */
-    #lookupPhone { font-size:16px; }
     input[type="checkbox"]{
       width:auto;
       margin-right:8px;
@@ -594,7 +591,37 @@ async function loadScheduleBySubject(subject){
   const marginTop = box.innerHTML.trim() === "" ? "2px" : "24px";
   box.innerHTML += `<div style='margin-top:${marginTop}'>${html}</div>`;
 }
-  
+
+// Pecah tiap baris materi jadi (rentang tanggal) + (nama materi), lalu tata
+// bertumpuk: tanggal label kecil abu-abu di atas, materi di bawahnya.
+// Tidak perlu rata-spasi manual di spreadsheet; struktur yang merapikan.
+function renderMateriItems(materiText){
+  const lines = String(materiText)
+    .split(/\r?\n/)
+    .map(l => l.trim())
+    .filter(l => l.length);
+
+  // pola: "05 Jan 2026 - 18 Jan 2026  <nama materi>"
+  const re = /^(\d{1,2}\s+[A-Za-z]+\s+\d{4}\s*[-–]\s*\d{1,2}\s+[A-Za-z]+\s+\d{4})\s+(.+)$/;
+
+  return lines.map(l => {
+    const m = l.match(re);
+
+    if(m){
+      const tanggal = m[1].replace(/\s+/g, " ");  // rapikan spasi ganda
+      const materi  = m[2].trim();
+      return `
+        <div style="padding:8px 0;border-bottom:1px solid #f0f0f0">
+          <div style="color:#888;font-size:12px;margin-bottom:2px">${tanggal}</div>
+          <div style="font-size:14px">${materi}</div>
+        </div>`;
+    }
+
+    // baris tanpa rentang tanggal: tampilkan apa adanya
+    return `<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px">${l}</div>`;
+  }).join("");
+}
+
 async function loadMateri(){
   const box = document.getElementById("materiBox");
 
@@ -637,18 +664,7 @@ async function loadMateri(){
   box.innerHTML = `
     <b>${materiTitle}</b><br><br>
   
-    ${data.map(m => {
-      const lines = m.materi
-        .split(/\r?\n/)        
-        .map(l => l.trim())
-        .filter(l => l.length);
-
-      return `
-        <div class="slot">
-          ${lines.map(l => `• ${l}`).join("<br>")}
-        </div>
-      `;
-    }).join("")}
+    ${data.map(m => `<div class="slot">${renderMateriItems(m.materi)}</div>`).join("")}
   `;
 }
 
@@ -663,13 +679,9 @@ async function fetchMateriHTML(subject){
 
   if(!data.length) return "";
 
-  const slotsHTML = data.map(m => {
-    const lines = m.materi
-      .split(/\r?\n/)
-      .map(l => l.trim())
-      .filter(l => l.length);
-    return `<div class="slot">${lines.map(l => `• ${l}`).join("<br>")}</div>`;
-  }).join("");
+  const slotsHTML = data.map(m =>
+    `<div class="slot">${renderMateriItems(m.materi)}</div>`
+  ).join("");
 
   return `<b>Materi Pembelajaran ${subject}</b><br><br>${slotsHTML}<br>`;
 }
