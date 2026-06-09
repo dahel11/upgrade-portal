@@ -12,7 +12,7 @@
     }
     body { font-family: Arial; background:#f5f5f5; padding:20px; max-width:700px; margin:auto; }
     .card { background:white; padding:16px; border-radius:12px; margin-bottom:16px; }
-    select, input, textarea, button { width:100%; padding:10px; margin-top:8px; }
+    select, input, textarea, button { width:100%; padding:10px; margin-top:8px; font-size:16px; }
     input[type="checkbox"]{
       width:auto;
       margin-right:8px;
@@ -937,9 +937,9 @@ async function lihatUpgrade(){
     const totalMonthly = currentMonthlyPrice + priceUpgrade;  // tagihan penuh bulan berikutnya
     const prorata = totalUpgrade < priceUpgrade;       // benar2 prorata atau penuh?
 
-    // keterangan inline (hanya saat prorata): subjek + tanggal jatuh tempo
+    // keterangan (hanya saat prorata): subjek + tanggal, di baris bawah, jarak rapat
     const keterangan = prorata
-      ? ` <span style="color:#666;font-size:13px">(untuk paket ${tambahanLabel} hingga ${latestDueDate ? formatTanggal(latestDueDate) : "jatuh tempo berikutnya"})</span>`
+      ? `<div style="margin-top:2px;color:#666;font-size:13px">(untuk paket ${tambahanLabel} hingga ${latestDueDate ? formatTanggal(latestDueDate) : "jatuh tempo berikutnya"})</div>`
       : "";
 
     // baris kedua: prefix "Dari " hanya saat prorata
