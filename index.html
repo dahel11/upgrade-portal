@@ -853,7 +853,7 @@ async function lihatUpgrade(){
   const today = new Date();
   today.setHours(0,0,0,0);
 
-  const semStart = semesterStart ? new Date(semesterStart) : today;  // <-- TES PRORATA. Aslinya: semesterStart ? new Date(semesterStart) : today. Test: new Date("2026-05-01")
+  const semStart = new Date("2026-05-01");  // <-- TES PRORATA. Aslinya: semesterStart ? new Date(semesterStart) : today. Test: new Date("2026-05-01")
   semStart.setHours(0,0,0,0);
 
   const requestDate = today > semStart ? today : semStart;
