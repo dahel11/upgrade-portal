@@ -143,6 +143,8 @@
   <b>Pilih kelas</b>
   <select id="kelas">
     <option value="">Pilih kelas</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
     <option value="7">7</option>
     <option value="8">8</option>
     <option value="9">9</option>
@@ -340,11 +342,11 @@ document.getElementById("kelas").onchange = function() {
 
 }
   
-  else if(kelas === "10" || kelas === "11"){
+  else if(["5","6","10","11"].includes(kelas)){
 
     upgradeSection.style.display = "block";
   
-    if(kelas === "10"){
+    if(["5","6","10"].includes(kelas)){
   
       document.getElementById("optIPA").style.display =
         currentFlags.hasIPA ? "none" : "block";
@@ -417,7 +419,7 @@ document.getElementById("kelas").onchange = function() {
     document.getElementById("mapelSection").style.display="none";
   } 
   
-  else if(kelas === "10" || kelas === "11"){
+  else if(["5","6","10","11"].includes(kelas)){
 
     mapel = "";
 
