@@ -1167,12 +1167,14 @@ function calculateSemesterUpgrade(startDate,endDate,priceUpgrade,breakStart,brea
     }
   }
 
-  // amount = biaya sebelum diskon
-  const amount = costFullMonth + prorateCost - breakCost;
-
-  // Diskon 10% untuk upgrade semesterly -> price upgrade
+  // Samakan pembulatan dengan spreadsheet (3x ROUND):
+  //   amount = ROUND(full + prorate - break)
+  //   disc   = ROUND(amount * 10%)
+  //   total  = ROUND(amount - disc)
   const DISKON = 0.10;
-  const total = Math.round(amount - (amount * DISKON));   // = round(amount * 0.9)
+  const amount = Math.round(costFullMonth + prorateCost - breakCost);
+  const disc   = Math.round(amount * DISKON);
+  const total  = Math.round(amount - disc);
 
   return total;
 }
