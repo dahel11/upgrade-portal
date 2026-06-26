@@ -539,7 +539,7 @@ async function loadSchedule(){
       "<b>Pilihan jadwal " + mapel + " tersedia</b><br>" +
       "<div style='font-size:13px;color:#666;margin-top:2px'>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</div>" +
       data.slice(0,10).map(s => `
-        <div class='slot' data-mapel="${mapel}" onclick="pickSlot('${mapel}','${s.days}','${s.time}','${s.teacher}',event)">
+        <div class='slot' data-mapel="${mapel}" data-slotname="${s.slotName || ''}" onclick="pickSlot('${mapel}','${s.days}','${s.time}','${s.teacher}',event)">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div>
               <b>${s.days} • ${formatTime(s.time)}</b><br>
@@ -574,7 +574,7 @@ async function fetchScheduleHTML(subject){
     <div style='margin-bottom:6px'><b>Pilihan jadwal ${subject} tersedia</b></div>
     <div style='font-size:13px;color:#666;margin-bottom:8px'>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</div>
     ${data.slice(0,10).map(s => `
-      <div class='slot' data-mapel="${subject}" onclick="pickSlot('${subject}','${s.days}','${s.time}','${s.teacher}',event)">
+      <div class='slot' data-mapel="${subject}" data-slotname="${s.slotName || ''}" onclick="pickSlot('${subject}','${s.days}','${s.time}','${s.teacher}',event)">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
             <b>${s.days} • ${formatTime(s.time)}</b><br>
@@ -723,6 +723,8 @@ async function submitForm(){
   formData.append("entry.1265930966", document.getElementById("nomor").value);
   formData.append("entry.2132303950", kelas);
   formData.append("entry.1375621433", document.getElementById("preferensi").value);
+  formData.append("entry.1996867650",
+    Object.values(selectedSchedule).map(s => s.slotName || "").join("\n"));   // Nama Slot (internal)
   formData.append("entry.754072172", document.getElementById("biayaInput").value);
   formData.append("entry.1200583005", document.getElementById("tenureInput").value);
 
@@ -774,9 +776,13 @@ function pickSlot(mapelSlot,day,time,teacher,event){
     return;
   }
 
+  const slotName =
+    (event.currentTarget && event.currentTarget.dataset.slotname) || "";
+
   selectedSchedule[mapelSlot] = {
     days: days,
-    time: time
+    time: time,
+    slotName: slotName
   };
 
   document.querySelectorAll(".slot[data-mapel='"+mapelSlot+"']").forEach(slot=>{
