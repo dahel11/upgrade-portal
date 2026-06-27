@@ -302,51 +302,11 @@ document.getElementById("kelas").onchange = function() {
 
   const upgradeSection = document.getElementById("upgradeSection");
 
-  if(["7","8","9"].includes(kelas)){
+  if(["5","6","7","8","9","10","11"].includes(kelas)){
 
     upgradeSection.style.display = "block";
   
-    const paketLengkap =
-      currentFlags.hasMTK &&
-      currentFlags.hasIPA;
-  
-    if(paketLengkap){
-  
-      document.getElementById("lihatBtn").style.display = "none";
-      document.getElementById("multiNote").style.display = "none";
-      document.getElementById("autoUpgradeText").style.display = "none";
-  
-      document.getElementById("upgradeSection").insertAdjacentHTML(
-        "beforeend",
-        `<div class="upgradeInfo" style="margin-top:12px;font-size:14px;color:#555">
-          Paket belajar saat ini sudah merupakan paket lengkap.<br>
-          Tidak ada penambahan yang tersedia.
-        </div>`
-      );
-  
-    }
-  
-    else{
-  
-      document.getElementById("optIPA").style.display = "none";
-      document.getElementById("optFisika").style.display = "none";
-      document.getElementById("optKimia").style.display = "none";
-      document.getElementById("optMTK").style.display = "none";
-  
-      document.getElementById("autoUpgradeText").style.display = "block";
-      document.getElementById("multiNote").style.display = "none";
-  
-      document.getElementById("lihatBtn").style.display = "block";
-  
-    }
-
-}
-  
-  else if(["5","6","10","11"].includes(kelas)){
-
-    upgradeSection.style.display = "block";
-  
-    if(["5","6","10"].includes(kelas)){
+    if(["5","6","7","8","9","10"].includes(kelas)){
   
       document.getElementById("optIPA").style.display =
         currentFlags.hasIPA ? "none" : "block";
@@ -414,12 +374,7 @@ document.getElementById("kelas").onchange = function() {
   priceBox.style.display = "none";
   priceBox.innerHTML = "";
   
-  if(["7","8","9"].includes(kelas)){
-    mapel = "IPA";
-    document.getElementById("mapelSection").style.display="none";
-  } 
-  
-  else if(["5","6","10","11"].includes(kelas)){
+  if(["5","6","7","8","9","10","11"].includes(kelas)){
 
     mapel = "";
 
@@ -880,10 +835,6 @@ async function lihatUpgrade(){
   
   // Harga penambahan ditarik dari Price_Table (per grade), tiap unit dijumlah.
   // Tidak ada lagi diskon bundle Fisika+Kimia.
-  if(["7","8","9"].includes(kelas)){
-    priceUpgrade += addonPrices.IPA;   // IPA otomatis untuk 7/8/9
-  }
-
   if(pilihIPA){
     priceUpgrade += addonPrices.IPA;
   }
@@ -902,7 +853,6 @@ async function lihatUpgrade(){
 
   // Daftar subjek yang ditambahkan, untuk teks penjelas ke orang tua.
   const tambahanList = [];
-  if(["7","8","9"].includes(kelas)) tambahanList.push("IPA");
   if(pilihIPA) tambahanList.push("IPA");
   if(pilihFisika) tambahanList.push("Fisika");
   if(pilihKimia) tambahanList.push("Kimia");
@@ -1008,7 +958,6 @@ async function lihatUpgrade(){
 
   // kumpulkan subjects yang perlu di-fetch (tanpa duplikat)
   const subjects = [];
-  if(["7","8","9"].includes(kelas)) subjects.push("IPA");
   if(pilihIPA && !subjects.includes("IPA")) subjects.push("IPA");
   if(pilihFisika) subjects.push("Fisika");
   if(pilihKimia) subjects.push("Kimia");
