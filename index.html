@@ -1248,7 +1248,7 @@ async function lookupStudent(){
       data.grade;
 
     document.getElementById("studentPackage").innerText =
-      (data.package || "-");
+      (cleanPackageName(data.package) || "-");
 
     document.getElementById("studentTenure").innerText =
       (tenureMap[data.tenure] || data.tenure);
@@ -1274,6 +1274,18 @@ async function lookupStudent(){
 
   }
 
+}
+
+// Versi nama paket untuk DITAMPILKAN ke orang tua: buang setiap "- Kelas N".
+// Display-only — nama mentah tetap dipakai untuk join harga di backend.
+// Berlaku untuk nama paket apa pun yang berpola, tanpa perlu sheet/edit kode.
+function cleanPackageName(name){
+  return String(name || "")
+    .replace(/\s*-\s*Kelas\s*\d+/gi, "")  // hapus "- Kelas N"
+    .replace(/\s*,\s*/g, ", ")            // rapikan koma antar mapel
+    .replace(/\s{2,}/g, " ")              // rapikan spasi ganda
+    .replace(/^[,\s]+|[,\s]+$/g, "")      // buang koma/spasi di ujung
+    .trim();
 }
 
 function formatTanggal(dateStr){
