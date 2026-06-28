@@ -11,7 +11,7 @@
       box-sizing:border-box;
     }
     body { font-family: Arial; background:#f5f5f5; padding:20px; max-width:700px; margin:auto; }
-    .card { background:white; padding:16px; border-radius:12px; margin-bottom:16px; }
+    .card { background:white; padding:16px; border-radius:12px; margin-bottom:16px; font-size:14px; }
     select, input, textarea, button { width:100%; padding:10px; margin-top:8px; }
     input[type="checkbox"]{
       width:auto;
@@ -24,6 +24,15 @@
     }
     button { background:#2563eb; color:white; border:none; border-radius:8px; }
     .slot { border:1px solid #eee; padding:10px; border-radius:8px; margin-top:8px; }
+    .info-grid {
+      display:grid;
+      grid-template-columns:max-content 1fr;
+      column-gap:10px;
+      row-gap:6px;
+      margin-top:4px;
+    }
+    .info-grid .info-label { display:flex; justify-content:space-between; gap:8px; }
+    .info-grid .info-label::after { content:":"; }
     button:disabled{
       background:#cbd5e1;
       cursor:not-allowed;
@@ -95,7 +104,7 @@
   </a>
 </div>
   
-<h2 style="text-align:center; margin-bottom:24px;">
+<h2 style="text-align:center; margin-bottom:24px; font-size:20px;">
   Formulir Penambahan Paket Belajar CoLearn
 </h2>
 
@@ -121,10 +130,12 @@
     Data murid ditemukan
   </b>
 
-  <div id="studentName"></div>
-  <div id="studentGrade"></div>
-  <div id="studentPackage"></div>
-  <div id="studentTenure"></div>
+  <div class="info-grid">
+    <div class="info-label">Nama</div><div id="studentName"></div>
+    <div class="info-label">Kelas</div><div id="studentGrade"></div>
+    <div class="info-label">Paket belajar saat ini</div><div id="studentPackage"></div>
+    <div class="info-label">Pembayaran terakhir</div><div id="studentTenure"></div>
+  </div>
 
 </div>
   
@@ -132,6 +143,8 @@
   <b>Pilih kelas</b>
   <select id="kelas">
     <option value="">Pilih kelas</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
     <option value="7">7</option>
     <option value="8">8</option>
     <option value="9">9</option>
@@ -253,13 +266,17 @@ let biayaUpgrade = 0;
 
 let currentPackage = "";
 
-const semesterEndMap = {
-  "7": "2026-06-14",
-  "8": "2026-06-14",
-  "9": "2026-05-03",
-  "10": "2026-06-14",
-  "11": "2026-06-14",
-  "12": "2026-04-29"
+// --- Diisi dari studentLookup (sumber: spreadsheet) ---
+let semesterStart = null;     // StartDate semester utk grade murid
+let semesterEnd   = null;     // EndDate semester utk grade murid
+let breakStart    = null;     // HolidayPeriodFrom (null jika tidak ada break)
+let breakEnd      = null;     // HolidayPeriodTo
+let latestDueDate = null;     // tanggal jatuh tempo paket aktif (utk prorate monthly)
+
+let addonPrices = { IPA:0, Fisika:0, Kimia:0, MTK2x:0 };
+
+let currentFlags = {          // isi paket murid SAAT INI (dibaca dari Price_Table)
+  hasMTK:false, mtk2x:false, hasIPA:false, hasFisika:false, hasKimia:false
 };
 
 document.getElementById("kelas").onchange = function() {
@@ -285,57 +302,17 @@ document.getElementById("kelas").onchange = function() {
 
   const upgradeSection = document.getElementById("upgradeSection");
 
-  if(["7","8","9"].includes(kelas)){
+  if(["5","6","7","8","9","10","11"].includes(kelas)){
 
     upgradeSection.style.display = "block";
   
-    const paketLengkap =
-      currentPackage.includes("MTK") &&
-      currentPackage.includes("IPA");
-  
-    if(paketLengkap){
-  
-      document.getElementById("lihatBtn").style.display = "none";
-      document.getElementById("multiNote").style.display = "none";
-      document.getElementById("autoUpgradeText").style.display = "none";
-  
-      document.getElementById("upgradeSection").insertAdjacentHTML(
-        "beforeend",
-        `<div class="upgradeInfo" style="margin-top:12px;font-size:14px;color:#555">
-          Paket belajar saat ini sudah merupakan paket lengkap.<br>
-          Tidak ada penambahan yang tersedia.
-        </div>`
-      );
-  
-    }
-  
-    else{
-  
-      document.getElementById("optIPA").style.display = "none";
-      document.getElementById("optFisika").style.display = "none";
-      document.getElementById("optKimia").style.display = "none";
-      document.getElementById("optMTK").style.display = "none";
-  
-      document.getElementById("autoUpgradeText").style.display = "block";
-      document.getElementById("multiNote").style.display = "none";
-  
-      document.getElementById("lihatBtn").style.display = "block";
-  
-    }
-
-}
-  
-  else if(kelas === "10" || kelas === "11"){
-
-    upgradeSection.style.display = "block";
-  
-    if(kelas === "10"){
+    if(["5","6","7","8","9","10"].includes(kelas)){
   
       document.getElementById("optIPA").style.display =
-        currentPackage.includes("IPA") ? "none" : "block";
+        currentFlags.hasIPA ? "none" : "block";
   
       document.getElementById("optMTK").style.display =
-        currentPackage.includes("2x") ? "none" : "flex";
+        currentFlags.mtk2x ? "none" : "flex";
   
       document.getElementById("optFisika").style.display = "none";
       document.getElementById("optKimia").style.display = "none";
@@ -345,13 +322,13 @@ document.getElementById("kelas").onchange = function() {
     if(kelas === "11"){
   
       document.getElementById("optFisika").style.display =
-        currentPackage.includes("Fisika") ? "none" : "block";
+        currentFlags.hasFisika ? "none" : "block";
   
       document.getElementById("optKimia").style.display =
-        currentPackage.includes("Kimia") ? "none" : "block";
+        currentFlags.hasKimia ? "none" : "block";
   
       document.getElementById("optMTK").style.display =
-        currentPackage.includes("2x") ? "none" : "flex";
+        currentFlags.mtk2x ? "none" : "flex";
   
       document.getElementById("optIPA").style.display = "none";
   
@@ -397,12 +374,7 @@ document.getElementById("kelas").onchange = function() {
   priceBox.style.display = "none";
   priceBox.innerHTML = "";
   
-  if(["7","8","9"].includes(kelas)){
-    mapel = "IPA";
-    document.getElementById("mapelSection").style.display="none";
-  } 
-  
-  else if(kelas === "10" || kelas === "11"){
+  if(["5","6","7","8","9","10","11"].includes(kelas)){
 
     mapel = "";
 
@@ -522,7 +494,7 @@ async function loadSchedule(){
       "<b>Pilihan jadwal " + mapel + " tersedia</b><br>" +
       "<div style='font-size:13px;color:#666;margin-top:2px'>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</div>" +
       data.slice(0,10).map(s => `
-        <div class='slot' data-mapel="${mapel}" onclick="pickSlot('${mapel}','${s.days}','${s.time}','${s.teacher}',event)">
+        <div class='slot' data-mapel="${mapel}" data-slotname="${s.slotName || ''}" onclick="pickSlot('${mapel}','${s.days}','${s.time}','${s.teacher}',event)">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div>
               <b>${s.days} • ${formatTime(s.time)}</b><br>
@@ -557,7 +529,7 @@ async function fetchScheduleHTML(subject){
     <div style='margin-bottom:6px'><b>Pilihan jadwal ${subject} tersedia</b></div>
     <div style='font-size:13px;color:#666;margin-bottom:8px'>Klik salah satu jadwal. Jadwal akan dikonfirmasi kembali oleh Kakak Siaga.</div>
     ${data.slice(0,10).map(s => `
-      <div class='slot' data-mapel="${subject}" onclick="pickSlot('${subject}','${s.days}','${s.time}','${s.teacher}',event)">
+      <div class='slot' data-mapel="${subject}" data-slotname="${s.slotName || ''}" onclick="pickSlot('${subject}','${s.days}','${s.time}','${s.teacher}',event)">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
             <b>${s.days} • ${formatTime(s.time)}</b><br>
@@ -587,7 +559,37 @@ async function loadScheduleBySubject(subject){
   const marginTop = box.innerHTML.trim() === "" ? "2px" : "24px";
   box.innerHTML += `<div style='margin-top:${marginTop}'>${html}</div>`;
 }
-  
+
+// Pecah tiap baris materi jadi (rentang tanggal) + (nama materi), lalu tata
+// bertumpuk: tanggal label kecil abu-abu di atas, materi di bawahnya.
+// Tidak perlu rata-spasi manual di spreadsheet; struktur yang merapikan.
+function renderMateriItems(materiText){
+  const lines = String(materiText)
+    .split(/\r?\n/)
+    .map(l => l.trim())
+    .filter(l => l.length);
+
+  // pola: "05 Jan 2026 - 18 Jan 2026  <nama materi>"
+  const re = /^(\d{1,2}\s+[A-Za-z]+\s+\d{4}\s*[-–]\s*\d{1,2}\s+[A-Za-z]+\s+\d{4})\s+(.+)$/;
+
+  return lines.map(l => {
+    const m = l.match(re);
+
+    if(m){
+      const tanggal = m[1].replace(/\s+/g, " ");  // rapikan spasi ganda
+      const materi  = m[2].trim();
+      return `
+        <div style="padding:8px 0;border-bottom:1px solid #f0f0f0">
+          <div style="color:#888;font-size:12px;margin-bottom:2px">${tanggal}</div>
+          <div style="font-size:14px">${materi}</div>
+        </div>`;
+    }
+
+    // baris tanpa rentang tanggal: tampilkan apa adanya
+    return `<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px">${l}</div>`;
+  }).join("");
+}
+
 async function loadMateri(){
   const box = document.getElementById("materiBox");
 
@@ -630,18 +632,7 @@ async function loadMateri(){
   box.innerHTML = `
     <b>${materiTitle}</b><br><br>
   
-    ${data.map(m => {
-      const lines = m.materi
-        .split(/\r?\n/)        
-        .map(l => l.trim())
-        .filter(l => l.length);
-
-      return `
-        <div class="slot">
-          ${lines.map(l => `• ${l}`).join("<br>")}
-        </div>
-      `;
-    }).join("")}
+    ${data.map(m => `<div class="slot">${renderMateriItems(m.materi)}</div>`).join("")}
   `;
 }
 
@@ -656,13 +647,9 @@ async function fetchMateriHTML(subject){
 
   if(!data.length) return "";
 
-  const slotsHTML = data.map(m => {
-    const lines = m.materi
-      .split(/\r?\n/)
-      .map(l => l.trim())
-      .filter(l => l.length);
-    return `<div class="slot">${lines.map(l => `• ${l}`).join("<br>")}</div>`;
-  }).join("");
+  const slotsHTML = data.map(m =>
+    `<div class="slot">${renderMateriItems(m.materi)}</div>`
+  ).join("");
 
   return `<b>Materi Pembelajaran ${subject}</b><br><br>${slotsHTML}<br>`;
 }
@@ -691,6 +678,8 @@ async function submitForm(){
   formData.append("entry.1265930966", document.getElementById("nomor").value);
   formData.append("entry.2132303950", kelas);
   formData.append("entry.1375621433", document.getElementById("preferensi").value);
+  formData.append("entry.1996867650",
+    Object.values(selectedSchedule).map(s => s.slotName || "").join("\n"));   // Nama Slot (internal)
   formData.append("entry.754072172", document.getElementById("biayaInput").value);
   formData.append("entry.1200583005", document.getElementById("tenureInput").value);
 
@@ -742,9 +731,13 @@ function pickSlot(mapelSlot,day,time,teacher,event){
     return;
   }
 
+  const slotName =
+    (event.currentTarget && event.currentTarget.dataset.slotname) || "";
+
   selectedSchedule[mapelSlot] = {
     days: days,
-    time: time
+    time: time,
+    slotName: slotName
   };
 
   document.querySelectorAll(".slot[data-mapel='"+mapelSlot+"']").forEach(slot=>{
@@ -817,11 +810,21 @@ async function lihatUpgrade(){
   btn.style.background = "#75abfb";
   btn.innerText = "Sedang memuat...";
 
+  // Anchor tanggal = max(hari ini, awal semester).
+  // Sebelum semester mulai -> semua dihitung seolah dari tanggal mulai semester.
+  // Setelah semester jalan -> dihitung dari hari ini.
   const today = new Date();
+  today.setHours(0,0,0,0);
 
-  const semesterEnd = semesterEndMap[kelas];
-  const breakStart = "2026-01-02";
-  const breakEnd = "2026-01-01";
+  const semStart = semesterStart ? new Date(semesterStart) : today;  // <-- TES PRORATA. Aslinya: semesterStart ? new Date(semesterStart) : today. Test: new Date("2026-05-01")
+  semStart.setHours(0,0,0,0);
+
+  const requestDate = today > semStart ? today : semStart;
+  // semesterEnd, breakStart, breakEnd sudah diisi dari studentLookup
+
+  // Pra-semester = request <= awal semester. Saat ini monthly ditagih PENUH
+  // (tidak prorata); prorata hanya berlaku jika upgrade di tengah semester.
+  const isPreSemester = today.getTime() <= semStart.getTime();
 
   let priceUpgrade = 0;
 
@@ -830,25 +833,35 @@ async function lihatUpgrade(){
   const pilihKimia = document.getElementById("checkKimia")?.checked;
   const pilihMTK = document.getElementById("checkMTK")?.checked;
   
-  if(["7","8","9"].includes(kelas)){
-    priceUpgrade += 49000;
-  }
-  
+  // Harga penambahan ditarik dari Price_Table (per grade), tiap unit dijumlah.
+  // Tidak ada lagi diskon bundle Fisika+Kimia.
   if(pilihIPA){
-    priceUpgrade += 49000;
+    priceUpgrade += addonPrices.IPA;
   }
-  
-  if(pilihFisika && pilihKimia){
-    priceUpgrade += 79000;
+
+  if(pilihFisika){
+    priceUpgrade += addonPrices.Fisika;
   }
-  else{
-    if(pilihFisika) priceUpgrade += 49000;
-    if(pilihKimia) priceUpgrade += 49000;
+
+  if(pilihKimia){
+    priceUpgrade += addonPrices.Kimia;
   }
-  
+
   if(pilihMTK){
-    priceUpgrade += 25000;
+    priceUpgrade += addonPrices.MTK2x;
   }
+
+  // Daftar subjek yang ditambahkan, untuk teks penjelas ke orang tua.
+  const tambahanList = [];
+  if(pilihIPA) tambahanList.push("IPA");
+  if(pilihFisika) tambahanList.push("Fisika");
+  if(pilihKimia) tambahanList.push("Kimia");
+  if(pilihMTK) tambahanList.push("Matematika 2x/Minggu");
+
+  const tambahanLabel =
+    tambahanList.length <= 1
+      ? tambahanList.join("")
+      : tambahanList.slice(0,-1).join(", ") + " dan " + tambahanList[tambahanList.length-1];
 
   if(priceUpgrade === 0){
     alert("Silakan pilih penambahan terlebih dahulu.");
@@ -863,7 +876,7 @@ async function lihatUpgrade(){
   if(studentTenure === "semesterly"){
   
     totalUpgrade = calculateSemesterUpgrade(
-      today,
+      requestDate,
       semesterEnd,
       priceUpgrade,
       breakStart,
@@ -874,7 +887,9 @@ async function lihatUpgrade(){
   
   if(studentTenure === "monthly"){
   
-    totalUpgrade = priceUpgrade;
+    totalUpgrade = isPreSemester
+      ? priceUpgrade                                          // <= awal semester: penuh
+      : calculateMonthlyUpgrade(requestDate, latestDueDate, priceUpgrade);  // tengah semester: prorate
   
   }
   
@@ -902,19 +917,31 @@ async function lihatUpgrade(){
 
   if(studentTenure === "monthly"){
 
-    biayaUpgrade = priceUpgrade;
-    const totalMonthly = currentMonthlyPrice + priceUpgrade;
-  
+    biayaUpgrade = totalUpgrade;                       // yang ditagih sekarang
+    const totalMonthly = currentMonthlyPrice + priceUpgrade;  // tagihan penuh bulan berikutnya
+    const prorata = totalUpgrade < priceUpgrade;       // benar2 prorata atau penuh?
+
+    // keterangan (hanya saat prorata): rentang hitung, di baris bawah, jarak rapat
+    const keterangan = prorata
+      ? `<div style="margin-top:2px;color:#666;font-size:13px">Dihitung dari ${formatTanggal(requestDate)} hingga tanggal jatuh tempo (${latestDueDate ? formatTanggal(latestDueDate) : "berikutnya"}).</div>`
+      : "";
+
+    // baris kedua: prefix "Dari " hanya saat prorata
+    const labelPenuh = prorata
+      ? "Dari penambahan penuh per bulan"
+      : "Penambahan penuh per bulan";
+
     priceBox.innerHTML =
-    `Biaya penambahan: <b>Rp ${priceUpgrade.toLocaleString()}</b>
-  
-    <div style="margin-top:8px;color:#666;font-size:14px">
-    Total per bulan: 
+    `Biaya penambahan: <b>Rp ${totalUpgrade.toLocaleString()}</b>${keterangan}
+
+    <div style="margin-top:8px;color:#666;font-size:13px">
+    ${labelPenuh}: <b>Rp ${priceUpgrade.toLocaleString()}</b><br>
+    Total per bulan berikutnya:
     <b>
-    Rp ${currentMonthlyPrice.toLocaleString()} 
-    + 
+    Rp ${currentMonthlyPrice.toLocaleString()}
+    +
     Rp ${priceUpgrade.toLocaleString()}
-    = 
+    =
     Rp ${totalMonthly.toLocaleString()}
     </b>
     </div>`;
@@ -931,7 +958,6 @@ async function lihatUpgrade(){
 
   // kumpulkan subjects yang perlu di-fetch (tanpa duplikat)
   const subjects = [];
-  if(["7","8","9"].includes(kelas)) subjects.push("IPA");
   if(pilihIPA && !subjects.includes("IPA")) subjects.push("IPA");
   if(pilihFisika) subjects.push("Fisika");
   if(pilihKimia) subjects.push("Kimia");
@@ -1080,20 +1106,64 @@ function calculateSemesterUpgrade(startDate,endDate,priceUpgrade,breakStart,brea
 
   const prorateCost = priceUpgrade*(diffDays/daysInMonth);
 
-  const breakStartDate = new Date(breakStart);
-  const breakEndDate = new Date(breakEnd);
+  // Potongan break/libur. Jika tidak ada break (kolom kosong), breakCost = 0.
+  let breakCost = 0;
 
-  const breakDays =
-    Math.floor((breakEndDate-breakStartDate)/(1000*60*60*24))+1;
+  if(breakStart && breakEnd){
+    const breakStartDate = new Date(breakStart);
+    const breakEndDate = new Date(breakEnd);
 
-  const breakMonthDays =
-    new Date(breakEndDate.getFullYear(),breakEndDate.getMonth()+1,0).getDate();
+    const breakDays =
+      Math.floor((breakEndDate-breakStartDate)/(1000*60*60*24))+1;
 
-  const breakCost = (priceUpgrade/breakMonthDays)*breakDays;
+    if(breakDays > 0){
+      const breakMonthDays =
+        new Date(breakEndDate.getFullYear(),breakEndDate.getMonth()+1,0).getDate();
 
-  const total = Math.round(costFullMonth+prorateCost-breakCost);
+      breakCost = (priceUpgrade/breakMonthDays)*breakDays;
+    }
+  }
+
+  // Samakan pembulatan dengan spreadsheet (3x ROUND):
+  //   amount = ROUND(full + prorate - break)
+  //   disc   = ROUND(amount * 10%)
+  //   total  = ROUND(amount - disc)
+  const DISKON = 0.10;
+  const amount = Math.round(costFullMonth + prorateCost - breakCost);
+  const disc   = Math.round(amount * DISKON);
+  const total  = Math.round(amount - disc);
 
   return total;
+}
+
+// Prorate untuk murid MONTHLY (sebelumnya flat).
+//   prorate_days = (due_date - request_date) + 1
+//   > 30 hari  -> tagih penuh selisih
+//   <= 30 hari -> ROUND(selisih * prorate_days / jumlah hari di bulan request_date)
+// request_date = anchor max(today, awal semester).
+function calculateMonthlyUpgrade(requestDate, dueDate, selisih){
+
+  const req = new Date(requestDate);
+  req.setHours(0,0,0,0);
+
+  // jika due date tidak tersedia, fallback ke harga penuh
+  if(!dueDate) return selisih;
+
+  const due = new Date(dueDate);
+  due.setHours(0,0,0,0);
+
+  const prorateDays =
+    Math.floor((due - req)/(1000*60*60*24)) + 1;
+
+  // due date sudah lewat anchor -> kasus ganjil, tagih penuh (cek manual)
+  if(prorateDays <= 0) return selisih;
+
+  if(prorateDays > 30) return selisih;
+
+  const daysInMonth =
+    new Date(req.getFullYear(), req.getMonth()+1, 0).getDate();
+
+  return Math.round(selisih * (prorateDays / daysInMonth));
 }
 
 async function lookupStudent(){
@@ -1128,6 +1198,18 @@ async function lookupStudent(){
     currentPackage = data.package || "";
     currentMonthlyPrice = data.currentPrice;
 
+    // --- nilai per-semester dari spreadsheet ---
+    semesterStart = data.semester ? data.semester.start : null;
+    semesterEnd   = data.semester ? data.semester.end   : null;
+    breakStart    = data.break ? data.break.start : null;
+    breakEnd      = data.break ? data.break.end   : null;
+    latestDueDate = data.latest_due_date || null;
+
+    addonPrices  = data.addonPrices || { IPA:0, Fisika:0, Kimia:0, MTK2x:0 };
+    currentFlags = data.current || {
+      hasMTK:false, mtk2x:false, hasIPA:false, hasFisika:false, hasKimia:false
+    };
+
     const tenureMap = {
       monthly: "per bulan",
       semesterly: "per semester"
@@ -1160,16 +1242,16 @@ async function lookupStudent(){
     document.getElementById("studentInfo").style.display="block";
 
     document.getElementById("studentName").innerText =
-      "Nama: " + data.name;
+      data.name;
 
     document.getElementById("studentGrade").innerText =
-      "Kelas: " + data.grade;
+      data.grade;
 
     document.getElementById("studentPackage").innerText =
-      "Paket belajar saat ini: " + (data.package || "-");
+      (data.package || "-");
 
     document.getElementById("studentTenure").innerText =
-      "Pembayaran terakhir: " + (tenureMap[data.tenure] || data.tenure);
+      (tenureMap[data.tenure] || data.tenure);
 
     studentTenure = data.tenure;
     currentMonthlyPrice = data.currentPrice;
@@ -1194,10 +1276,6 @@ async function lookupStudent(){
 
 }
 
-function packageHas(keyword){
-  return currentPackage.includes(keyword);
-}  
-  
 function formatTanggal(dateStr){
 
   const d = new Date(dateStr);
