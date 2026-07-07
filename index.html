@@ -1143,7 +1143,7 @@ function calculateSemesterUpgrade(startDate,endDate,priceUpgrade,breakStart,brea
 }
 
 // Prorate untuk murid MONTHLY (sebelumnya flat).
-//   prorate_days = (due_date - request_date) + 1
+//   prorate_days = (due_date - request_date)   // due_date = tgl perpanjangan (eksklusif)
 //   > 30 hari  -> tagih penuh selisih
 //   <= 30 hari -> ROUND(selisih * prorate_days / jumlah hari di bulan request_date)
 // request_date = anchor max(today, awal semester).
@@ -1158,10 +1158,14 @@ function calculateMonthlyUpgrade(requestDate, dueDate, selisih){
   const due = new Date(dueDate);
   due.setHours(0,0,0,0);
 
+  // due_date = tanggal perpanjangan / start_date_of_service + 1 bulan (EKSKLUSIF:
+  // hari itu harga penuh mulai berlaku, jadi tidak ikut diprorate).
+  // Prorate = jumlah hari dari request s/d sehari sebelum perpanjangan = (due - req).
+  // Cocok dgn spreadsheet: Req 20 Jul, End 6 Aug -> 17 hari -> ROUND(80000*17/31)=43.871.
   const prorateDays =
-    Math.floor((due - req)/(1000*60*60*24)) + 1;
+    Math.floor((due - req)/(1000*60*60*24));
 
-  // due date sudah lewat anchor -> kasus ganjil, tagih penuh (cek manual)
+  // due date sudah lewat / sama dengan hari ini -> harga penuh (awal siklus)
   if(prorateDays <= 0) return selisih;
 
   if(prorateDays > 30) return selisih;
