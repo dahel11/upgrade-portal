@@ -1,28 +1,252 @@
 <!DOCTYPE html>
+
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>CoLearn</title>
+  <title>Formulir Penambahan Paket Belajar CoLearn</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      text-align: center;
+    *{
+      box-sizing:border-box;
     }
-    img { height: 40px; margin-bottom: 16px; }
-    p { color: #64748b; font-size: 16px; }
+    body { font-family: Arial; background:#f5f5f5; padding:20px; max-width:700px; margin:auto; }
+    .card { background:white; padding:16px; border-radius:12px; margin-bottom:16px; font-size:14px; }
+    select, input, textarea, button { width:100%; padding:10px; margin-top:8px; }
+    input[type="checkbox"]{
+      width:auto;
+      margin-right:8px;
+      margin-top:3px;
+    }
+    input, textarea, select{
+      border:1px solid #e5e7eb;
+      border-radius:8px;
+    }
+    button { background:#2563eb; color:white; border:none; border-radius:8px; }
+    .slot { border:1px solid #eee; padding:10px; border-radius:8px; margin-top:8px; }
+    .info-grid {
+      display:grid;
+      grid-template-columns:max-content 1fr;
+      column-gap:10px;
+      row-gap:6px;
+      margin-top:4px;
+    }
+    .info-grid .info-label { display:flex; justify-content:space-between; gap:8px; }
+    .info-grid .info-label::after { content:":"; }
+    button:disabled{
+      background:#cbd5e1;
+      cursor:not-allowed;
+      opacity:0.8;
+    }
+    #successMessage{
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:white;
+      display:none;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      padding:20px;
+    }
+
+    .successBox h2{
+      font-size:24px;
+      margin-bottom:16px;
+    }
+
+    .successBox p{
+      font-size:16px;
+      line-height:1.6;
+      margin-bottom:24px;
+    }
+
+    .successBox button{
+      background:#2563eb;
+      color:white;
+      border:none;
+      border-radius:8px;
+      padding:12px 20px;
+      font-size:16px;
+    }
+    #upgradeSection label{
+      display:flex;
+      align-items:flex-start;
+      gap:8px;
+      margin-top:6px;
+    }
+
+    #upgradeSection input[type="checkbox"]{
+      width:auto;
+      padding:0;
+      margin-top:4px;
+    }
+
+    .upgradeText{
+      display:block;
+    }
+
+    .upgradeNote{
+      font-size:13px;
+      margin-top:4px;
+    }
   </style>
+
 </head>
+
 <body>
-  <div>
-    <img src="CoLearn Logo Blue.png" alt="CoLearn" />
-    <p>Coming soon</p>
+
+<div style="text-align:center;margin-bottom:12px">
+  <a href="https://colearn.id" target="_blank">
+    <img src="CoLearn Logo Blue.png" style="height:40px">
+  </a>
+</div>
+  
+<h2 style="text-align:center; margin-bottom:24px; font-size:20px;">
+  Formulir Penambahan Paket Belajar CoLearn
+</h2>
+
+<div class="card" id="lookupSection">
+
+  <b>Masukkan nomor murid yang terdaftar di CoLearn</b>
+
+  <input 
+    id="lookupPhone"
+    type="tel"
+    placeholder="Nomor yang terdaftar di aplikasi"
+  >
+
+  <button onclick="lookupStudent()" id="lookupBtn">
+    Cek Data Murid
+  </button>
+
+</div>
+
+<div class="card" id="studentInfo" style="display:none">
+
+  <b style="display:block;margin-bottom:8px">
+    Data murid ditemukan
+  </b>
+
+  <div class="info-grid">
+    <div class="info-label">Nama</div><div id="studentName"></div>
+    <div class="info-label">Kelas</div><div id="studentGrade"></div>
+    <div class="info-label">Paket belajar saat ini</div><div id="studentPackage"></div>
+    <div class="info-label">Pembayaran terakhir</div><div id="studentTenure"></div>
+  </div>
+
+</div>
+  
+<div class="card" id="kelasSection" style="display:none;">
+  <b>Pilih kelas</b>
+  <select id="kelas">
+    <option value="">Pilih kelas</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="8">8</option>
+    <option value="9">9</option>
+    <option value="10">10</option>
+    <option value="11">11</option>
+  </select>
+</div>
+
+<div id="upgradeSection" class="card" style="display:none">
+
+  <b>Penambahan yang tersedia</b>
+
+  <div id="multiNote" style="font-size:13px;color:#666;margin-top:4px">
+    Bisa memilih lebih dari satu
+  </div>
+
+  <div id="autoUpgradeText" style="display:none;margin-top:8px;font-size:14px">
+    IPA (1x per minggu)
+  </div>
+
+  <div style="margin-top:10px">
+
+    <label id="optIPA" style="display:none;">
+      <input type="checkbox" id="checkIPA">
+      <span>IPA (1x/Minggu)</span>
+    </label>
+
+    <label id="optFisika" style="display:none;">
+      <input type="checkbox" id="checkFisika">
+      <span>Fisika (1x/Minggu)</span>
+    </label>
+
+    <label id="optKimia" style="display:none;">
+      <input type="checkbox" id="checkKimia">
+      <span>Kimia (1x/Minggu)</span>
+    </label>
+
+    <label id="optMTK" style="display:none;">
+
+      <input type="checkbox" id="checkMTK">
+
+      <span>Frekuensi kelas Matematika (2x/Minggu)</span>
+
+    </label>
+
+  </div>
+
+  <button id="lihatBtn" style="margin-top:12px" onclick="lihatUpgrade()">
+    Lihat harga dan jadwal
+  </button>
+
+  <div id="updateHint"
+       style="font-size:13px;color:#555;margin-top:6px;display:none">
+    Klik "Lihat harga dan jadwal"
+  </div>
+
+</div>
+<div id="mapelSection" class="card" style="display:none">
+  <b>Pilih mapel tambahan</b>
+  <select id="mapel">
+    <option value="">Pilih mapel</option>
+    <option value="Fisika">Fisika</option>
+    <option value="Kimia">Kimia</option>
+    <option value="FisikaKimia">Fisika + Kimia</option>
+  </select>
+</div>
+
+<div id="priceBox" class="card" style="display:none"></div>
+
+<div id="materiBox" class="card" style="display:none"></div>
+  
+<div id="schedule" class="card" style="display:none"></div>
+
+<div id="formSection" class="card" style="display:none">
+  <input id="nama" placeholder="Nama murid" readonly>
+  <input id="nomor" type="tel" placeholder="Nomor HP murid" readonly>
+  <textarea id="preferensi" rows="3" placeholder="Pilihan jadwal" readonly onfocus="this.blur()"></textarea>
+  <input id="biayaInput" type="hidden">
+  <input id="tenureInput" type="hidden">
+  <input id="biayaDisplay" type="hidden">
+  <div style="font-size:13px; color:#555; margin-top:10px; line-height:1.5">
+  Jumlah sesi mata pelajaran tambahan akan menyesuaikan hingga tanggal jatuh tempo.<br>
+  Khusus per bulan, pembayaran bulan berikutnya seluruh mata pelajaran akan digabung dan dibayarkan sesuai tanggal jatuh tempo.
+</div>
+  <button id="submitBtn" onclick="submitForm()" disabled>
+    Kirim Formulir
+  </button>
+</div>
+
+<div id="successMessage" style="display:none;">
+  <div class="successBox">
+    <h2>Formulir berhasil terkirim</h2>
+
+    <p>
+      Terima kasih. Permintaan sedang diproses.<br>
+      Kakak Siaga akan segera menghubungi melalui WhatsApp.
+    </p>
+
+    <button onclick="location.reload()">
+      Kembali ke halaman utama
+    </button>
   </div>
 </div>
   
