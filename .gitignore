@@ -1,0 +1,12 @@
+.vercel
+
+# Node / Vite
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+
+# Supabase
+supabase/.temp
+supabase/*

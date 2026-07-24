@@ -1,4 +1,8 @@
 {
-"framework": null,
-"cleanUrls": true
+  "framework": "vite",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/legacy/:path*", "destination": "/legacy/index.html" },
+    { "source": "/((?!api/|legacy/|assets/|favicon.png).*)", "destination": "/index.html" }
+  ]
 }
