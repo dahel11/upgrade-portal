@@ -1,11 +1,48 @@
+/* Design tokens sourced from CoLearn's production frontend
+ * (/Users/imamfachrudin/Documents/engineering/colearn_id_frontend — src/styles/constants/colors.ts,
+ * typography.ts, and component styles under src/components/atoms/button, form-component/input,
+ * add-ons/package-selection-modal) so this portal matches the company's actual brand look. */
 :root {
-  --color-primary: #3646c7;
-  --color-primary-dark: #2a37a0;
-  --color-text: #14142b;
-  --color-muted: #6b7280;
-  --color-border: #e5e7eb;
+  /* Brand */
+  --color-primary: #1e5af6; /* brand-500 */
+  --color-primary-hover: #1545d3; /* brand-600 */
+  --color-primary-light: #deebff; /* brand-100 — filled secondary buttons, selected chip bg */
+  --color-primary-lighter: #ebf3ff; /* brand-50 — subtle card backgrounds */
+  --color-primary-soft: #a4c5fe; /* brand-200 — hover on light-filled surfaces */
+  --color-yellow: #fee643;
+  --color-yellow-dark: #f49b26;
+
+  /* Text / neutrals */
+  --color-text: #181b25; /* neutral-1000 */
+  --color-text-secondary: #5e6c84; /* neutral-700 */
+  --color-muted: #777d88; /* neutral-600 */
+  --color-border: #d1dae6; /* periwinkle-500 — inputs, option cards */
+  --color-border-light: #d5dfee; /* neutral-200 — subtle card borders */
+  --color-disabled: #a4b3cd; /* neutral-400 */
   --color-bg: #ffffff;
-  font-family: "Helvetica Neue", Arial, sans-serif;
+  --color-bg-subtle: #f3faff; /* neutral-50 */
+
+  /* Semantic */
+  --color-error-text: #ec3360;
+  --color-error-bg: #fedbd6;
+  --color-success-text: #309781;
+  --color-success-bg: #e1fce6;
+
+  /* Typography */
+  --font-primary: "Poppins", system-ui, sans-serif; /* headings, buttons, labels */
+  --font-secondary: "Overpass", system-ui, sans-serif; /* body copy */
+
+  /* Radii */
+  --radius-sm: 6px; /* buttons, inputs, checkboxes */
+  --radius-md: 10px; /* compact cards, option cards */
+  --radius-lg: 16px; /* hero/summary surfaces */
+  --radius-pill: 999px;
+
+  /* Shadow */
+  --shadow-card: 0px 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-soft: 0px 0px 32px rgba(40, 60, 109, 0.1);
+
+  font-family: var(--font-secondary);
   color-scheme: light;
 }
 
@@ -27,6 +64,17 @@ body,
 body {
   background: var(--color-bg);
   color: var(--color-text);
+  font-family: var(--font-secondary);
+}
+
+h1,
+h2,
+h3,
+.btn-primary,
+.btn-secondary,
+.top-bar a,
+.link-button {
+  font-family: var(--font-primary);
 }
 
 .screen {
@@ -65,23 +113,29 @@ body {
   background: var(--color-primary);
   color: #fff;
   border: none;
-  border-radius: 10px;
-  padding: 18px 20px;
+  border-radius: var(--radius-sm);
+  padding: 15px 20px;
   font-size: 16px;
   font-weight: 700;
   text-align: center;
   cursor: pointer;
   margin-bottom: 20px;
+  transition: background-color 0.15s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
 }
 
 .btn-primary:disabled {
-  background: #9aa0c9;
+  background: var(--color-disabled);
   cursor: not-allowed;
 }
 
 .btn-primary .subtitle {
   display: block;
   font-weight: 400;
+  font-family: var(--font-secondary);
   font-style: italic;
   font-size: 13px;
   margin-top: 4px;
@@ -90,23 +144,28 @@ body {
 .btn-secondary {
   display: block;
   width: 100%;
-  background: #fff;
+  background: var(--color-primary-light);
   color: var(--color-primary);
-  border: 2px solid var(--color-primary);
-  border-radius: 10px;
-  padding: 16px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 15px 20px;
   font-size: 16px;
   font-weight: 700;
   text-align: center;
   cursor: pointer;
   margin-bottom: 20px;
+  transition: background-color 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--color-primary-soft);
 }
 
 /* Legacy alias — kept so any remaining `.card`/`.card-title`/`.card-subtitle` usage still renders
  * reasonably; new code should use `.option-card` below instead. */
 .card {
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 16px;
   margin-bottom: 12px;
   cursor: pointer;
@@ -114,7 +173,7 @@ body {
 
 .card.selected {
   border-color: var(--color-primary);
-  background: #eef0fd;
+  background: var(--color-primary-lighter);
 }
 
 .card-title {
@@ -129,8 +188,9 @@ body {
 }
 
 .section-title {
+  font-family: var(--font-primary);
   font-size: 19px;
-  font-weight: 800;
+  font-weight: 700;
   margin: 4px 0 2px;
 }
 
@@ -141,12 +201,13 @@ body {
 }
 
 .error-text {
-  color: #c0392b;
+  color: var(--color-error-text);
   font-size: 13px;
   margin: 0 0 14px;
 }
 
 .subsection-title {
+  font-family: var(--font-primary);
   font-size: 13px;
   font-weight: 700;
   color: var(--color-text);
@@ -173,7 +234,7 @@ body {
   width: 100%;
   background: #fff;
   border: 1.5px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 12px 14px;
   text-align: left;
   cursor: pointer;
@@ -182,7 +243,7 @@ body {
 
 .option-card.selected {
   border-color: var(--color-primary);
-  background: #f6f7fd;
+  background: var(--color-primary-lighter);
 }
 
 .option-card:disabled {
@@ -234,7 +295,8 @@ body {
 }
 
 .option-price {
-  font-weight: 800;
+  font-weight: 700;
+  font-family: var(--font-primary);
   flex-shrink: 0;
   font-size: 15px;
   color: var(--color-text);
@@ -242,24 +304,26 @@ body {
 
 .option-badge {
   font-size: 10.5px;
-  background: #eef0fd;
+  background: #fff;
+  border: 1px solid var(--color-primary);
   color: var(--color-primary);
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-weight: 700;
   white-space: nowrap;
 }
 
 /* Compact payment summary card — replaces the plain <table> layout */
 .summary-card {
-  background: #f6f7fd;
-  border: 1px solid #e3e6fb;
-  border-radius: 14px;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
   padding: 16px 18px;
   display: flex;
   flex-direction: column;
   gap: 9px;
   margin: 12px 0 18px;
+  box-shadow: var(--shadow-soft);
 }
 
 .summary-row {
@@ -286,7 +350,7 @@ body {
   justify-content: space-between;
   padding-top: 10px;
   margin-top: 2px;
-  border-top: 1px dashed #d7dafc;
+  border-top: 1px dashed var(--color-border);
 }
 
 .summary-total-label {
@@ -296,8 +360,9 @@ body {
 }
 
 .summary-total-value {
+  font-family: var(--font-primary);
   font-size: 21px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--color-primary);
 }
 
@@ -337,7 +402,9 @@ body {
 }
 
 .center-message h2 {
+  font-family: var(--font-primary);
   font-size: 20px;
+  font-weight: 700;
   margin: 0;
 }
 
@@ -359,14 +426,15 @@ body {
 }
 
 .hero-greeting {
+  font-family: var(--font-primary);
   font-size: 26px;
-  font-weight: 800;
+  font-weight: 700;
   margin: 0 0 8px;
   color: var(--color-text);
 }
 
 .hero-subtitle {
-  color: var(--color-muted);
+  color: var(--color-text-secondary);
   font-size: 15px;
   line-height: 1.5;
   margin: 0 auto;
@@ -378,13 +446,14 @@ body {
 }
 
 .info-card {
-  background: #f6f7fd;
-  border: 1px solid #e3e6fb;
-  border-radius: 14px;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
   padding: 16px 18px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  box-shadow: var(--shadow-soft);
 }
 
 .info-row {
@@ -423,19 +492,19 @@ body {
 
 .package-chip {
   background: #fff;
-  border: 1px solid #d7dafc;
-  color: var(--color-text);
+  border: 1px solid var(--color-primary-soft);
+  color: var(--color-primary);
   font-weight: 700;
   font-size: 12.5px;
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .hero-countdown {
   text-align: center;
   color: var(--color-primary);
-  background: #eef0fd;
-  border-radius: 999px;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-pill);
   padding: 8px 16px;
   font-size: 13px;
   font-weight: 700;
@@ -465,8 +534,8 @@ body {
   gap: 14px;
   width: 100%;
   background: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border: 1.5px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
   padding: 16px;
   text-align: left;
   cursor: pointer;
@@ -475,7 +544,7 @@ body {
 
 .action-card:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 4px 14px rgba(54, 70, 199, 0.12);
+  box-shadow: var(--shadow-card);
   transform: translateY(-1px);
 }
 
@@ -483,8 +552,8 @@ body {
   flex-shrink: 0;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
-  background: #eef0fd;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-lighter);
   color: var(--color-primary);
   display: flex;
   align-items: center;
@@ -543,7 +612,7 @@ body {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 3px solid #e3e6fb;
+  border: 3px solid var(--color-primary-lighter);
   border-top-color: var(--color-primary);
   animation: spin 0.7s linear infinite;
 }
