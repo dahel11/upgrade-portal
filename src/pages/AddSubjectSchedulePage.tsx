@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { TopBar } from "../components/TopBar";
+import { LoadingIndicator } from "../components/LoadingIndicator";
 import { computeOfferingSelection, getAssumedCurrentTenure } from "../lib/offeringSelection";
 import { resolveFinancePaymentType } from "../lib/financePaymentType";
 import { fetchScheduleSlots, validateInvoice, type ScheduleSlot } from "../lib/edgeFunctions";
@@ -25,6 +26,7 @@ export function AddSubjectSchedulePage() {
   );
 
   const [slotsByOffering, setSlotsByOffering] = useState<Record<string, ScheduleSlot[]>>({});
+  const [slotsLoading, setSlotsLoading] = useState(true);
   const [slotsError, setSlotsError] = useState<string | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -39,6 +41,8 @@ export function AddSubjectSchedulePage() {
     }
 
     let cancelled = false;
+    setSlotsLoading(true);
+    setSlotsError(null);
     Promise.all(
       selectedOfferings.map((offering) =>
         fetchScheduleSlots(ctx.finance.grade, scheduleSubjectOf(offering)).then((slots) => [offering.id, slots] as const),
@@ -51,6 +55,10 @@ export function AddSubjectSchedulePage() {
       .catch((err: Error) => {
         if (cancelled) return;
         setSlotsError(err.message);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setSlotsLoading(false);
       });
 
     return () => {
@@ -122,34 +130,38 @@ export function AddSubjectSchedulePage() {
 
       {slotsError && <p className="error-text">Gagal memuat jadwal: {slotsError}</p>}
 
-      {selectedOfferings.map((offering) => (
-        <div key={offering.id}>
-          <h3 className="subsection-title">Jadwal {stripGradeSuffix(offering.name)}</h3>
-          <div className="option-list">
-            {(slotsByOffering[offering.id] ?? []).map((slot) => {
-              const selected = ctx.scheduleChoices[offering.id]?.slot.slot_label === slot.slot_label;
-              return (
-                <button
-                  key={slot.slot_label}
-                  type="button"
-                  className={`option-card${selected ? " selected" : ""}`}
-                  onClick={() => chooseSlot(offering, slot)}
-                >
-                  <span className="option-indicator" />
-                  <span className="option-body">
-                    <span className="option-title">
-                      {slot.day} • {slot.time}
+      {slotsLoading ? (
+        <LoadingIndicator label="Mencari jadwal yang tersedia..." />
+      ) : (
+        selectedOfferings.map((offering) => (
+          <div key={offering.id}>
+            <h3 className="subsection-title">Jadwal {stripGradeSuffix(offering.name)}</h3>
+            <div className="option-list">
+              {(slotsByOffering[offering.id] ?? []).map((slot) => {
+                const selected = ctx.scheduleChoices[offering.id]?.slot.slot_label === slot.slot_label;
+                return (
+                  <button
+                    key={slot.slot_label}
+                    type="button"
+                    className={`option-card${selected ? " selected" : ""}`}
+                    onClick={() => chooseSlot(offering, slot)}
+                  >
+                    <span className="option-indicator" />
+                    <span className="option-body">
+                      <span className="option-title">
+                        {slot.day} • {slot.time}
+                      </span>
+                      <span className="option-subtitle">
+                        {slot.teacher} • Sisa kursi: {slot.seats_remaining}
+                      </span>
                     </span>
-                    <span className="option-subtitle">
-                      {slot.teacher} • Sisa kursi: {slot.seats_remaining}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        ))
+      )}
 
       {!showPricing && (
         <button
@@ -165,7 +177,7 @@ export function AddSubjectSchedulePage() {
       {showPricing && (
         <>
           <h3 className="subsection-title">Tenor pembayaran</h3>
-          {previewLoading && <p className="section-hint">Menghitung harga...</p>}
+          {previewLoading && <LoadingIndicator label="Menghitung harga..." />}
           {previewError && <p className="error-text">Gagal menghitung harga: {previewError}</p>}
 
           <div className="option-list">
