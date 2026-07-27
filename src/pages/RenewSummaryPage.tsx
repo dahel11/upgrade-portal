@@ -51,6 +51,13 @@ export function RenewSummaryPage() {
 
   const { finance, payment } = state;
   const period = derivePeriodFromPayment(payment);
+  // `payment.net_invoice` (synced from the payment link's own recorded amount) is preferred since
+  // it reflects the exact invoice being redirected to, but has been observed 0/null for some
+  // accounts (sync/data gap) — retention_to_finances' monthly_price/semesterly_price is already
+  // proven reliable (it's what the previous tenor-choice screen showed), so fall back to that
+  // rather than ever displaying Rp0.
+  const fallbackAmount = tenor === "monthly" ? finance.monthly_price : finance.semesterly_price;
+  const totalAmount = payment.net_invoice || fallbackAmount || 0;
 
   return (
     <div className="screen">
@@ -61,7 +68,7 @@ export function RenewSummaryPage() {
         studentName={finance.user_name}
         grade={finance.grade}
         packageLabel={finance.offering_names}
-        totalAmount={payment.net_invoice ?? 0}
+        totalAmount={totalAmount}
         tenorLabel={tenor === "monthly" ? "Per bulan" : "Per semester"}
         periodLabel={formatPeriod(period.start, period.end)}
       />
