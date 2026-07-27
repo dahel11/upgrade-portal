@@ -1,6 +1,28 @@
 import { supabase } from "./supabase";
 import type { ManualCheckoutResult, ValidateInvoiceResult } from "../types";
 
+/** `supabase.functions.invoke`'s error only says "Edge Function returned a non-2xx status code" —
+ * the actual `{ error: "..." }` body the function sent is on `error.context` (a Response). Pull
+ * that out so callers (and the console) see the real reason, not just the generic wrapper. */
+async function describeFunctionError(error: unknown): Promise<string> {
+  if (error && typeof error === "object" && "context" in error) {
+    const context = (error as { context?: unknown }).context;
+    if (context instanceof Response) {
+      try {
+        const body = await context.clone().json();
+        return body?.error ?? body?.message ?? JSON.stringify(body);
+      } catch {
+        try {
+          return await context.clone().text();
+        } catch {
+          // fall through to generic message below
+        }
+      }
+    }
+  }
+  return error instanceof Error ? error.message : String(error);
+}
+
 export interface ValidateInvoiceParams {
   user_id: string;
   finance_payment_type: string;
@@ -10,12 +32,20 @@ export interface ValidateInvoiceParams {
 }
 
 export async function validateInvoice(params: ValidateInvoiceParams): Promise<ValidateInvoiceResult> {
+  console.log("[validate-invoice] request params:", params);
+
   const { data, error } = await supabase.functions.invoke<ValidateInvoiceResult>("validate-invoice", {
     body: params,
   });
 
-  if (error) throw error;
+  if (error) {
+    const detail = await describeFunctionError(error);
+    console.error("[validate-invoice] failed:", detail);
+    throw new Error(detail);
+  }
   if (!data) throw new Error("validate-invoice returned no data");
+
+  console.log("[validate-invoice] response:", data);
   return data;
 }
 
@@ -25,12 +55,20 @@ export interface ManualCheckoutParams {
 }
 
 export async function manualCheckout(params: ManualCheckoutParams): Promise<ManualCheckoutResult> {
+  console.log("[manual-checkout] request params:", params);
+
   const { data, error } = await supabase.functions.invoke<ManualCheckoutResult>("manual-checkout", {
     body: params,
   });
 
-  if (error) throw error;
+  if (error) {
+    const detail = await describeFunctionError(error);
+    console.error("[manual-checkout] failed:", detail);
+    throw new Error(detail);
+  }
   if (!data) throw new Error("manual-checkout returned no data");
+
+  console.log("[manual-checkout] response:", data);
   return data;
 }
 
