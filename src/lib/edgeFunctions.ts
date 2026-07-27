@@ -42,30 +42,16 @@ export interface ScheduleSlot {
   slot_label: string;
 }
 
-/**
- * ⚠️ The AWS `slotschedule` endpoint's exact response field names haven't been verified against a
- * live call (no reachable credentials/network at build time) — this normalizer accepts a few
- * plausible key spellings inferred from the `archived-2342324323.html` legacy form and the jadwal
- * mockup. Re-check against a real response before shipping and tighten this if needed.
- */
-function normalizeSlot(raw: Record<string, unknown>): ScheduleSlot {
-  const day = String(raw.day ?? raw.hari ?? "");
-  const time = String(raw.time ?? raw.jam ?? raw.waktu ?? "");
-  const teacher = String(raw.teacher ?? raw.guru ?? raw.tutor_name ?? "");
-  const seats = Number(raw.seats_remaining ?? raw.sisa_kursi ?? raw.available_seats ?? 0);
-  return {
-    day,
-    time,
-    teacher,
-    seats_remaining: seats,
-    slot_label: String(raw.slot_label ?? raw.id ?? `${day}-${time}-${teacher}`),
-  };
-}
+/** `frequency` (e.g. "2x") only matters for Matematika's schedule feed — see
+ * `offeringFrequency()` in lib/format.ts. Calls `/api/class-schedule` (this portal's own
+ * endpoint) — NOT `/api/schedule`, which is left untouched for whatever the legacy portal/other
+ * consumers depend on. `class-schedule.js` already normalizes the upstream (Google Apps Script)
+ * response into this exact shape, filtered to `status: "Available"`. */
+export async function fetchScheduleSlots(kelas: string, subject: string, frequency?: string): Promise<ScheduleSlot[]> {
+  const params = new URLSearchParams({ kelas, subject });
+  if (frequency) params.set("frequency", frequency);
 
-export async function fetchScheduleSlots(kelas: string, subject: string): Promise<ScheduleSlot[]> {
-  const response = await fetch(`/api/schedule?kelas=${encodeURIComponent(kelas)}&subject=${encodeURIComponent(subject)}`);
+  const response = await fetch(`/api/class-schedule?${params.toString()}`);
   if (!response.ok) throw new Error("Failed to fetch schedule");
-  const raw = await response.json();
-  const list: unknown[] = Array.isArray(raw) ? raw : (raw.data ?? raw.slots ?? []);
-  return list.map((item) => normalizeSlot(item as Record<string, unknown>));
+  return response.json();
 }

@@ -26,25 +26,37 @@ export function RenewTenorPage() {
   return (
     <div className="screen">
       <TopBar showBack />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 20 }}>
+      <h2 className="section-title">Pilih tenor pembayaran</h2>
+      <p className="section-hint">Perpanjangan untuk paket {finance.offering_names}</p>
+
+      <div className="option-list">
         <button
           type="button"
-          className="btn-primary"
+          className="option-card"
           onClick={() => navigate(`/${userId}/renew/summary?tenor=monthly`)}
         >
-          Per bulan
-          <br />
-          {formatIdr(finance.monthly_price)}
+          <span className="option-indicator" />
+          <span className="option-body">
+            <span className="option-title">Per bulan</span>
+            <span className="option-subtitle">Ditagih setiap bulan</span>
+          </span>
+          <span className="option-price">{formatIdr(finance.monthly_price ?? 0)}</span>
         </button>
+
         <button
           type="button"
-          className="btn-primary"
+          className="option-card"
           onClick={() => navigate(`/${userId}/renew/summary?tenor=semesterly`)}
         >
-          Per semester
-          <br />
-          {formatIdr(finance.semesterly_price)}
-          <span className="subtitle">(termasuk diskon 10%)</span>
+          <span className="option-indicator" />
+          <span className="option-body">
+            <span className="option-title">
+              Per semester
+              <span className="option-badge">Hemat 10%</span>
+            </span>
+            <span className="option-subtitle">Ditagih sekali untuk satu semester</span>
+          </span>
+          <span className="option-price">{formatIdr(finance.semesterly_price ?? 0)}</span>
         </button>
       </div>
     </div>

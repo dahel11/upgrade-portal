@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { TopBar } from "../components/TopBar";
 import { StatusScreen } from "../components/StatusScreen";
+import { AddSubjectIcon, CalendarIcon, ChevronRightIcon, RenewIcon } from "../components/icons";
 import { fetchRetentionFinance } from "../lib/data";
+import { daysUntil, firstName, formatDate, splitOfferingNames } from "../lib/format";
+import logo from "../assets/colearn-logo-blue.png";
 import type { RetentionFinance } from "../types";
 
 type LoadState =
@@ -74,20 +77,79 @@ export function LandingPage() {
     );
   }
 
+  const remaining = finance.due_date ? daysUntil(finance.due_date) : null;
+
   return (
     <div className="screen">
       <TopBar />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 20 }}>
-        <button type="button" className="btn-primary" onClick={() => navigate(`/${userId}/renew/tenor`)}>
-          Perpanjang
-          <br />
-          paket saat ini
-          <span className="subtitle">{finance.offering_names}</span>
+
+      <div className="hero">
+        <img src={logo} alt="CoLearn" className="hero-logo" />
+        <h1 className="hero-greeting">Halo, {firstName(finance.user_name)}!</h1>
+        <p className="hero-subtitle">
+          Waktunya perpanjang paket belajar supaya <strong>{firstName(finance.user_name)}</strong> bisa terus belajar
+          tanpa jeda.
+        </p>
+      </div>
+
+      <div className="info-card">
+        <div className="info-row stacked">
+          <span>Paket saat ini</span>
+          <span className="package-chips">
+            {splitOfferingNames(finance.offering_names).map((name) => (
+              <span key={name} className="package-chip">
+                {name}
+              </span>
+            ))}
+          </span>
+        </div>
+        <div className="info-row">
+          <span>Kelas</span>
+          <strong>{finance.grade}</strong>
+        </div>
+        {finance.due_date && (
+          <div className="info-row">
+            <span>Berakhir pada</span>
+            <strong>
+              <CalendarIcon /> {formatDate(finance.due_date)}
+            </strong>
+          </div>
+        )}
+      </div>
+
+      {remaining !== null && remaining >= 0 && (
+        <p className="hero-countdown">
+          {remaining === 0 ? "Paket Anda berakhir hari ini" : `${remaining} hari lagi menuju masa perpanjangan`}
+        </p>
+      )}
+
+      <p className="section-label">Pilih salah satu untuk melanjutkan</p>
+
+      <div className="action-list">
+        <button type="button" className="action-card" onClick={() => navigate(`/${userId}/renew/tenor`)}>
+          <span className="action-icon">
+            <RenewIcon />
+          </span>
+          <span className="action-text">
+            <span className="action-title">Perpanjang paket saat ini</span>
+            <span className="action-desc">{splitOfferingNames(finance.offering_names).join(" + ")}</span>
+          </span>
+          <span className="action-chevron">
+            <ChevronRightIcon />
+          </span>
         </button>
-        <button type="button" className="btn-primary" onClick={() => navigate(`/${userId}/add-subject/select`)}>
-          Tambah mata
-          <br />
-          pelajaran lain
+
+        <button type="button" className="action-card" onClick={() => navigate(`/${userId}/add-subject/select`)}>
+          <span className="action-icon">
+            <AddSubjectIcon />
+          </span>
+          <span className="action-text">
+            <span className="action-title">Tambah mata pelajaran lain</span>
+            <span className="action-desc">Tambah subjek baru atau tingkatkan frekuensi belajar</span>
+          </span>
+          <span className="action-chevron">
+            <ChevronRightIcon />
+          </span>
         </button>
       </div>
     </div>

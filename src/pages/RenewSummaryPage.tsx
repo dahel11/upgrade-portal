@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { TopBar } from "../components/TopBar";
 import { StatusScreen } from "../components/StatusScreen";
-import { PaymentSummaryTable } from "../components/PaymentSummaryTable";
-import { derivePeriodFromMeta, fetchRetentionFinance, fetchRetentionPayments, findRenewalPaymentLink } from "../lib/data";
+import { PaymentSummaryCard } from "../components/PaymentSummaryCard";
+import { derivePeriodFromPayment, fetchRetentionFinance, fetchRetentionPayments, findRenewalPaymentLink } from "../lib/data";
 import { formatPeriod } from "../lib/format";
 import type { RetentionFinance, RetentionPayment, Tenor } from "../types";
 
@@ -50,18 +50,18 @@ export function RenewSummaryPage() {
   if (state.kind === "error") return <StatusScreen title="Terjadi kesalahan" message={state.message} />;
 
   const { finance, payment } = state;
-  const period = derivePeriodFromMeta(payment.meta);
+  const period = derivePeriodFromPayment(payment);
 
   return (
     <div className="screen">
       <TopBar showBack />
       <h2 className="section-title">Ringkasan Pembayaran</h2>
 
-      <PaymentSummaryTable
+      <PaymentSummaryCard
         studentName={finance.user_name}
         grade={finance.grade}
         packageLabel={finance.offering_names}
-        totalAmount={payment.meta.invoice.net_invoice}
+        totalAmount={payment.net_invoice ?? 0}
         tenorLabel={tenor === "monthly" ? "Per bulan" : "Per semester"}
         periodLabel={formatPeriod(period.start, period.end)}
       />
@@ -72,10 +72,10 @@ export function RenewSummaryPage() {
       </p>
 
       <div className="button-row">
-        <a className="btn-secondary" style={{ flex: 1, textAlign: "center" }} href={`/${userId}/renew/tenor`}>
+        <a className="btn-secondary" href={`/${userId}/renew/tenor`}>
           Kembali
         </a>
-        <a className="btn-primary" style={{ flex: 1, textAlign: "center" }} href={payment.invoice_url}>
+        <a className="btn-primary" href={payment.invoice_url}>
           Bayar
         </a>
       </div>

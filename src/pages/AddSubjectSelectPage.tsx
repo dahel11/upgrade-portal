@@ -1,5 +1,6 @@
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { TopBar } from "../components/TopBar";
+import { AddSubjectIcon } from "../components/icons";
 import { stripGradeSuffix } from "../lib/format";
 import type { AddSubjectContextValue } from "./addSubjectContext";
 
@@ -21,17 +22,23 @@ export function AddSubjectSelectPage() {
       <h2 className="section-title">Mata pelajaran tersedia</h2>
       <p className="section-hint">Bisa memilih lebih dari satu</p>
 
-      <div>
-        {ctx.availableOfferings.map((offering) => (
-          <label key={offering.id} className="checkbox-row">
-            <input
-              type="checkbox"
-              checked={ctx.selectedOfferingIds.includes(offering.id)}
-              onChange={() => toggle(offering.id)}
-            />
-            <span>{stripGradeSuffix(offering.name)}</span>
-          </label>
-        ))}
+      <div className="option-list">
+        {ctx.availableOfferings.map((offering) => {
+          const selected = ctx.selectedOfferingIds.includes(offering.id);
+          return (
+            <button
+              key={offering.id}
+              type="button"
+              className={`option-card${selected ? " selected" : ""}`}
+              onClick={() => toggle(offering.id)}
+            >
+              <span className="option-indicator checkbox">{selected ? "✓" : ""}</span>
+              <span className="option-body">
+                <span className="option-title">{stripGradeSuffix(offering.name)}</span>
+              </span>
+            </button>
+          );
+        })}
         {ctx.availableOfferings.length === 0 && (
           <p className="section-hint">Tidak ada mata pelajaran tambahan yang tersedia untuk kelas ini.</p>
         )}
@@ -39,12 +46,11 @@ export function AddSubjectSelectPage() {
 
       <button
         type="button"
-        className="btn-primary"
-        style={{ marginTop: 24 }}
+        className="btn-primary page-footer-button"
         disabled={ctx.selectedOfferingIds.length === 0}
         onClick={() => navigate(`/${ctx.userId}/add-subject/schedule`)}
       >
-        Lihat harga dan jadwal
+        <AddSubjectIcon /> Lihat jadwal
       </button>
     </div>
   );

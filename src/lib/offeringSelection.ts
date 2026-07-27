@@ -1,6 +1,13 @@
 import { subjectFamily } from "./format";
 import type { OfferingMapping } from "../types";
 
+/** Prefer the authoritative `subject` column (lowercased for comparison); fall back to
+ * regex-guessing from `name` only for rows synced before that column existed (should self-heal
+ * after the next sync). */
+function subjectOf(offering: OfferingMapping): string {
+  return (offering.subject ?? subjectFamily(offering.name)).toLowerCase();
+}
+
 export interface OfferingSelectionResult {
   finalOfferingIds: string[];
   /** ids that were dropped from the current set because a same-subject frequency upgrade
@@ -33,10 +40,10 @@ export function computeOfferingSelection(
       continue;
     }
 
-    // main_course: look for an existing offering in the same subject family to replace.
-    const family = subjectFamily(selected.name);
+    // main_course: look for an existing offering in the same subject to replace.
+    const subject = subjectOf(selected);
     const sameFamilyCurrent = currentOfferings.find(
-      (o) => o.reference_type === "main_course" && subjectFamily(o.name) === family,
+      (o) => o.reference_type === "main_course" && subjectOf(o) === subject,
     );
 
     programChanged = true;

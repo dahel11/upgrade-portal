@@ -47,6 +47,16 @@ export function stripGradeSuffix(name: string): string {
   return name.replace(/\s*-\s*Kelas\s*\d+\s*$/i, "").trim();
 }
 
+/** `retention_to_finances.offering_names` is a comma-separated string (e.g. "Matematika
+ * 1x/Minggu - Kelas 8, IPA - Kelas 8") — split into individual, grade-suffix-stripped package
+ * names for display as separate chips instead of one run-on line. */
+export function splitOfferingNames(value: string): string[] {
+  return value
+    .split(",")
+    .map((name) => stripGradeSuffix(name))
+    .filter(Boolean);
+}
+
 /** Strips grade suffix and frequency marker, preserving case — used as the `subject` param for
  * the schedule API (e.g. "Matematika 2x/Minggu - Kelas 10" -> "Matematika"). */
 export function subjectDisplayName(name: string): string {
@@ -57,13 +67,34 @@ export function subjectDisplayName(name: string): string {
 
 /** The subject "family" a main_course offering belongs to, used to detect a frequency upgrade of
  * the same subject (e.g. "Matematika 1x/Minggu" and "Matematika 2x/Minggu" are the same family).
- * Strips both the grade suffix and the frequency marker ("1x/Minggu", "2x/Minggu", ...). */
+ * Strips both the grade suffix and the frequency marker ("1x/Minggu", "2x/Minggu", ...). Fallback
+ * only — prefer `OfferingMapping.subject` (the authoritative column) when available. */
 export function subjectFamily(name: string): string {
   return subjectDisplayName(name).toLowerCase();
 }
 
+/** Extracts the weekly frequency marker from an offering name (e.g. "Matematika 2x/Minggu -
+ * Kelas 10" -> "2x"). Used as the class-schedule API's optional `frequency` param — only
+ * Matematika's schedule feed distinguishes 1x/2x; other subjects ignore it. */
+export function offeringFrequency(name: string): string | null {
+  const match = name.match(/(\d+)\s*x\s*\/\s*minggu/i);
+  return match ? `${match[1]}x` : null;
+}
+
+/** First word of a full name, for a friendlier greeting ("Joshua albert" -> "Joshua"). */
+export function firstName(fullName: string): string {
+  return fullName.trim().split(/\s+/)[0] ?? fullName;
+}
+
+/** Whole days remaining until an ISO date, relative to now. Negative if already past. */
+export function daysUntil(isoDate: string): number {
+  const target = new Date(isoDate).getTime();
+  const now = Date.now();
+  return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+}
+
 /** Parses a "DD-MM-YYYY" (optionally comma-separated list) date string, as seen in
- * `retention_to_payments.meta.payment_for_date`, returning ISO (YYYY-MM-DD) strings. */
+ * `retention_to_payments.payment_for_date`, returning ISO (YYYY-MM-DD) strings. */
 export function parseIndonesianDateList(value: string): string[] {
   return value
     .split(",")

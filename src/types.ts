@@ -6,11 +6,13 @@ export interface RetentionFinance {
   invoice_number: string;
   user_name: string;
   user_id: string;
-  due_date: string;
+  // Nullable: real Metabase data leaves these blank on a meaningful share of rows (older/inactive
+  // retention records that never reach the pricing screens anyway).
+  due_date: string | null;
   retention_status: string;
   invoice_status: string;
-  monthly_price: number;
-  semesterly_price: number;
+  monthly_price: number | null;
+  semesterly_price: number | null;
   payment_date: string | null;
   grade: string;
   offering_names: string;
@@ -19,80 +21,43 @@ export interface RetentionFinance {
   offering_ids: string | string[];
 }
 
-export interface CheckoutMetaDetail {
-  course_name?: string;
-  offering_name?: string;
-  offering_id: string;
-  net_invoice: number;
-  monthly_price?: number;
-  base_price?: number;
-  discounts?: unknown[];
-  total_discount?: number;
-}
-
-export interface CheckoutMetaInvoice {
-  discounts: unknown[];
-  net_invoice: number;
-  monthly_price: number;
-  base_price?: number;
-  total_discount: number;
-  offering_end_date: string;
-  semester_end_date: string;
-  offering_start_date: string;
-  semester_start_date: string;
-}
-
-/** The full body originally used to generate a `retention_to_payments` row's Xendit link. */
-export interface CheckoutMeta {
-  hash: string;
-  details: CheckoutMetaDetail[];
-  invoice: CheckoutMetaInvoice;
-  grade: string;
-  amount: number;
-  remark?: string;
-  finance: { id: string; reference_id: string; invoice_number: string };
-  user_id: string;
-  refundable?: boolean;
-  parent_name: string;
-  offering_ids: string[];
-  parent_email: string | null;
-  payment_type: string;
-  student_name: string;
-  user_invoice: { discounts: unknown; base_price: number; net_invoice: number; total_discount: number };
-  is_automation?: boolean;
-  student_email: string | null;
-  student_grade: string;
-  invoice_number: string;
-  retention_type?: string;
-  invoice_summary?: unknown;
-  payment_context: string;
-  tenure_duration: string;
-  invoice_duration: number;
-  payment_category: "installment" | "full_payment";
-  payment_for_date?: string;
-  payment_till_date?: string;
-  sales_agent_email: string;
-  parent_country_code: string;
-  parent_phone_number: string;
-  finance_payment_type: string;
-  student_country_code: string;
-  student_phone_number: string;
-  retention_payment_type: string;
-  subscription_starts_in: string;
-  student_is_existing_user?: boolean;
-  contactable_whatsapp_number: string;
-}
-
+// Originally this table stored the *entire* body used to generate the Xendit link as one `meta`
+// jsonb blob (~1.5KB/row, mostly finance/invoice fields for a past, unrelated checkout). At ~18k
+// rows that was the single biggest contributor to sync-retention-payments hitting
+// WORKER_RESOURCE_LIMIT. Only a handful of scalar fields were ever actually read from it — contact
+// identity fields (for manual-checkout) and a few pricing/period fields (for the renewal flow's
+// Ringkasan Pembayaran, which deliberately avoids a live validate_invoice call — see build plan
+// decision #2). Those are now synced as flat columns instead of a nested blob.
 export interface RetentionPayment {
   id: string;
   invoice_number: string;
   user_id: string;
-  due_date: string;
+  due_date: string | null;
   retention_status: string;
   payment_type: string;
   invoice_url: string;
   status: "pending" | "expired" | string;
-  meta: CheckoutMeta;
+
+  // Contact identity fields — used server-side by manual-checkout, not by the frontend directly.
+  student_name: string | null;
+  student_email: string | null;
+  student_grade: string | null;
+  student_country_code: string | null;
+  student_phone_number: string | null;
+  parent_name: string | null;
+  parent_email: string | null;
+  parent_country_code: string | null;
+  parent_phone_number: string | null;
+  contactable_whatsapp_number: string | null;
+  sales_agent_email: string | null;
+
+  // Pricing/period fields — used by the renewal flow's Ringkasan Pembayaran.
+  net_invoice: number | null;
+  semester_start_date: string | null;
+  semester_end_date: string | null;
+  /** Raw "DD-MM-YYYY[, DD-MM-YYYY...]" string — parse with `parseIndonesianDateList`. */
+  payment_for_date: string | null;
+  payment_till_date: string | null;
 }
 
 export interface OfferingMapping {
@@ -101,6 +66,10 @@ export interface OfferingMapping {
   price: number;
   grade: string;
   name: string;
+  /** Authoritative subject name (e.g. "Matematika", "IPA", "Fisika", "Kimia") — used for
+   * same-subject frequency-upgrade detection and as the schedule API's `subject` param. Nullable
+   * only until a resync backfills rows synced before this column existed. */
+  subject: string | null;
   created_at: string;
   updated_at: string;
 }

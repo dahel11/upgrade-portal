@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { TopBar } from "../components/TopBar";
-import { PaymentSummaryTable } from "../components/PaymentSummaryTable";
+import { PaymentSummaryCard } from "../components/PaymentSummaryCard";
 import { manualCheckout } from "../lib/edgeFunctions";
-import { formatPeriod, subjectDisplayName } from "../lib/format";
+import { formatPeriod, stripGradeSuffix } from "../lib/format";
 import type { AddSubjectContextValue } from "./addSubjectContext";
 
 export function AddSubjectSummaryPage() {
@@ -14,11 +14,13 @@ export function AddSubjectSummaryPage() {
 
   const preview = ctx.chosenTenor ? ctx.tenorPreview?.[ctx.chosenTenor] : null;
 
+  // Full name minus grade suffix (keeps frequency, e.g. "Matematika 2x/Minggu") — subject alone
+  // would lose that detail, which matters here since this is the final confirmation screen.
   const packageLabel = useMemo(
     () =>
       ctx.availableOfferings
         .filter((o) => ctx.selectedOfferingIds.includes(o.id))
-        .map((o) => subjectDisplayName(o.name))
+        .map((o) => stripGradeSuffix(o.name))
         .join(", "),
     [ctx.availableOfferings, ctx.selectedOfferingIds],
   );
@@ -54,7 +56,7 @@ export function AddSubjectSummaryPage() {
       <TopBar showBack />
       <h2 className="section-title">Ringkasan Pembayaran</h2>
 
-      <PaymentSummaryTable
+      <PaymentSummaryCard
         studentName={ctx.finance.user_name}
         grade={ctx.finance.grade}
         packageLabel={packageLabel}
@@ -68,13 +70,13 @@ export function AddSubjectSummaryPage() {
         kembali, dibatalkan, dan dipindahtangankan. Baca Syarat dan Ketentuan CoLearn di colearn.id/ketentuan-layanan
       </p>
 
-      {error && <p className="section-hint" style={{ color: "#c0392b" }}>{error}</p>}
+      {error && <p className="error-text">{error}</p>}
 
       <div className="button-row">
-        <button type="button" className="btn-secondary" style={{ flex: 1 }} onClick={() => navigate(-1)}>
+        <button type="button" className="btn-secondary" onClick={() => navigate(-1)}>
           Kembali
         </button>
-        <button type="button" className="btn-primary" style={{ flex: 1 }} disabled={submitting} onClick={handleBayar}>
+        <button type="button" className="btn-primary" disabled={submitting} onClick={handleBayar}>
           {submitting ? "Memproses..." : "Bayar"}
         </button>
       </div>

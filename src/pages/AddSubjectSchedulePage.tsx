@@ -4,8 +4,16 @@ import { TopBar } from "../components/TopBar";
 import { computeOfferingSelection, getAssumedCurrentTenure } from "../lib/offeringSelection";
 import { resolveFinancePaymentType } from "../lib/financePaymentType";
 import { fetchScheduleSlots, validateInvoice, type ScheduleSlot } from "../lib/edgeFunctions";
-import { formatDate, formatIdr, subjectDisplayName } from "../lib/format";
+import { formatDate, formatIdr, stripGradeSuffix, subjectDisplayName } from "../lib/format";
+import type { OfferingMapping } from "../types";
 import type { AddSubjectContextValue, TenorPreview } from "./addSubjectContext";
+
+/** The schedule API's `subject` param comes straight from the offering_mapping_to_grade.subject
+ * column (per product decision) — falling back to a regex-derived guess only for rows synced
+ * before that column existed. */
+function scheduleSubjectOf(offering: OfferingMapping): string {
+  return offering.subject ?? subjectDisplayName(offering.name);
+}
 
 export function AddSubjectSchedulePage() {
   const ctx = useOutletContext<AddSubjectContextValue>();
@@ -20,6 +28,9 @@ export function AddSubjectSchedulePage() {
   const [slotsError, setSlotsError] = useState<string | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  // Two explicit stages: pick a schedule slot per subject first ("Lihat jadwal" already got them
+  // here); only once they click "Lihat harga" do we call validate-invoice and reveal tenor/price.
+  const [showPricing, setShowPricing] = useState(false);
 
   useEffect(() => {
     if (selectedOfferings.length === 0) {
@@ -30,7 +41,7 @@ export function AddSubjectSchedulePage() {
     let cancelled = false;
     Promise.all(
       selectedOfferings.map((offering) =>
-        fetchScheduleSlots(ctx.finance.grade, subjectDisplayName(offering.name)).then((slots) => [offering.id, slots] as const),
+        fetchScheduleSlots(ctx.finance.grade, scheduleSubjectOf(offering)).then((slots) => [offering.id, slots] as const),
       ),
     )
       .then((results) => {
@@ -57,8 +68,10 @@ export function AddSubjectSchedulePage() {
 
   const allSlotsChosen = selectedOfferings.every((o) => ctx.scheduleChoices[o.id]);
 
-  useEffect(() => {
-    if (!allSlotsChosen || ctx.tenorPreview) return;
+  function handleLihatHarga() {
+    if (!allSlotsChosen) return;
+    setShowPricing(true);
+    if (ctx.tenorPreview) return; // already fetched (e.g. user went back and forth)
 
     const { finalOfferingIds, programChanged, subjectAdded } = computeOfferingSelection(
       ctx.currentOfferings,
@@ -97,89 +110,110 @@ export function AddSubjectSchedulePage() {
       })
       .catch((err: Error) => setPreviewError(err.message))
       .finally(() => setPreviewLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allSlotsChosen]);
+  }
 
-  const canConfirm = allSlotsChosen && ctx.tenorPreview && ctx.chosenTenor;
+  const canConfirm = showPricing && ctx.tenorPreview && ctx.chosenTenor;
 
   return (
     <div className="screen">
       <TopBar showBack />
-      <h2 className="section-title">Mata pelajaran tersedia</h2>
-      <p className="section-hint">Bisa memilih lebih dari satu</p>
+      <h2 className="section-title">Jadwal & tenor</h2>
+      <p className="section-hint">{selectedOfferings.map((o) => stripGradeSuffix(o.name)).join(", ")}</p>
+
+      {slotsError && <p className="error-text">Gagal memuat jadwal: {slotsError}</p>}
 
       {selectedOfferings.map((offering) => (
         <div key={offering.id}>
-          <h3 style={{ fontSize: 14, marginTop: 20 }}>Pilihan jadwal {subjectDisplayName(offering.name)} tersedia</h3>
-          {slotsError && <p className="section-hint">Gagal memuat jadwal: {slotsError}</p>}
-          {(slotsByOffering[offering.id] ?? []).map((slot) => {
-            const selected = ctx.scheduleChoices[offering.id]?.slot.slot_label === slot.slot_label;
-            return (
-              <div
-                key={slot.slot_label}
-                className={`card${selected ? " selected" : ""}`}
-                onClick={() => chooseSlot(offering, slot)}
-              >
-                <div className="card-title">
-                  {slot.day} • {slot.time}
-                </div>
-                <div className="card-subtitle">
-                  {slot.teacher}
-                  <br />
-                  Sisa kursi: {slot.seats_remaining}
-                </div>
-              </div>
-            );
-          })}
+          <h3 className="subsection-title">Jadwal {stripGradeSuffix(offering.name)}</h3>
+          <div className="option-list">
+            {(slotsByOffering[offering.id] ?? []).map((slot) => {
+              const selected = ctx.scheduleChoices[offering.id]?.slot.slot_label === slot.slot_label;
+              return (
+                <button
+                  key={slot.slot_label}
+                  type="button"
+                  className={`option-card${selected ? " selected" : ""}`}
+                  onClick={() => chooseSlot(offering, slot)}
+                >
+                  <span className="option-indicator" />
+                  <span className="option-body">
+                    <span className="option-title">
+                      {slot.day} • {slot.time}
+                    </span>
+                    <span className="option-subtitle">
+                      {slot.teacher} • Sisa kursi: {slot.seats_remaining}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       ))}
 
-      {allSlotsChosen && (
-        <>
-          <h3 style={{ fontSize: 14, marginTop: 20 }}>Pilihan tenor pembayaran tersedia</h3>
-          <p className="section-hint">Silakan pilih salah satu</p>
-
-          {previewLoading && <p className="section-hint">Menghitung harga...</p>}
-          {previewError && <p className="section-hint">Gagal menghitung harga: {previewError}</p>}
-
-          {ctx.tenorPreview?.monthly && (
-            <div
-              className={`card${ctx.chosenTenor === "monthly" ? " selected" : ""}`}
-              onClick={() => ctx.setChosenTenor("monthly")}
-            >
-              <div className="card-title">Per bulan sebesar {formatIdr(ctx.tenorPreview.monthly.net_invoice)}</div>
-              <div className="card-subtitle">
-                Jika dibayarkan, akan memperpanjang paket belajar hingga {formatDate(ctx.tenorPreview.monthly.period_end)}
-              </div>
-            </div>
-          )}
-
-          {ctx.tenorPreview?.semesterly && (
-            <div
-              className={`card${ctx.chosenTenor === "semesterly" ? " selected" : ""}`}
-              onClick={() => ctx.setChosenTenor("semesterly")}
-            >
-              <div className="card-title">
-                Per semester sebesar {formatIdr(ctx.tenorPreview.semesterly.net_invoice)}
-              </div>
-              <div className="card-subtitle">
-                Jika dibayarkan, akan memperpanjang paket belajar hingga{" "}
-                {formatDate(ctx.tenorPreview.semesterly.period_end)}
-              </div>
-            </div>
-          )}
-        </>
+      {!showPricing && (
+        <button
+          type="button"
+          className="btn-primary page-footer-button"
+          disabled={!allSlotsChosen}
+          onClick={handleLihatHarga}
+        >
+          Lihat harga
+        </button>
       )}
 
-      <button
-        type="button"
-        className="btn-primary"
-        style={{ marginTop: 24 }}
-        disabled={!canConfirm}
-        onClick={() => navigate(`/${ctx.userId}/add-subject/summary`)}
-      >
-        Konfirmasi Pembayaran
-      </button>
+      {showPricing && (
+        <>
+          <h3 className="subsection-title">Tenor pembayaran</h3>
+          {previewLoading && <p className="section-hint">Menghitung harga...</p>}
+          {previewError && <p className="error-text">Gagal menghitung harga: {previewError}</p>}
+
+          <div className="option-list">
+            {ctx.tenorPreview?.monthly && (
+              <button
+                type="button"
+                className={`option-card${ctx.chosenTenor === "monthly" ? " selected" : ""}`}
+                onClick={() => ctx.setChosenTenor("monthly")}
+              >
+                <span className="option-indicator" />
+                <span className="option-body">
+                  <span className="option-title">Per bulan</span>
+                  <span className="option-subtitle">
+                    Memperpanjang paket belajar hingga {formatDate(ctx.tenorPreview.monthly.period_end)}
+                  </span>
+                </span>
+                <span className="option-price">{formatIdr(ctx.tenorPreview.monthly.net_invoice)}</span>
+              </button>
+            )}
+
+            {ctx.tenorPreview?.semesterly && (
+              <button
+                type="button"
+                className={`option-card${ctx.chosenTenor === "semesterly" ? " selected" : ""}`}
+                onClick={() => ctx.setChosenTenor("semesterly")}
+              >
+                <span className="option-indicator" />
+                <span className="option-body">
+                  <span className="option-title">Per semester</span>
+                  <span className="option-subtitle">
+                    Memperpanjang paket belajar hingga {formatDate(ctx.tenorPreview.semesterly.period_end)}
+                  </span>
+                </span>
+                <span className="option-price">{formatIdr(ctx.tenorPreview.semesterly.net_invoice)}</span>
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="btn-primary page-footer-button"
+            disabled={!canConfirm}
+            onClick={() => navigate(`/${ctx.userId}/add-subject/summary`)}
+          >
+            Konfirmasi Pembayaran
+          </button>
+        </>
+      )}
     </div>
   );
 }
