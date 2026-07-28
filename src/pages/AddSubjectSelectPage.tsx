@@ -45,7 +45,7 @@ export function AddSubjectSelectPage() {
                 <button type="button" className="option-card-main" onClick={() => toggle(offering.id)}>
                   <span className="option-indicator checkbox">{selected ? "✓" : ""}</span>
                   <span className="option-body">
-                    <span className="option-title">{stripGradeSuffix(offering.name)}</span>
+                    <span className="option-title">{offering.name}</span>
                     {upgrade && (
                       <span className="option-badge option-badge-warning option-badge-block">
                         Teman-teman & guru akan berganti
