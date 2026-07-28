@@ -4,8 +4,18 @@ import type { OfferingMapping } from "../types";
 /** Prefer the authoritative `subject` column (lowercased for comparison); fall back to
  * regex-guessing from `name` only for rows synced before that column existed (should self-heal
  * after the next sync). */
-function subjectOf(offering: OfferingMapping): string {
+export function subjectOf(offering: OfferingMapping): string {
   return (offering.subject ?? subjectFamily(offering.name)).toLowerCase();
+}
+
+/** True when `offering` is a main_course selection that shares a subject family with something
+ * the user already has — i.e. picking it would replace their current variant (see
+ * `computeOfferingSelection`). Used to warn upfront that the class/teacher/classmates will change,
+ * since that's decided by which schedule slot is available, not by the student's choice. */
+export function isFrequencyUpgrade(offering: OfferingMapping, currentOfferings: OfferingMapping[]): boolean {
+  if (offering.reference_type !== "main_course") return false;
+  const subject = subjectOf(offering);
+  return currentOfferings.some((o) => o.reference_type === "main_course" && subjectOf(o) === subject);
 }
 
 export interface OfferingSelectionResult {
