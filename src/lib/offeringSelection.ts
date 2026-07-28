@@ -1,11 +1,12 @@
-import { subjectFamily } from "./format";
+import { normalizeSubjectKey } from "./format";
 import type { OfferingMapping } from "../types";
 
-/** Prefer the authoritative `subject` column (lowercased for comparison); fall back to
- * regex-guessing from `name` only for rows synced before that column existed (should self-heal
- * after the next sync). */
+/** Prefer the authoritative `subject` column, normalized to strip any frequency marker it might
+ * carry (observed in real data, e.g. "Matematika 2x" instead of a clean "Matematika") so two
+ * frequency variants of the same subject still compare equal; falls back to the offering's `name`
+ * for rows synced before the `subject` column existed. */
 export function subjectOf(offering: OfferingMapping): string {
-  return (offering.subject ?? subjectFamily(offering.name)).toLowerCase();
+  return normalizeSubjectKey(offering.subject ?? offering.name);
 }
 
 /** True when `offering` is a main_course selection that shares a subject family with something

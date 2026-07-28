@@ -1,4 +1,4 @@
-import { subjectDisplayName } from "./format";
+import { normalizeSubjectKey } from "./format";
 import type { OfferingMapping } from "../types";
 
 /** Draft copy — curated per subject to help the user understand what they're picking, not just
@@ -30,14 +30,9 @@ const SUBJECT_INFO: Record<string, string> = {
 const DEFAULT_DESCRIPTION =
   "Materi disesuaikan dengan kurikulum sekolah di kelas kamu, mencakup konsep inti dan latihan soal.";
 
-function normalizeKey(raw: string): string {
-  return raw.toLowerCase().replace(/[^a-z]/g, "");
-}
-
 /** Short blurb on what the student will learn — shown when a user expands an offering's info
  * panel while picking subjects to add/upgrade. */
 export function getSubjectInfo(offering: OfferingMapping): string {
-  const raw = offering.subject ?? subjectDisplayName(offering.name);
-  const key = normalizeKey(raw);
+  const key = normalizeSubjectKey(offering.subject ?? offering.name);
   return SUBJECT_INFO[key] ?? DEFAULT_DESCRIPTION;
 }

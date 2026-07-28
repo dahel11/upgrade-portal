@@ -73,6 +73,18 @@ export function subjectFamily(name: string): string {
   return subjectDisplayName(name).toLowerCase();
 }
 
+/** Normalizes any subject-ish string (either `OfferingMapping.subject` or `.name`) into a
+ * comparison/lookup key — strips grade suffix, casing, and any weekly-frequency marker ("2x",
+ * "2x/Minggu"). Needed because `OfferingMapping.subject` has been observed to sometimes carry the
+ * frequency marker itself (e.g. "Matematika 2x") rather than a clean subject name, which broke
+ * same-subject matching when compared/looked-up verbatim. */
+export function normalizeSubjectKey(raw: string): string {
+  return stripGradeSuffix(raw)
+    .toLowerCase()
+    .replace(/\d+\s*x\s*(\/\s*minggu)?/gi, "")
+    .replace(/[^a-z]/g, "");
+}
+
 /** Extracts the weekly frequency marker from an offering name (e.g. "Matematika 2x/Minggu -
  * Kelas 10" -> "2x"). Used as the class-schedule API's optional `frequency` param — only
  * Matematika's schedule feed distinguishes 1x/2x; other subjects ignore it. */

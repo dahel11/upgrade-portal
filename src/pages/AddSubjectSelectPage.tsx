@@ -13,11 +13,13 @@ export function AddSubjectSelectPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   function toggle(id: string) {
+    const nowSelected = !ctx.selectedOfferingIds.includes(id);
     ctx.setSelectedOfferingIds(
-      ctx.selectedOfferingIds.includes(id)
-        ? ctx.selectedOfferingIds.filter((existing) => existing !== id)
-        : [...ctx.selectedOfferingIds, id],
+      nowSelected ? [...ctx.selectedOfferingIds, id] : ctx.selectedOfferingIds.filter((existing) => existing !== id),
     );
+    // Selecting a subject auto-opens its info panel so the "what you'll learn" / class-change
+    // details are seen right away, without an extra tap.
+    if (nowSelected) setExpandedId(id);
   }
 
   function toggleInfo(id: string) {
@@ -44,7 +46,7 @@ export function AddSubjectSelectPage() {
                     <span className="option-title">{stripGradeSuffix(offering.name)}</span>
                     {upgrade && (
                       <span className="option-badge option-badge-warning option-badge-block">
-                        Kelas & guru akan berganti
+                        Teman-teman & guru akan berganti
                       </span>
                     )}
                   </span>
@@ -67,8 +69,9 @@ export function AddSubjectSelectPage() {
                   <p>{getSubjectInfo(offering)}</p>
                   {upgrade && (
                     <p className="option-info-warning">
-                      Karena ini upgrade frekuensi dari mata pelajaran yang sudah kamu ikuti, jadwal kelas akan
-                      disesuaikan — teman sekelas dan guru pengampu bisa berbeda dari kelas kamu saat ini.
+                      Teman-teman & guru akan berganti — karena ini upgrade frekuensi dari mata pelajaran yang sudah
+                      kamu ikuti, jadwal kelas akan disesuaikan sehingga teman sekelas dan guru pengampu bisa berbeda
+                      dari kelas kamu saat ini.
                     </p>
                   )}
                 </div>
