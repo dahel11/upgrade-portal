@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { TopBar } from "../components/TopBar";
 import { StatusScreen } from "../components/StatusScreen";
 import { PaymentSummaryCard } from "../components/PaymentSummaryCard";
@@ -14,6 +14,7 @@ type LoadState =
 
 export function RenewSummaryPage() {
   const { userId } = useParams<{ userId: string }>();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tenor = (searchParams.get("tenor") as Tenor) ?? "monthly";
   const [state, setState] = useState<LoadState>({ kind: "loading" });
@@ -61,7 +62,7 @@ export function RenewSummaryPage() {
 
   return (
     <div className="screen">
-      <TopBar showBack />
+      <TopBar showBack backTo={`/${userId}/renew/tenor`} />
       <h2 className="section-title">Ringkasan Pembayaran</h2>
 
       <PaymentSummaryCard
@@ -79,9 +80,9 @@ export function RenewSummaryPage() {
       </p>
 
       <div className="button-row">
-        <a className="btn-secondary" href={`/${userId}/renew/tenor`}>
+        <button type="button" className="btn-secondary" onClick={() => navigate(`/${userId}/renew/tenor`)}>
           Kembali
-        </a>
+        </button>
         <a className="btn-primary" href={payment.invoice_url}>
           Bayar
         </a>

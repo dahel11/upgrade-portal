@@ -18,7 +18,7 @@ export function AddSubjectSelectPage() {
 
   return (
     <div className="screen">
-      <TopBar showBack />
+      <TopBar showBack backTo={`/${ctx.userId}`} />
       <h2 className="section-title">Mata pelajaran tersedia</h2>
       <p className="section-hint">Bisa memilih lebih dari satu</p>
 

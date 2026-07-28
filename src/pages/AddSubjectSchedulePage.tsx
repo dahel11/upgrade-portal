@@ -124,7 +124,16 @@ export function AddSubjectSchedulePage() {
 
   return (
     <div className="screen">
-      <TopBar showBack />
+      <TopBar
+        showBack
+        onBack={() => {
+          if (showPricing) {
+            setShowPricing(false);
+            return;
+          }
+          navigate(`/${ctx.userId}/add-subject/select`);
+        }}
+      />
       <h2 className="section-title">Jadwal & tenor</h2>
       <p className="section-hint">{selectedOfferings.map((o) => stripGradeSuffix(o.name)).join(", ")}</p>
 

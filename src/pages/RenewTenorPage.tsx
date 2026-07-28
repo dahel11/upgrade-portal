@@ -56,7 +56,7 @@ export function RenewTenorPage() {
 
   return (
     <div className="screen">
-      <TopBar showBack />
+      <TopBar showBack backTo={`/${userId}`} />
       <h2 className="section-title">Pilih tenor pembayaran</h2>
       <p className="section-hint">Perpanjangan untuk paket {finance.offering_names}</p>
 

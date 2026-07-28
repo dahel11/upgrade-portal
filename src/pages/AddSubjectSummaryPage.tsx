@@ -53,7 +53,7 @@ export function AddSubjectSummaryPage() {
 
   return (
     <div className="screen">
-      <TopBar showBack />
+      <TopBar showBack backTo={`/${ctx.userId}/add-subject/schedule`} />
       <h2 className="section-title">Ringkasan Pembayaran</h2>
 
       <PaymentSummaryCard
@@ -73,7 +73,11 @@ export function AddSubjectSummaryPage() {
       {error && <p className="error-text">{error}</p>}
 
       <div className="button-row">
-        <button type="button" className="btn-secondary" onClick={() => navigate(-1)}>
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => navigate(`/${ctx.userId}/add-subject/schedule`)}
+        >
           Kembali
         </button>
         <button type="button" className="btn-primary" disabled={submitting} onClick={handleBayar}>
