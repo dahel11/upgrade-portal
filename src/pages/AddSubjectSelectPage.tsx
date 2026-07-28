@@ -17,9 +17,11 @@ export function AddSubjectSelectPage() {
     ctx.setSelectedOfferingIds(
       nowSelected ? [...ctx.selectedOfferingIds, id] : ctx.selectedOfferingIds.filter((existing) => existing !== id),
     );
-    // Selecting a subject auto-opens its info panel so the "what you'll learn" / class-change
-    // details are seen right away, without an extra tap.
-    if (nowSelected) setExpandedId(id);
+
+    setExpandedId((current) => {
+      if (nowSelected) return id;
+      return current === id ? null : current;
+    });
   }
 
   function toggleInfo(id: string) {
@@ -69,8 +71,8 @@ export function AddSubjectSelectPage() {
                   <p>{getSubjectInfo(offering)}</p>
                   {upgrade && (
                     <p className="option-info-warning">
-                      Teman-teman & guru akan berganti — karena ini upgrade frekuensi dari mata pelajaran yang sudah
-                      kamu ikuti, jadwal kelas akan disesuaikan sehingga teman sekelas dan guru pengampu bisa berbeda
+                      Teman-teman & guru akan berganti, karena ini upgrade frekuensi dari mata pelajaran yang sudah
+                      kamu ikuti, jadwal kelas akan disesuaikan sehingga teman sekelas dan guru pun bisa berbeda
                       dari kelas kamu saat ini.
                     </p>
                   )}
