@@ -85,7 +85,7 @@ export function LandingPage() {
 
       <div className="hero">
         <img src={logo} alt="CoLearn" className="hero-logo" />
-        <h1 className="hero-greeting">Halo, {firstName(finance.user_name)}!</h1>
+        <h1 className="hero-greeting">Halo, {finance.user_name}!</h1>
         <p className="hero-subtitle">
           Waktunya perpanjang paket belajar supaya <strong>{firstName(finance.user_name)}</strong> bisa terus belajar
           tanpa jeda.
