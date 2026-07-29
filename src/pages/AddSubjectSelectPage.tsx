@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { TopBar } from "../components/TopBar";
+import { UnpaidTransactionModal } from "../components/UnpaidTransactionModal";
 import { AddSubjectIcon, ChevronDownIcon, InfoIcon } from "../components/icons";
+import { fetchPendingCheckoutTransactions } from "../lib/data";
 import { stripGradeSuffix } from "../lib/format";
 import { isFrequencyUpgrade } from "../lib/offeringSelection";
 import { getSubjectInfo } from "../lib/subjectInfo";
@@ -11,6 +13,25 @@ export function AddSubjectSelectPage() {
   const ctx = useOutletContext<AddSubjectContextValue>();
   const navigate = useNavigate();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [showUnpaidModal, setShowUnpaidModal] = useState(false);
+
+  // Warn upfront (before the user picks anything) if they already have an unpaid link out there —
+  // doesn't block the flow, just makes generating another one a deliberate choice. Best-effort:
+  // if the check itself fails, don't block the flow over it.
+  useEffect(() => {
+    let cancelled = false;
+    fetchPendingCheckoutTransactions(ctx.userId)
+      .then((transactions) => {
+        if (cancelled || transactions.length === 0) return;
+        setPendingCount(transactions.length);
+        setShowUnpaidModal(true);
+      })
+      .catch((err) => console.error("[pending-transactions] failed to check:", err));
+    return () => {
+      cancelled = true;
+    };
+  }, [ctx.userId]);
 
   function toggle(id: string) {
     const nowSelected = !ctx.selectedOfferingIds.includes(id);
@@ -94,6 +115,15 @@ export function AddSubjectSelectPage() {
       >
         <AddSubjectIcon /> Lihat jadwal
       </button>
+
+      {showUnpaidModal && (
+        <UnpaidTransactionModal
+          userId={ctx.userId}
+          count={pendingCount}
+          onCancel={() => navigate(`/${ctx.userId}`)}
+          onContinue={() => setShowUnpaidModal(false)}
+        />
+      )}
     </div>
   );
 }

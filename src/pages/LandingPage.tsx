@@ -152,6 +152,10 @@ export function LandingPage() {
           </span>
         </button>
       </div>
+
+      <button type="button" className="link-button footer-link" onClick={() => navigate(`/${userId}/invoices`)}>
+        Lihat riwayat transaksi
+      </button>
     </div>
   );
 }

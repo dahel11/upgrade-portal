@@ -1,21 +1,42 @@
 import { supabase } from "./supabase";
 import { parseIndonesianDateList } from "./format";
-import type { OfferingMapping, RetentionFinance, RetentionPayment, Tenor } from "../types";
+import type {
+  CheckoutTransaction,
+  InvoiceStatus,
+  OfferingMapping,
+  RetentionFinance,
+  RetentionPayment,
+  Tenor,
+} from "../types";
 
 export async function fetchRetentionFinance(userId: string): Promise<RetentionFinance | null> {
-  const { data, error } = await supabase
-    .from("retention_to_finances")
-    .select("*")
-    .eq("user_id", userId)
-    .maybeSingle();
+  const { data, error } = await supabase.from("retention_to_finances_dev").select("*").eq("user_id", userId);
 
   if (error) throw error;
-  return data as RetentionFinance | null;
+  if (!data || data.length === 0) return null;
+  return pickRetentionFinance(data as RetentionFinance[]);
+}
+
+/**
+ * `retention_to_finances` isn't guaranteed unique per user_id — a user can carry a stale/failed
+ * sync artifact (e.g. `retention_status: "import_failed"`) or an older already-`completed` cycle
+ * alongside their current one. Mirrors `findRenewalPaymentLink`'s tie-break below: prefer the
+ * currently-actionable "active" entry, then a "completed" one, falling back to the first row if
+ * neither status is present.
+ */
+function pickRetentionFinance(rows: RetentionFinance[]): RetentionFinance {
+  const active = rows.find((r) => r.retention_status === "active" && r.invoice_status === "active");
+  if (active) return active;
+
+  const completed = rows.find((r) => r.retention_status === "completed");
+  if (completed) return completed;
+
+  return rows[0];
 }
 
 export async function fetchRetentionPayments(userId: string): Promise<RetentionPayment[]> {
   const { data, error } = await supabase
-    .from("retention_to_payments")
+    .from("retention_to_payments_dev")
     .select("*")
     .eq("user_id", userId);
 
@@ -24,10 +45,48 @@ export async function fetchRetentionPayments(userId: string): Promise<RetentionP
 }
 
 export async function fetchOfferingMappingForGrade(grade: string): Promise<OfferingMapping[]> {
-  const { data, error } = await supabase.from("offering_mapping_to_grade").select("*").eq("grade", grade);
+  const { data, error } = await supabase.from("offering_mapping_to_grade_dev").select("*").eq("grade", grade);
 
   if (error) throw error;
   return (data ?? []) as OfferingMapping[];
+}
+
+export async function fetchCheckoutTransactions(userId: string): Promise<CheckoutTransaction[]> {
+  const { data, error } = await supabase
+    .from("checkout_transactions")
+    .select("id, invoice_validation_id, user_id, created_at, invoice_id, invoice_url")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as CheckoutTransaction[];
+}
+
+export async function fetchInvoiceStatuses(invoiceIds: string[]): Promise<InvoiceStatus[]> {
+  if (invoiceIds.length === 0) return [];
+
+  const { data, error } = await supabase.from("checkout_invoice_statuses_dev").select("*").in("invoice_id", invoiceIds);
+
+  if (error) throw error;
+  return (data ?? []) as InvoiceStatus[];
+}
+
+/**
+ * Transactions to warn about before letting the user generate another checkout — i.e. "did you
+ * already generate a link you haven't paid yet". A transaction with no synced status row yet
+ * (sync-checkout-status hasn't picked it up) is treated as pending too, since "unknown" is closer
+ * to "maybe still unpaid" than to "safe to ignore". `expired` is deliberately excluded: it can no
+ * longer be paid, so it's not something to warn about (open item — revisit if product wants it
+ * flagged too, e.g. to point at exactly which subject that was for).
+ */
+export async function fetchPendingCheckoutTransactions(userId: string): Promise<CheckoutTransaction[]> {
+  const transactions = await fetchCheckoutTransactions(userId);
+  if (transactions.length === 0) return [];
+
+  const statuses = await fetchInvoiceStatuses(transactions.map((t) => t.invoice_id));
+  const statusByInvoiceId = new Map(statuses.map((s) => [s.invoice_id, s.status]));
+
+  return transactions.filter((t) => (statusByInvoiceId.get(t.invoice_id) ?? "pending") === "pending");
 }
 
 /**

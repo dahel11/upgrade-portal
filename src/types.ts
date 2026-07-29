@@ -93,3 +93,28 @@ export interface ManualCheckoutResult {
   invoice_url: string;
   invoice_id: string;
 }
+
+export interface CheckoutTransaction {
+  id: string;
+  invoice_validation_id: string;
+  user_id: string;
+  created_at: string;
+  invoice_id: string;
+  invoice_url: string;
+}
+
+// Synced from Metabase question #1938 (see supabase/functions/sync-checkout-status) — the only way
+// this app can observe payment status, since package_purchases has no live status-check API and
+// this app has no direct DB access. `invoice_id` matches CheckoutTransaction.invoice_id
+// (package_purchases' `payments.id`) — joined client-side, not via a SQL join.
+export interface InvoiceStatus {
+  invoice_id: string;
+  user_id: string;
+  status: "initiated" | "pending" | "paid" | "cancelled" | "failed" | "expired" | "api_call_failed" | string;
+  paid_at: string | null;
+  paid_amount: number | null;
+  total_amount: number | null;
+  invoice_url: string | null;
+  receipt_number: string | null;
+  synced_at: string;
+}

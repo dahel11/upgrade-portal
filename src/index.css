@@ -325,6 +325,24 @@ h3,
   background: #fef3c7;
 }
 
+.option-badge-success {
+  border-color: var(--color-success-text);
+  color: var(--color-success-text);
+  background: var(--color-success-bg);
+}
+
+.option-badge-error {
+  border-color: var(--color-error-text);
+  color: var(--color-error-text);
+  background: var(--color-error-bg);
+}
+
+.option-badge-muted {
+  border-color: var(--color-border);
+  color: var(--color-muted);
+  background: var(--color-bg-subtle);
+}
+
 /* Expandable variant of .option-card — the row above stays clickable for selection, a separate
  * info toggle expands a details panel without affecting the selection state. */
 .option-card-expandable {
@@ -678,6 +696,12 @@ h3,
   display: flex;
 }
 
+.footer-link {
+  display: block;
+  margin: 20px auto 0;
+  text-align: center;
+}
+
 .page-footer-button {
   margin-top: 24px;
   display: flex;
@@ -711,4 +735,105 @@ h3,
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Countdown ring (PaymentWaitingScreen) — `--progress` (0..1) set inline per tick */
+.countdown-ring {
+  --progress: 1;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: conic-gradient(var(--color-primary) calc(var(--progress) * 360deg), var(--color-primary-lighter) 0deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 0 4px;
+  transition: background 0.9s linear;
+}
+
+.countdown-number {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-primary);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* Transaction history list (TransactionsPage) */
+
+.transaction-card {
+  background: #fff;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.transaction-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Warning modal (UnpaidTransactionModal) */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 27, 37, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+  z-index: 100;
+}
+
+@media (min-width: 480px) {
+  .modal-overlay {
+    align-items: center;
+  }
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 22px 20px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-title {
+  font-family: var(--font-primary);
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--color-text);
+}
+
+.modal-message {
+  font-size: 13.5px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+
+.modal-link {
+  display: inline-block;
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 13.5px;
+  text-decoration: none;
+  margin-bottom: 18px;
 }

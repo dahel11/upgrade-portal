@@ -117,3 +117,30 @@ export function parseIndonesianDateList(value: string): string[] {
       return `${year}-${month}-${day}`;
     });
 }
+
+// Mirrors package_purchases' Payment::STATUS enum (see supabase/functions/sync-checkout-status).
+const INVOICE_STATUS_LABELS: Record<string, string> = {
+  initiated: "Diproses",
+  pending: "Menunggu Pembayaran",
+  paid: "Sudah Dibayar",
+  cancelled: "Dibatalkan",
+  failed: "Gagal",
+  expired: "Kedaluwarsa",
+  api_call_failed: "Gagal",
+};
+
+/** Human-readable label for an `InvoiceStatus.status` value. `undefined` means
+ * sync-checkout-status hasn't picked up this invoice yet (not "unpaid" or "paid" — just unknown). */
+export function describeInvoiceStatus(status: string | undefined): string {
+  if (!status) return "Memeriksa status...";
+  return INVOICE_STATUS_LABELS[status] ?? status;
+}
+
+/** CSS class suffix (`option-badge-*`) for an invoice status badge — see `.option-badge-*` in
+ * index.css. */
+export function invoiceStatusBadgeClass(status: string | undefined): string {
+  if (status === "paid") return "option-badge-success";
+  if (status === "failed" || status === "cancelled" || status === "api_call_failed") return "option-badge-error";
+  if (status === "expired") return "option-badge-muted";
+  return "option-badge-warning"; // pending, initiated, or not yet synced
+}

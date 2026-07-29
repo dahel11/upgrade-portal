@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { TopBar } from "../components/TopBar";
 import { PaymentSummaryCard } from "../components/PaymentSummaryCard";
+import { PaymentWaitingScreen } from "../components/PaymentWaitingScreen";
+import { fetchInvoiceStatuses } from "../lib/data";
 import { manualCheckout } from "../lib/edgeFunctions";
 import { formatPeriod, stripGradeSuffix } from "../lib/format";
 import type { AddSubjectContextValue } from "./addSubjectContext";
@@ -11,6 +13,7 @@ export function AddSubjectSummaryPage() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [waiting, setWaiting] = useState<{ invoiceId: string; paymentUrl: string } | null>(null);
 
   const preview = ctx.chosenTenor ? ctx.tenorPreview?.[ctx.chosenTenor] : null;
 
@@ -33,6 +36,11 @@ export function AddSubjectSummaryPage() {
   async function handleBayar() {
     setSubmitting(true);
     setError(null);
+
+    // Must open synchronously here, before the `await` below — a tab opened after an async gap
+    // loses the "direct user gesture" browsers require, and gets popup-blocked (Safari especially).
+    const paymentTab = window.open("", "_blank");
+
     try {
       const scheduleChoice = Object.fromEntries(
         Object.entries(ctx.scheduleChoices).map(([offeringId, choice]) => [
@@ -44,11 +52,34 @@ export function AddSubjectSummaryPage() {
         invoice_validation_id: preview!.invoice_validation_id,
         schedule_choice: scheduleChoice,
       });
-      window.location.href = result.invoice_url;
+
+      if (paymentTab) {
+        paymentTab.location.href = result.invoice_url;
+        setWaiting({ invoiceId: result.invoice_id, paymentUrl: result.invoice_url });
+      } else {
+        // Popup was blocked — fall back to same-tab navigation so the user isn't stuck.
+        window.location.href = result.invoice_url;
+      }
     } catch (err) {
+      paymentTab?.close();
       setError(err instanceof Error ? err.message : "Gagal memproses pembayaran.");
       setSubmitting(false);
     }
+  }
+
+  if (waiting) {
+    return (
+      <PaymentWaitingScreen
+        userId={ctx.userId}
+        paymentUrl={waiting.paymentUrl}
+        onCancel={() => setWaiting(null)}
+        timeoutPath={`/${ctx.userId}/invoices`}
+        checkPaid={async () => {
+          const statuses = await fetchInvoiceStatuses([waiting.invoiceId]);
+          return statuses[0]?.status === "paid";
+        }}
+      />
+    );
   }
 
   return (

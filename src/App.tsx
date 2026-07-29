@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { LandingPage } from "./pages/LandingPage";
+import { TransactionsPage } from "./pages/TransactionsPage";
 import { RenewTenorPage } from "./pages/RenewTenorPage";
 import { RenewSummaryPage } from "./pages/RenewSummaryPage";
 import { AddSubjectFlowLayout } from "./pages/AddSubjectFlowLayout";
@@ -13,6 +14,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/:userId" element={<LandingPage />} />
+        <Route path="/:userId/invoices" element={<TransactionsPage />} />
         <Route path="/:userId/renew/tenor" element={<RenewTenorPage />} />
         <Route path="/:userId/renew/summary" element={<RenewSummaryPage />} />
         <Route path="/:userId/add-subject" element={<AddSubjectFlowLayout />}>
