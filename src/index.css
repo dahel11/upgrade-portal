@@ -294,6 +294,17 @@ h3,
   line-height: 1.4;
 }
 
+/* Testing/finance-verification aid — shows the exact user_id + finance_payment_type sent to
+ * validate_invoice, so the finance team can cross-check without needing backend access. */
+.option-debug {
+  display: block;
+  font-family: monospace;
+  font-size: 10.5px;
+  color: var(--color-disabled);
+  margin-top: 4px;
+  word-break: break-all;
+}
+
 .option-price {
   font-weight: 700;
   font-family: var(--font-primary);

@@ -202,6 +202,9 @@ export function AddSubjectSchedulePage() {
                   <span className="option-subtitle">
                     Memperpanjang paket belajar hingga {formatDate(ctx.tenorPreview.monthly.period_end)}
                   </span>
+                  <span className="option-debug">
+                    user_id: {ctx.userId} • finance_payment_type: {ctx.tenorPreview.monthly.finance_payment_type}
+                  </span>
                 </span>
                 <span className="option-price">{formatIdr(ctx.tenorPreview.monthly.net_invoice)}</span>
               </button>
@@ -218,6 +221,9 @@ export function AddSubjectSchedulePage() {
                   <span className="option-title">Per semester</span>
                   <span className="option-subtitle">
                     Memperpanjang paket belajar hingga {formatDate(ctx.tenorPreview.semesterly.period_end)}
+                  </span>
+                  <span className="option-debug">
+                    user_id: {ctx.userId} • finance_payment_type: {ctx.tenorPreview.semesterly.finance_payment_type}
                   </span>
                 </span>
                 <span className="option-price">{formatIdr(ctx.tenorPreview.semesterly.net_invoice)}</span>
