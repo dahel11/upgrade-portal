@@ -144,3 +144,26 @@ export function invoiceStatusBadgeClass(status: string | undefined): string {
   if (status === "expired") return "option-badge-muted";
   return "option-badge-warning"; // pending, initiated, or not yet synced
 }
+
+/** "Today" as a bare "YYYY-MM-DD" string in Asia/Jakarta — the timezone the rest of this app's
+ * dates are shown in — so it compares lexicographically against a schedule slot's
+ * `slot_start_date` (also a bare date, no time component) without any timezone-shift surprises. */
+function todayInJakarta(): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
+}
+
+/** Label for a schedule slot's start-date badge, given its `slot_start_date` ("YYYY-MM-DD").
+ * `undefined` when there's nothing to show (the schedule API didn't return one for this slot). */
+export function classStartLabel(slotStartDate: string | null): string | undefined {
+  if (!slotStartDate) return undefined;
+  const today = todayInJakarta();
+  if (slotStartDate < today) return "Kelas sudah dimulai";
+  if (slotStartDate === today) return "Mulai hari ini";
+  return `Mulai ${formatDate(slotStartDate)}`;
+}
+
+/** CSS class suffix (`option-badge-*`) for a schedule slot's start-date badge — green once the
+ * class has already started, amber while it's still upcoming (including "starts today"). */
+export function classStartBadgeClass(slotStartDate: string | null): string {
+  return slotStartDate && slotStartDate < todayInJakarta() ? "option-badge-success" : "option-badge-warning";
+}

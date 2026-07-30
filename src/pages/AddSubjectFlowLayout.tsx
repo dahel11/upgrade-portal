@@ -3,6 +3,7 @@ import { Outlet, useParams } from "react-router-dom";
 import { StatusScreen } from "../components/StatusScreen";
 import { fetchOfferingMappingForGrade, fetchRetentionFinance } from "../lib/data";
 import { parseOfferingIds } from "../lib/format";
+import { isFrequencyDowngrade } from "../lib/offeringSelection";
 import type { OfferingMapping, RetentionFinance, Tenor } from "../types";
 import type { AddSubjectContextValue, ScheduleChoice, TenorPreview } from "./addSubjectContext";
 
@@ -47,7 +48,12 @@ export function AddSubjectFlowLayout() {
   const { finance, catalog } = state;
   const currentIds = new Set(parseOfferingIds(finance.offering_ids));
   const currentOfferings = catalog.filter((o) => currentIds.has(o.id));
-  const availableOfferings = catalog.filter((o) => !currentIds.has(o.id));
+  // Never offer a same-subject variant at a lower weekly frequency than what the user already
+  // has (e.g. hide "Matematika 1x/Minggu" once they're on "Matematika 2x/Minggu") — downgrades
+  // aren't allowed, per product direction.
+  const availableOfferings = catalog.filter(
+    (o) => !currentIds.has(o.id) && !isFrequencyDowngrade(o, currentOfferings),
+  );
 
   const context: AddSubjectContextValue = {
     userId: userId!,

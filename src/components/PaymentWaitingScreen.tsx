@@ -5,11 +5,12 @@ import logo from "../assets/colearn-logo-blue.png";
 
 const WAIT_SECONDS = 60;
 const POLL_INTERVAL_MS = 4000;
+const WAITING_ILLUSTRATION_URL =
+  "https://vqhaeqcorxsizfiswphs.supabase.co/storage/v1/object/public/live_class/Coco-neco-fishing.png";
 
 interface PaymentWaitingScreenProps {
   userId: string;
   paymentUrl: string;
-  onCancel: () => void;
   /** Caller-supplied "has this been paid yet?" check — the right source differs per flow:
    * add-subject invoices are tracked in `checkout_invoice_statuses` (keyed by the exact invoice_id
    * manual-checkout returns); the renew flow's pre-generated links never get a `manual-checkout`
@@ -28,7 +29,7 @@ interface PaymentWaitingScreenProps {
  * `checkPaid` until it resolves true or `WAIT_SECONDS` runs out. If nothing resolves in time, hands
  * off to `timeoutPath` rather than claiming the payment failed — it may well still be processing
  * (see `checkPaid` doc — some sources sync far slower than this window). */
-export function PaymentWaitingScreen({ userId, paymentUrl, onCancel, checkPaid, timeoutPath }: PaymentWaitingScreenProps) {
+export function PaymentWaitingScreen({ userId, paymentUrl, checkPaid, timeoutPath }: PaymentWaitingScreenProps) {
   const navigate = useNavigate();
   const [secondsLeft, setSecondsLeft] = useState(WAIT_SECONDS);
   const [paid, setPaid] = useState(false);
@@ -63,25 +64,20 @@ export function PaymentWaitingScreen({ userId, paymentUrl, onCancel, checkPaid, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const progress = secondsLeft / WAIT_SECONDS;
-
   return (
     <div className="screen">
       <TopBar />
       <div className="center-message">
         <img src={logo} alt="CoLearn" />
-        <div className="countdown-ring" style={{ "--progress": progress } as React.CSSProperties}>
-          <span className="countdown-number">{secondsLeft}</span>
-        </div>
+        <img src={WAITING_ILLUSTRATION_URL} alt="" className="waiting-illustration" />
         <h2>Menunggu Pembayaran</h2>
         <p>
-          Selesaikan pembayaran di tab yang baru saja terbuka. Halaman ini otomatis memperbarui begitu pembayaran
-          kami terima.
+          Sambil menunggu, Coco lagi santai dulu. Selesaikan pembayaran di tab yang baru saja terbuka atau kembali ke halaman awal.
         </p>
         <a href={paymentUrl} target="_blank" rel="noreferrer" className="link-button">
-          Buka lagi halaman pembayaran
+          Membuka link pembayaran kembali
         </a>
-        <button type="button" className="btn-secondary" onClick={onCancel}>
+        <button type="button" className="btn-secondary" onClick={() => navigate(`/${userId}`)}>
           Kembali
         </button>
       </div>

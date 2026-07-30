@@ -91,10 +91,12 @@ export function AddSubjectSelectPage() {
                 <div className="option-info-panel">
                   <p>{getSubjectInfo(offering)}</p>
                   {upgrade && (
+                    // Temporarily placeholder text (2026-07-30, per direct request) — the pill
+                    // badge above ("Teman-teman & guru akan berganti") stays as final copy, only
+                    // this longer explanation is unreviewed draft copy for now.
                     <p className="option-info-warning">
-                      Teman-teman & guru akan berganti, karena ini upgrade frekuensi dari mata pelajaran yang sudah
-                      kamu ikuti, jadwal kelas akan disesuaikan sehingga teman sekelas dan guru pun bisa berbeda
-                      dari kelas kamu saat ini.
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
+                      labore et dolore magna aliqua.
                     </p>
                   )}
                 </div>

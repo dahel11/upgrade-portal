@@ -72,7 +72,6 @@ export function AddSubjectSummaryPage() {
       <PaymentWaitingScreen
         userId={ctx.userId}
         paymentUrl={waiting.paymentUrl}
-        onCancel={() => setWaiting(null)}
         timeoutPath={`/${ctx.userId}/invoices`}
         checkPaid={async () => {
           const statuses = await fetchInvoiceStatuses([waiting.invoiceId]);

@@ -1,4 +1,4 @@
-import { normalizeSubjectKey } from "./format";
+import { normalizeSubjectKey, offeringFrequency } from "./format";
 import type { OfferingMapping } from "../types";
 
 /** Prefer the authoritative `subject` column, normalized to strip any frequency marker it might
@@ -9,6 +9,16 @@ export function subjectOf(offering: OfferingMapping): string {
   return normalizeSubjectKey(offering.subject ?? offering.name);
 }
 
+/** Numeric weekly frequency parsed from the offering's name (e.g. "Matematika 2x/Minggu" -> 2).
+ * `null` for subjects with no frequency marker at all (IPA, Fisika, Kimia, ...) — those have only
+ * one variant, so there's nothing to compare. */
+function frequencyOf(offering: OfferingMapping): number | null {
+  const marker = offeringFrequency(offering.name);
+  if (!marker) return null;
+  const match = marker.match(/\d+/);
+  return match ? Number(match[0]) : null;
+}
+
 /** True when `offering` is a main_course selection that shares a subject family with something
  * the user already has — i.e. picking it would replace their current variant (see
  * `computeOfferingSelection`). Used to warn upfront that the class/teacher/classmates will change,
@@ -17,6 +27,23 @@ export function isFrequencyUpgrade(offering: OfferingMapping, currentOfferings: 
   if (offering.reference_type !== "main_course") return false;
   const subject = subjectOf(offering);
   return currentOfferings.some((o) => o.reference_type === "main_course" && subjectOf(o) === subject);
+}
+
+/** True when `offering` is a same-subject main_course variant at a *lower* weekly frequency than
+ * one the user already has (e.g. currently on "Matematika 2x/Minggu", candidate is "Matematika
+ * 1x/Minggu") — downgrades aren't offered. Only compares when both sides have a parseable
+ * frequency marker; subjects without one (no frequency variants to begin with) are never flagged. */
+export function isFrequencyDowngrade(offering: OfferingMapping, currentOfferings: OfferingMapping[]): boolean {
+  if (offering.reference_type !== "main_course") return false;
+  const candidateFrequency = frequencyOf(offering);
+  if (candidateFrequency === null) return false;
+
+  const subject = subjectOf(offering);
+  return currentOfferings.some((o) => {
+    if (o.reference_type !== "main_course" || subjectOf(o) !== subject) return false;
+    const currentFrequency = frequencyOf(o);
+    return currentFrequency !== null && candidateFrequency < currentFrequency;
+  });
 }
 
 export interface OfferingSelectionResult {

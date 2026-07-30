@@ -78,6 +78,9 @@ export interface ScheduleSlot {
   teacher: string;
   seats_remaining: number;
   slot_label: string;
+  /** "YYYY-MM-DD", or `null` if the upstream schedule API didn't return one for this slot. See
+   * `classStartLabel` in lib/format.ts for how this becomes a badge. */
+  slot_start_date: string | null;
 }
 
 /** `frequency` (e.g. "2x") only matters for Matematika's schedule feed — see

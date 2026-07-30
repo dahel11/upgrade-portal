@@ -59,7 +59,6 @@ export function RenewSummaryPage() {
       <PaymentWaitingScreen
         userId={userId!}
         paymentUrl={payment.invoice_url}
-        onCancel={() => setWaiting(false)}
         // No checkout_transactions row exists for this pre-generated link (only manual-checkout
         // creates one), so /invoices wouldn't show it — send to the landing page instead.
         timeoutPath={`/${userId}`}

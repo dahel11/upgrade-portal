@@ -65,6 +65,7 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-secondary);
+  overflow-x: hidden; /* the waiting-illustration's viewport-breakout trick can 1px-overflow otherwise */
 }
 
 h1,
@@ -288,10 +289,26 @@ h3,
 }
 
 .option-subtitle {
+  display: block;
   font-size: 12.5px;
   color: var(--color-muted);
   margin-top: 2px;
   line-height: 1.4;
+}
+
+/* Lets a badge (e.g. classStartLabel on a schedule slot) sit beside .option-subtitle on the same
+ * row, with a gap between them, instead of .option-subtitle's own `display: block` forcing it
+ * onto its own line. */
+.option-subtitle-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.option-subtitle-row .option-subtitle {
+  margin-top: 0;
 }
 
 /* Testing/finance-verification aid — shows the exact user_id + finance_payment_type sent to
@@ -748,32 +765,26 @@ h3,
   }
 }
 
-/* Countdown ring (PaymentWaitingScreen) — `--progress` (0..1) set inline per tick */
-.countdown-ring {
-  --progress: 1;
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
-  background: conic-gradient(var(--color-primary) calc(var(--progress) * 360deg), var(--color-primary-lighter) 0deg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 4px 0 4px;
-  transition: background 0.9s linear;
+/* Breaks out of `.screen`'s 480px cap (see above) — without this, `max-width` here could never
+ * exceed the parent's own width no matter how large it's set. Scoped as `.center-message
+ * .waiting-illustration` (not just `.waiting-illustration`) so it outweighs the generic
+ * `.center-message img` rule above, which would otherwise win and force this back to 120px. */
+.center-message .waiting-illustration {
+  display: block;
+  width: 100vw;
+  max-width: 320px;
+  margin: 8px calc(50% - 50vw) 4px;
+  animation: waiting-bob 3s ease-in-out infinite;
 }
 
-.countdown-number {
-  width: 66px;
-  height: 66px;
-  border-radius: 50%;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-primary);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--color-primary);
+@keyframes waiting-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 /* Transaction history list (TransactionsPage) */

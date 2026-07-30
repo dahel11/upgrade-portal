@@ -5,7 +5,7 @@ import { LoadingIndicator } from "../components/LoadingIndicator";
 import { computeOfferingSelection, getAssumedCurrentTenure } from "../lib/offeringSelection";
 import { resolveFinancePaymentType } from "../lib/financePaymentType";
 import { fetchScheduleSlots, validateInvoice, type ScheduleSlot } from "../lib/edgeFunctions";
-import { formatDate, formatIdr, stripGradeSuffix, subjectDisplayName } from "../lib/format";
+import { classStartBadgeClass, classStartLabel, formatDate, formatIdr, stripGradeSuffix, subjectDisplayName } from "../lib/format";
 import type { OfferingMapping } from "../types";
 import type { AddSubjectContextValue, TenorPreview } from "./addSubjectContext";
 
@@ -148,6 +148,7 @@ export function AddSubjectSchedulePage() {
             <div className="option-list">
               {(slotsByOffering[offering.id] ?? []).map((slot) => {
                 const selected = ctx.scheduleChoices[offering.id]?.slot.slot_label === slot.slot_label;
+                const startLabel = classStartLabel(slot.slot_start_date);
                 return (
                   <button
                     key={slot.slot_label}
@@ -160,8 +161,13 @@ export function AddSubjectSchedulePage() {
                       <span className="option-title">
                         {slot.day} • {slot.time}
                       </span>
-                      <span className="option-subtitle">
-                        {slot.teacher} • Sisa kursi: {slot.seats_remaining}
+                      <span className="option-subtitle-row">
+                        {startLabel && (
+                          <span className={`option-badge ${classStartBadgeClass(slot.slot_start_date)}`}>{startLabel}</span>
+                        )}
+                        <span className="option-subtitle">
+                          {slot.teacher} • Sisa kursi: {slot.seats_remaining}
+                        </span>
                       </span>
                     </span>
                   </button>

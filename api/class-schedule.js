@@ -33,6 +33,11 @@ export default async function handler(req, res) {
         teacher,
         seats_remaining: Number(item.seatsLeft ?? item.sisa_kursi ?? item.seats_remaining ?? 0),
         slot_label: item.slotName ?? item.slot_name ?? `${day}-${time}-${teacher}-${item.course_id ?? ""}`,
+        // "YYYY-MM-DD" — when this slot's class actually starts. Used to badge whether it's
+        // already running, starts today, or starts on a future date (see classStartLabel in
+        // src/lib/format.ts). Not `item.classStarted` directly: that's the upstream's own
+        // today-relative boolean, which can't distinguish "starts today" from "starts in future".
+        slot_start_date: item.slot_start_date ?? null,
       };
     });
 
