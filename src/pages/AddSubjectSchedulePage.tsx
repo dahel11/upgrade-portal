@@ -166,7 +166,7 @@ export function AddSubjectSchedulePage() {
                           <span className={`option-badge ${classStartBadgeClass(slot.slot_start_date)}`}>{startLabel}</span>
                         )}
                         <span className="option-subtitle">
-                          {slot.teacher} • Sisa kursi: {slot.seats_remaining}
+                          {slot.teacher}
                         </span>
                       </span>
                     </span>
