@@ -63,7 +63,7 @@ export function LandingPage() {
     return (
       <StatusScreen
         title="Terima kasih!"
-        message={`Pembayaran ${finance.user_name} untuk periode ini sudah kami terima. Sampai jumpa di periode retensi berikutnya.`}
+        message={`Pembayaran ${finance.user_name} untuk periode ini sudah kami terima.`}
       />
     );
   }
