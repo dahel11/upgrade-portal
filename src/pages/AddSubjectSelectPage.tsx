@@ -69,7 +69,7 @@ export function AddSubjectSelectPage() {
                     <span className="option-title">{offering.name}</span>
                     {upgrade && (
                       <span className="option-badge option-badge-warning option-badge-block">
-                        Teman-teman & guru akan berganti
+                        Teman-teman & guru akan berbeda
                       </span>
                     )}
                   </span>
