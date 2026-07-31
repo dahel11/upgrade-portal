@@ -6,7 +6,6 @@ import { AddSubjectIcon, ChevronDownIcon, InfoIcon } from "../components/icons";
 import { fetchPendingCheckoutTransactions } from "../lib/data";
 import { stripGradeSuffix } from "../lib/format";
 import { isFrequencyUpgrade } from "../lib/offeringSelection";
-import { getSubjectInfo } from "../lib/subjectInfo";
 import type { AddSubjectContextValue } from "./addSubjectContext";
 
 export function AddSubjectSelectPage() {
@@ -89,7 +88,7 @@ export function AddSubjectSelectPage() {
               </div>
               {expanded && (
                 <div className="option-info-panel">
-                  <p>{getSubjectInfo(offering)}</p>
+                  {offering.description && <p>{offering.description}</p>}
                   {upgrade && (
                     // Temporarily placeholder text (2026-07-30, per direct request) — the pill
                     // badge above ("Teman-teman & guru akan berganti") stays as final copy, only

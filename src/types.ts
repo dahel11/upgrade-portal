@@ -70,6 +70,8 @@ export interface OfferingMapping {
    * same-subject frequency-upgrade detection and as the schedule API's `subject` param. Nullable
    * only until a resync backfills rows synced before this column existed. */
   subject: string | null;
+  /** Short blurb describing what the student will learn — shown in the offering info panel. */
+  description: string | null;
   created_at: string;
   updated_at: string;
 }
