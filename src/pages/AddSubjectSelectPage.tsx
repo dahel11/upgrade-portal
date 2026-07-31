@@ -89,7 +89,7 @@ export function AddSubjectSelectPage() {
               {expanded && (
                 <div className="option-info-panel">
                   {offering.description && <p>{offering.description}</p>}
-                  {upgrade && (
+                  {/* {upgrade && (
                     // Temporarily placeholder text (2026-07-30, per direct request) — the pill
                     // badge above ("Teman-teman & guru akan berganti") stays as final copy, only
                     // this longer explanation is unreviewed draft copy for now.
@@ -97,7 +97,7 @@ export function AddSubjectSelectPage() {
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
                       labore et dolore magna aliqua.
                     </p>
-                  )}
+                  )} */}
                 </div>
               )}
             </div>
