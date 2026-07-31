@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { TopBar } from "../components/TopBar";
 import { PaymentSummaryCard } from "../components/PaymentSummaryCard";
 import { PaymentWaitingScreen } from "../components/PaymentWaitingScreen";
 import { fetchInvoiceStatuses } from "../lib/data";
-import { manualCheckout } from "../lib/edgeFunctions";
+import { manualCheckout, notifyPaymentSlack } from "../lib/edgeFunctions";
 import { formatPeriod, stripGradeSuffix } from "../lib/format";
 import type { AddSubjectContextValue } from "./addSubjectContext";
 
@@ -14,6 +14,7 @@ export function AddSubjectSummaryPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [waiting, setWaiting] = useState<{ invoiceId: string; paymentUrl: string } | null>(null);
+  const slackNotifiedRef = useRef(false);
 
   const preview = ctx.chosenTenor ? ctx.tenorPreview?.[ctx.chosenTenor] : null;
 
@@ -45,7 +46,14 @@ export function AddSubjectSummaryPage() {
       const scheduleChoice = Object.fromEntries(
         Object.entries(ctx.scheduleChoices).map(([offeringId, choice]) => [
           offeringId,
-          { offering_id: offeringId, slot_label: choice.slot.slot_label },
+          {
+            offering_id: offeringId,
+            slot_label: choice.slot.slot_label,
+            offering_name: choice.offeringName,
+            day: choice.slot.day,
+            time: choice.slot.time,
+            teacher: choice.slot.teacher,
+          },
         ]),
       );
       const result = await manualCheckout({
@@ -75,7 +83,12 @@ export function AddSubjectSummaryPage() {
         timeoutPath={`/${ctx.userId}/invoices`}
         checkPaid={async () => {
           const statuses = await fetchInvoiceStatuses([waiting.invoiceId]);
-          return statuses[0]?.status === "paid";
+          const isPaid = statuses[0]?.status === "paid";
+          if (isPaid && !slackNotifiedRef.current) {
+            slackNotifiedRef.current = true;
+            notifyPaymentSlack(waiting.invoiceId).catch(console.error);
+          }
+          return isPaid;
         }}
       />
     );

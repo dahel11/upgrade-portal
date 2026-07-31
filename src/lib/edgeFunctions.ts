@@ -49,9 +49,19 @@ export async function validateInvoice(params: ValidateInvoiceParams): Promise<Va
   return data;
 }
 
+export interface ScheduleChoiceEntry {
+  offering_id: string;
+  slot_label: string;
+  /** Extra context stored for audit/notifications — not used by manual-checkout server-side. */
+  offering_name?: string;
+  day?: string;
+  time?: string;
+  teacher?: string;
+}
+
 export interface ManualCheckoutParams {
   invoice_validation_id: string;
-  schedule_choice: Record<string, { offering_id: string; slot_label: string }>;
+  schedule_choice: Record<string, ScheduleChoiceEntry>;
 }
 
 export async function manualCheckout(params: ManualCheckoutParams): Promise<ManualCheckoutResult> {
@@ -95,4 +105,16 @@ export async function fetchScheduleSlots(kelas: string, subject: string, frequen
   const response = await fetch(`/api/class-schedule?${params.toString()}`);
   if (!response.ok) throw new Error("Failed to fetch schedule");
   return response.json();
+}
+
+/** Fire-and-forget: notifies Slack that a payment was confirmed. Errors are swallowed — callers
+ * should `.catch(console.error)` to surface them without blocking the payment success flow. */
+export async function notifyPaymentSlack(invoiceId: string): Promise<void> {
+  const { error } = await supabase.functions.invoke("notify-payment-slack", {
+    body: { invoice_id: invoiceId },
+  });
+  if (error) {
+    const detail = await describeFunctionError(error);
+    throw new Error(detail);
+  }
 }
