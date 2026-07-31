@@ -10,7 +10,7 @@ import type {
 } from "../types";
 
 export async function fetchRetentionFinance(userId: string): Promise<RetentionFinance | null> {
-  const { data, error } = await supabase.from("retention_to_finances_dev").select("*").eq("user_id", userId);
+  const { data, error } = await supabase.from("retention_to_finances").select("*").eq("user_id", userId);
 
   if (error) throw error;
   if (!data || data.length === 0) return null;
@@ -36,7 +36,7 @@ function pickRetentionFinance(rows: RetentionFinance[]): RetentionFinance {
 
 export async function fetchRetentionPayments(userId: string): Promise<RetentionPayment[]> {
   const { data, error } = await supabase
-    .from("retention_to_payments_dev")
+    .from("retention_to_payments")
     .select("*")
     .eq("user_id", userId);
 
@@ -45,7 +45,7 @@ export async function fetchRetentionPayments(userId: string): Promise<RetentionP
 }
 
 export async function fetchOfferingMappingForGrade(grade: string): Promise<OfferingMapping[]> {
-  const { data, error } = await supabase.from("offering_mapping_to_grade_dev").select("*").eq("grade", grade);
+  const { data, error } = await supabase.from("offering_mapping_to_grade").select("*").eq("grade", grade);
 
   if (error) throw error;
   return (data ?? []) as OfferingMapping[];
@@ -65,7 +65,7 @@ export async function fetchCheckoutTransactions(userId: string): Promise<Checkou
 export async function fetchInvoiceStatuses(invoiceIds: string[]): Promise<InvoiceStatus[]> {
   if (invoiceIds.length === 0) return [];
 
-  const { data, error } = await supabase.from("checkout_invoice_statuses_dev").select("*").in("invoice_id", invoiceIds);
+  const { data, error } = await supabase.from("checkout_invoice_statuses").select("*").in("invoice_id", invoiceIds);
 
   if (error) throw error;
   return (data ?? []) as InvoiceStatus[];
