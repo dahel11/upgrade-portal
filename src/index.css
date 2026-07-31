@@ -247,6 +247,12 @@ h3,
   background: var(--color-primary-lighter);
 }
 
+.option-card.conflict,
+.option-card.selected.conflict {
+  border-color: var(--color-error-text);
+  background: var(--color-error-bg);
+}
+
 .option-card:disabled {
   opacity: 0.5;
   cursor: not-allowed;

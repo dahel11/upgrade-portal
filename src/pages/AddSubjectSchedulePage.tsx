@@ -9,6 +9,21 @@ import { classStartBadgeClass, classStartLabel, formatDate, formatIdr, stripGrad
 import type { OfferingMapping } from "../types";
 import type { AddSubjectContextValue, TenorPreview } from "./addSubjectContext";
 
+function parseTimeMinutes(time: string): [number, number] | null {
+  const m = time.match(/(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/);
+  if (!m) return null;
+  return [+m[1] * 60 + +m[2], +m[3] * 60 + +m[4]];
+}
+
+function slotsOverlap(a: ScheduleSlot, b: ScheduleSlot): boolean {
+  const daysA = new Set(a.day.split(",").map((d) => d.trim().toLowerCase()));
+  if (!b.day.split(",").some((d) => daysA.has(d.trim().toLowerCase()))) return false;
+  const ta = parseTimeMinutes(a.time);
+  const tb = parseTimeMinutes(b.time);
+  if (!ta || !tb) return false;
+  return ta[0] < tb[1] && tb[0] < ta[1];
+}
+
 /** The schedule API's `subject` param comes straight from the offering_mapping_to_grade.subject
  * column (per product decision) — falling back to a regex-derived guess only for rows synced
  * before that column existed. */
@@ -75,6 +90,22 @@ export function AddSubjectSchedulePage() {
   }
 
   const allSlotsChosen = selectedOfferings.every((o) => ctx.scheduleChoices[o.id]);
+
+  const conflictingSlotLabels = useMemo(() => {
+    const choices = Object.values(ctx.scheduleChoices);
+    const labels = new Set<string>();
+    for (let i = 0; i < choices.length; i++) {
+      for (let j = i + 1; j < choices.length; j++) {
+        if (slotsOverlap(choices[i].slot, choices[j].slot)) {
+          labels.add(choices[i].slot.slot_label);
+          labels.add(choices[j].slot.slot_label);
+        }
+      }
+    }
+    return labels;
+  }, [ctx.scheduleChoices]);
+
+  const hasScheduleConflict = conflictingSlotLabels.size > 0;
 
   function handleLihatHarga() {
     if (!allSlotsChosen) return;
@@ -148,12 +179,13 @@ export function AddSubjectSchedulePage() {
             <div className="option-list">
               {(slotsByOffering[offering.id] ?? []).map((slot) => {
                 const selected = ctx.scheduleChoices[offering.id]?.slot.slot_label === slot.slot_label;
+                const conflicting = selected && conflictingSlotLabels.has(slot.slot_label);
                 const startLabel = classStartLabel(slot.slot_start_date);
                 return (
                   <button
                     key={slot.slot_label}
                     type="button"
-                    className={`option-card${selected ? " selected" : ""}`}
+                    className={`option-card${selected ? " selected" : ""}${conflicting ? " conflict" : ""}`}
                     onClick={() => chooseSlot(offering, slot)}
                   >
                     <span className="option-indicator" />
@@ -179,14 +211,21 @@ export function AddSubjectSchedulePage() {
       )}
 
       {!showPricing && (
-        <button
-          type="button"
-          className="btn-primary page-footer-button"
-          disabled={!allSlotsChosen}
-          onClick={handleLihatHarga}
-        >
-          Lihat harga
-        </button>
+        <>
+          {hasScheduleConflict && (
+            <p className="error-text">
+              Jadwal yang dipilih saling bentrok. Pilih jadwal yang tidak bertabrakan untuk melanjutkan.
+            </p>
+          )}
+          <button
+            type="button"
+            className="btn-primary page-footer-button"
+            disabled={!allSlotsChosen || hasScheduleConflict}
+            onClick={handleLihatHarga}
+          >
+            Lihat harga
+          </button>
+        </>
       )}
 
       {showPricing && (

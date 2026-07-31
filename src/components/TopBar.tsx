@@ -11,7 +11,7 @@ interface TopBarProps {
   onBack?: () => void;
 }
 
-const HELP_URL = "https://wa.me/6281234567890?text=Halo%20CoLearn%2C%20saya%20butuh%20bantuan%20terkait%20perpanjangan%20paket";
+const HELP_URL = "https://wa.me/6281119954075?text=Halo%20CoLearn%2C%20saya%20butuh%20bantuan%20terkait%20perpanjangan%20paket";
 
 export function TopBar({ showBack = false, backTo, onBack }: TopBarProps) {
   const navigate = useNavigate();
