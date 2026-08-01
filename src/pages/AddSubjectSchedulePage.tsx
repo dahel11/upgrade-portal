@@ -151,7 +151,10 @@ export function AddSubjectSchedulePage() {
       .finally(() => setPreviewLoading(false));
   }
 
-  const canConfirm = showPricing && ctx.tenorPreview && ctx.chosenTenor;
+  // hasScheduleConflict is re-checked here too, not just before "Lihat harga": the slot buttons
+  // stay clickable while the pricing panel is showing, so a user can pick a conflicting slot again
+  // after already reaching this step — confirming must stay blocked either way.
+  const canConfirm = showPricing && ctx.tenorPreview && ctx.chosenTenor && !hasScheduleConflict;
 
   return (
     <div className="screen">
@@ -210,22 +213,21 @@ export function AddSubjectSchedulePage() {
         ))
       )}
 
+      {hasScheduleConflict && (
+        <p className="error-text">
+          Jadwal yang dipilih saling bentrok. Pilih jadwal yang tidak bertabrakan untuk melanjutkan.
+        </p>
+      )}
+
       {!showPricing && (
-        <>
-          {hasScheduleConflict && (
-            <p className="error-text">
-              Jadwal yang dipilih saling bentrok. Pilih jadwal yang tidak bertabrakan untuk melanjutkan.
-            </p>
-          )}
-          <button
-            type="button"
-            className="btn-primary page-footer-button"
-            disabled={!allSlotsChosen || hasScheduleConflict}
-            onClick={handleLihatHarga}
-          >
-            Lihat harga
-          </button>
-        </>
+        <button
+          type="button"
+          className="btn-primary page-footer-button"
+          disabled={!allSlotsChosen || hasScheduleConflict}
+          onClick={handleLihatHarga}
+        >
+          Lihat harga
+        </button>
       )}
 
       {showPricing && (
@@ -247,9 +249,9 @@ export function AddSubjectSchedulePage() {
                   <span className="option-subtitle">
                     Memperpanjang paket belajar hingga {formatDate(ctx.tenorPreview.monthly.period_end)}
                   </span>
-                  <span className="option-debug">
+                  {/* <span className="option-debug">
                     user_id: {ctx.userId} • finance_payment_type: {ctx.tenorPreview.monthly.finance_payment_type}
-                  </span>
+                  </span> */}
                 </span>
                 <span className="option-price">{formatIdr(ctx.tenorPreview.monthly.net_invoice)}</span>
               </button>
@@ -267,9 +269,9 @@ export function AddSubjectSchedulePage() {
                   <span className="option-subtitle">
                     Memperpanjang paket belajar hingga {formatDate(ctx.tenorPreview.semesterly.period_end)}
                   </span>
-                  <span className="option-debug">
+                  {/* <span className="option-debug">
                     user_id: {ctx.userId} • finance_payment_type: {ctx.tenorPreview.semesterly.finance_payment_type}
-                  </span>
+                  </span> */}
                 </span>
                 <span className="option-price">{formatIdr(ctx.tenorPreview.semesterly.net_invoice)}</span>
               </button>

@@ -38,6 +38,17 @@ export function AddSubjectSelectPage() {
       nowSelected ? [...ctx.selectedOfferingIds, id] : ctx.selectedOfferingIds.filter((existing) => existing !== id),
     );
 
+    // The offering set just changed, so any previously computed price preview no longer reflects
+    // what's actually selected — manual-checkout re-derives price/offering_ids from that preview's
+    // invoice_validation_id server-side, so a stale one would charge for the wrong offering set.
+    ctx.setTenorPreview(null);
+    ctx.setChosenTenor(null);
+    if (!nowSelected) {
+      ctx.setScheduleChoices(
+        Object.fromEntries(Object.entries(ctx.scheduleChoices).filter(([offeringId]) => offeringId !== id)),
+      );
+    }
+
     setExpandedId((current) => {
       if (nowSelected) return id;
       return current === id ? null : current;
