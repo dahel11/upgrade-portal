@@ -111,9 +111,9 @@ export function findRenewalPaymentLink(payments: RetentionPayment[], tenor: Teno
  * billing-coverage fields the backend already computed for this exact invoice); falls back to the
  * invoice's semester bounds if those are missing.
  *
- * ⚠️ Not yet verified against a real "monthly"/"semesterly" (non-`new_sales`) renewal row — flagged
- * as an open item in the build plan. `new_sales_*` sample data available so far reflects original
- * enrollment dates, not necessarily a subsequent renewal's period.
+ * Verified against a real "monthly"/"semesterly" (non-`new_sales`) renewal row (2026-08-03):
+ * `payment_for_date`/`payment_till_date` are populated on both, so the fallback branch is only hit
+ * when those are genuinely absent.
  */
 export function derivePeriodFromPayment(payment: RetentionPayment): { start: string; end: string } {
   if (payment.payment_for_date && payment.payment_till_date) {

@@ -57,6 +57,9 @@ export interface ScheduleChoiceEntry {
   day?: string;
   time?: string;
   teacher?: string;
+  /** Full raw slot as returned by /api/class-schedule, so admins can inspect fields (e.g.
+   * seats_remaining, slot_start_date) beyond what's flattened above without another round-trip. */
+  slot?: ScheduleSlot;
 }
 
 export interface ManualCheckoutParams {
@@ -107,14 +110,3 @@ export async function fetchScheduleSlots(kelas: string, subject: string, frequen
   return response.json();
 }
 
-/** Fire-and-forget: notifies Slack that a payment was confirmed. Errors are swallowed — callers
- * should `.catch(console.error)` to surface them without blocking the payment success flow. */
-export async function notifyPaymentSlack(invoiceId: string): Promise<void> {
-  const { error } = await supabase.functions.invoke("notify-payment-slack", {
-    body: { invoice_id: invoiceId },
-  });
-  if (error) {
-    const detail = await describeFunctionError(error);
-    throw new Error(detail);
-  }
-}
