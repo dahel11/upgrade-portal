@@ -71,7 +71,7 @@ export function LandingPage() {
   if (!isRetentionActive) {
     return (
       <StatusScreen
-        title="Belum ada aksi yang diperlukan"
+        title="Belum ada langkah yang perlu dilakukan"
         message="Saat ini tidak ada penawaran perpanjangan yang aktif untuk akun ini. Silakan hubungi CoLearn melalui WhatsApp bila ada pertanyaan."
       />
     );
