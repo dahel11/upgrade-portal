@@ -52,6 +52,8 @@ export function AddSubjectSummaryPage() {
             day: choice.slot.day,
             time: choice.slot.time,
             teacher: choice.slot.teacher,
+            slot_id: choice.slot.slot_id,
+            slot_name: choice.slot.slot_name,
             slot: choice.slot,
           },
         ]),

@@ -57,6 +57,8 @@ export interface ScheduleChoiceEntry {
   day?: string;
   time?: string;
   teacher?: string;
+  slot_id?: string;
+  slot_name?: string;
   /** Full raw slot as returned by /api/class-schedule, so admins can inspect fields (e.g.
    * seats_remaining, slot_start_date) beyond what's flattened above without another round-trip. */
   slot?: ScheduleSlot;
@@ -91,6 +93,12 @@ export interface ScheduleSlot {
   teacher: string;
   seats_remaining: number;
   slot_label: string;
+  /** Real per-slot identity from the media-sessions schedule feed, attached by
+   * api/class-schedule.js when it can confidently match this AWS slot. Absent when no match was
+   * found (e.g. sync lag, a slot not yet in the media-sessions dump) — in which case slot_label
+   * falls back to the legacy `${day}-${time}-${teacher}-${course_id}` format. */
+  slot_id?: string;
+  slot_name?: string;
   /** "YYYY-MM-DD", or `null` if the upstream schedule API didn't return one for this slot. See
    * `classStartLabel` in lib/format.ts for how this becomes a badge. */
   slot_start_date: string | null;
