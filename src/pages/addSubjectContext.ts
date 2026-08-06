@@ -1,4 +1,4 @@
-import type { OfferingMapping, RetentionFinance, Tenor, ValidateInvoiceResult } from "../types";
+import type { OfferingMapping, Tenor, ValidateInvoiceResult } from "../types";
 import type { ScheduleSlot } from "../lib/edgeFunctions";
 
 export interface ScheduleChoice {
@@ -14,7 +14,12 @@ export interface TenorPreview {
 
 export interface AddSubjectContextValue {
   userId: string;
-  finance: RetentionFinance;
+  userName: string;
+  grade: string;
+  /** Which bucket resolved this user — drives tenure assumptions (getAssumedCurrentTenure) and
+   * whether a monthly tenor option is even offered (semesterly-bucket users never see one, see
+   * AddSubjectSchedulePage). */
+  sourceKind: "retention" | "semesterly-upsell";
   currentOfferings: OfferingMapping[];
   availableOfferings: OfferingMapping[];
 

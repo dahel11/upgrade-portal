@@ -3,16 +3,18 @@ import { useNavigate, useParams } from "react-router-dom";
 import { TopBar } from "../components/TopBar";
 import { StatusScreen } from "../components/StatusScreen";
 import { AddSubjectIcon, CalendarIcon, ChevronRightIcon, RenewIcon } from "../components/icons";
-import { fetchRetentionFinance } from "../lib/data";
+import { computeAvailableOfferings, resolveCurrentPackageSource, summarizePackageSource } from "../lib/data";
 import { daysUntil, firstName, formatDate, splitOfferingNames } from "../lib/format";
 import logo from "../assets/colearn-logo-blue.png";
-import type { RetentionFinance } from "../types";
+import type { RetentionFinance, SemesterlyStudentTarget } from "../types";
 
 type LoadState =
   | { kind: "loading" }
   | { kind: "not-found" }
   | { kind: "error"; message: string }
-  | { kind: "ready"; finance: RetentionFinance };
+  | { kind: "ready"; finance: RetentionFinance }
+  | { kind: "semesterly-upsell"; target: SemesterlyStudentTarget }
+  | { kind: "semesterly-exhausted"; target: SemesterlyStudentTarget };
 
 export function LandingPage() {
   const { userId } = useParams<{ userId: string }>();
@@ -23,10 +25,28 @@ export function LandingPage() {
     if (!userId) return;
     let cancelled = false;
 
-    fetchRetentionFinance(userId)
-      .then((finance) => {
+    resolveCurrentPackageSource(userId)
+      .then(async (source) => {
         if (cancelled) return;
-        setState(finance ? { kind: "ready", finance } : { kind: "not-found" });
+
+        if (source.kind === "none") {
+          setState({ kind: "not-found" });
+          return;
+        }
+
+        if (source.kind === "semesterly-upsell") {
+          const summary = summarizePackageSource(source)!;
+          const { availableOfferings } = await computeAvailableOfferings(summary);
+          if (cancelled) return;
+          setState(
+            availableOfferings.length === 0
+              ? { kind: "semesterly-exhausted", target: source.target }
+              : { kind: "semesterly-upsell", target: source.target },
+          );
+          return;
+        }
+
+        setState({ kind: "ready", finance: source.finance });
       })
       .catch((err: Error) => {
         if (cancelled) return;
@@ -53,6 +73,82 @@ export function LandingPage() {
 
   if (state.kind === "error") {
     return <StatusScreen title="Terjadi kesalahan" message={state.message} />;
+  }
+
+  if (state.kind === "semesterly-exhausted") {
+    const { target } = state;
+    return (
+      <StatusScreen
+        title="Terima kasih!"
+        message={`${target.students_name} sudah mengikuti seluruh mata pelajaran yang tersedia untuk kelas ${target.grade} saat ini.`}
+      />
+    );
+  }
+
+  if (state.kind === "semesterly-upsell") {
+    const { target } = state;
+    return (
+      <div className="screen">
+        <TopBar />
+
+        <div className="hero">
+          <img src={logo} alt="CoLearn" className="hero-logo" />
+          <h1 className="hero-greeting">Halo, {target.students_name}!</h1>
+          <p className="hero-subtitle">
+            Paket semesteran <strong>{firstName(target.students_name)}</strong> sedang aktif, saat yang pas untuk
+            menambah mata pelajaran tambahan.
+          </p>
+        </div>
+
+        <div className="info-card">
+          <div className="info-row stacked">
+            <span>Paket aktif saat ini</span>
+            <span className="package-chips">
+              {splitOfferingNames(target.offering_names).map((name) => (
+                <span key={name} className="package-chip">
+                  {name}
+                </span>
+              ))}
+            </span>
+          </div>
+          <div className="info-row">
+            <span>Kelas</span>
+            <strong>{target.grade}</strong>
+          </div>
+        </div>
+
+        <p className="section-label">Pilih salah satu untuk melanjutkan</p>
+
+        <div className="action-list">
+          <button type="button" className="action-card" disabled>
+            <span className="action-icon">
+              <RenewIcon />
+            </span>
+            <span className="action-text">
+              <span className="action-title">Perpanjang paket saat ini</span>
+              <span className="action-desc">Terima kasih sudah melakukan pembayaran per semester</span>
+            </span>
+          </button>
+
+          <button type="button" className="action-card" onClick={() => navigate(`/${userId}/add-subject/select`)}>
+            <span className="action-icon">
+              <AddSubjectIcon />
+            </span>
+            <span className="action-text">
+              <span className="action-title">Tambah mata pelajaran lain</span>
+              <span className="action-desc">Makin semangat belajar dengan tambah subject baru</span>
+            </span>
+            <span className="action-chevron">
+              <ChevronRightIcon />
+            </span>
+          </button>
+        </div>
+
+        <button type="button" className="link-button footer-link" onClick={() => navigate(`/${userId}/invoices`)}>
+          Lihat riwayat transaksi
+        </button>
+      </div>
+    );
   }
 
   const { finance } = state;

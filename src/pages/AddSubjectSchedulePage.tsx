@@ -6,7 +6,7 @@ import { computeOfferingSelection, getAssumedCurrentTenure } from "../lib/offeri
 import { resolveFinancePaymentType } from "../lib/financePaymentType";
 import { fetchScheduleSlots, validateInvoice, type ScheduleSlot } from "../lib/edgeFunctions";
 import { classStartBadgeClass, classStartLabel, formatDate, formatIdr, stripGradeSuffix, subjectDisplayName } from "../lib/format";
-import type { OfferingMapping } from "../types";
+import type { OfferingMapping, ValidateInvoiceResult } from "../types";
 import type { AddSubjectContextValue, TenorPreview } from "./addSubjectContext";
 
 function parseTimeMinutes(time: string): [number, number] | null {
@@ -60,7 +60,7 @@ export function AddSubjectSchedulePage() {
     setSlotsError(null);
     Promise.all(
       selectedOfferings.map((offering) =>
-        fetchScheduleSlots(ctx.finance.grade, scheduleSubjectOf(offering)).then((slots) => [offering.id, slots] as const),
+        fetchScheduleSlots(ctx.grade, scheduleSubjectOf(offering)).then((slots) => [offering.id, slots] as const),
       ),
     )
       .then((results) => {
@@ -116,27 +116,43 @@ export function AddSubjectSchedulePage() {
       ctx.currentOfferings,
       selectedOfferings,
     );
-    const currentTenure = getAssumedCurrentTenure();
+    const currentTenure = getAssumedCurrentTenure(ctx.sourceKind);
+    // Only the retention_to_finances population is gated on a pre-existing ACTIVE invoice — the
+    // `retained_*` finance_payment_type family requires one and fails validate_invoice with
+    // "No active invoice found" otherwise. semesterly-upsell users have no active invoice at all
+    // (they're in the "existing_paid_user" state per the guide), so they get the plain family
+    // instead — see resolveFinancePaymentType's doc comment.
+    const hasActiveInvoice = ctx.sourceKind === "retention";
+
+    // Semesterly-bucket users are already committed to semesterly tenure — never offer them a
+    // downgrade back to monthly, so skip validating that option entirely rather than just hiding
+    // it in the UI after the fact.
+    const monthlyPromise: Promise<ValidateInvoiceResult | null> =
+      ctx.sourceKind === "semesterly-upsell"
+        ? Promise.resolve(null)
+        : validateInvoice({
+            user_id: ctx.userId,
+            finance_payment_type: resolveFinancePaymentType({
+              programChanged,
+              subjectAdded,
+              tenureChanged: currentTenure !== "monthly",
+              hasActiveInvoice,
+            }),
+            payment_category: "installment",
+            offering_ids: finalOfferingIds,
+            subscription_starts_in: "current_semester",
+          });
 
     setPreviewLoading(true);
     Promise.all([
-      validateInvoice({
-        user_id: ctx.userId,
-        finance_payment_type: resolveFinancePaymentType({
-          programChanged,
-          subjectAdded,
-          tenureChanged: currentTenure !== "monthly",
-        }),
-        payment_category: "installment",
-        offering_ids: finalOfferingIds,
-        subscription_starts_in: "current_semester",
-      }),
+      monthlyPromise,
       validateInvoice({
         user_id: ctx.userId,
         finance_payment_type: resolveFinancePaymentType({
           programChanged,
           subjectAdded,
           tenureChanged: currentTenure !== "semesterly",
+          hasActiveInvoice,
         }),
         payment_category: "full_payment",
         offering_ids: finalOfferingIds,

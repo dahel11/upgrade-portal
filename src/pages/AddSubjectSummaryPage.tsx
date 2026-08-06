@@ -97,8 +97,8 @@ export function AddSubjectSummaryPage() {
       <h2 className="section-title">Ringkasan Pembayaran</h2>
 
       <PaymentSummaryCard
-        studentName={ctx.finance.user_name}
-        grade={ctx.finance.grade}
+        studentName={ctx.userName}
+        grade={ctx.grade}
         packageLabel={packageLabel}
         totalAmount={preview.net_invoice}
         tenorLabel={ctx.chosenTenor === "monthly" ? "Per bulan" : "Per semester"}

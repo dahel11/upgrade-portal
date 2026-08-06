@@ -1,11 +1,13 @@
 import { supabase } from "./supabase";
-import { parseIndonesianDateList } from "./format";
+import { parseIndonesianDateList, parseOfferingIds } from "./format";
+import { isFrequencyDowngrade } from "./offeringSelection";
 import type {
   CheckoutTransaction,
   InvoiceStatus,
   OfferingMapping,
   RetentionFinance,
   RetentionPayment,
+  SemesterlyStudentTarget,
   Tenor,
 } from "../types";
 
@@ -49,6 +51,92 @@ export async function fetchOfferingMappingForGrade(grade: string): Promise<Offer
 
   if (error) throw error;
   return (data ?? []) as OfferingMapping[];
+}
+
+export async function fetchSemesterlyStudentTarget(userId: string): Promise<SemesterlyStudentTarget | null> {
+  const { data, error } = await supabase.from("semesterly_students_targetted").select("*").eq("user_id", userId);
+
+  if (error) throw error;
+  if (!data || data.length === 0) return null;
+  return pickSemesterlyStudentTarget(data as SemesterlyStudentTarget[]);
+}
+
+/** No status column on this table (unlike retention_to_finances) to prefer an "active" row by —
+ * tie-break on most recent created_at instead. */
+function pickSemesterlyStudentTarget(rows: SemesterlyStudentTarget[]): SemesterlyStudentTarget {
+  return [...rows].sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+}
+
+export type PackageSource =
+  | { kind: "retention"; finance: RetentionFinance }
+  | { kind: "semesterly-upsell"; target: SemesterlyStudentTarget }
+  | { kind: "none" };
+
+/**
+ * Single source of truth for the retention-vs-semesterly-bucket priority rule, shared by
+ * LandingPage and AddSubjectFlowLayout so the branch logic isn't duplicated in two places that
+ * could drift out of sync. Priority: an ACTIVE retention_to_finances row always wins (renewal is
+ * more urgent than an upsell). Otherwise, fall back to semesterly_students_targetted. Otherwise
+ * fall back to whatever retention row exists (possibly none) — preserves today's "Terima
+ * kasih!"/"Belum ada langkah" behavior for users in neither bucket.
+ */
+export async function resolveCurrentPackageSource(userId: string): Promise<PackageSource> {
+  const [finance, semesterlyTarget] = await Promise.all([
+    fetchRetentionFinance(userId),
+    fetchSemesterlyStudentTarget(userId),
+  ]);
+
+  const isActive = !!finance && finance.retention_status === "active" && finance.invoice_status === "active";
+
+  if (finance && isActive) return { kind: "retention", finance };
+  if (semesterlyTarget) return { kind: "semesterly-upsell", target: semesterlyTarget };
+  if (finance) return { kind: "retention", finance };
+  return { kind: "none" };
+}
+
+export interface CurrentPackageSummary {
+  userName: string;
+  grade: string;
+  offeringIds: string[];
+  sourceKind: "retention" | "semesterly-upsell";
+}
+
+/** Normalizes either source into the minimal shape the add-subject flow actually needs. `null`
+ * only for `kind: "none"` (callers should already have handled that case before reaching here). */
+export function summarizePackageSource(source: PackageSource): CurrentPackageSummary | null {
+  if (source.kind === "retention") {
+    return {
+      userName: source.finance.user_name,
+      grade: source.finance.grade,
+      offeringIds: parseOfferingIds(source.finance.offering_ids),
+      sourceKind: "retention",
+    };
+  }
+  if (source.kind === "semesterly-upsell") {
+    return {
+      userName: source.target.students_name,
+      grade: source.target.grade,
+      offeringIds: parseOfferingIds(source.target.offering_ids),
+      sourceKind: "semesterly-upsell",
+    };
+  }
+  return null;
+}
+
+/** Never offer a same-subject variant at a lower weekly frequency than what the user already has
+ * (downgrades aren't allowed, per product direction) — shared by AddSubjectFlowLayout (to build
+ * the add-subject wizard's catalog) and LandingPage (to decide whether a semesterly-bucket user
+ * has anything left to upsell into at all). */
+export async function computeAvailableOfferings(
+  summary: CurrentPackageSummary,
+): Promise<{ currentOfferings: OfferingMapping[]; availableOfferings: OfferingMapping[] }> {
+  const catalog = await fetchOfferingMappingForGrade(summary.grade);
+  const currentIds = new Set(summary.offeringIds);
+  const currentOfferings = catalog.filter((o) => currentIds.has(o.id));
+  const availableOfferings = catalog.filter(
+    (o) => !currentIds.has(o.id) && !isFrequencyDowngrade(o, currentOfferings),
+  );
+  return { currentOfferings, availableOfferings };
 }
 
 export async function fetchCheckoutTransactions(userId: string): Promise<CheckoutTransaction[]> {

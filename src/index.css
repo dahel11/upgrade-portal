@@ -690,6 +690,17 @@ h3,
   transform: translateY(-1px);
 }
 
+.action-card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.action-card:disabled:hover {
+  border-color: var(--color-border-light);
+  box-shadow: none;
+}
+
 .action-icon {
   flex-shrink: 0;
   width: 44px;

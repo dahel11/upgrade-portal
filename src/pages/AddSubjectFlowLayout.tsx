@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { Outlet, useParams } from "react-router-dom";
 import { StatusScreen } from "../components/StatusScreen";
-import { fetchOfferingMappingForGrade, fetchRetentionFinance } from "../lib/data";
-import { parseOfferingIds } from "../lib/format";
-import { isFrequencyDowngrade } from "../lib/offeringSelection";
-import type { OfferingMapping, RetentionFinance, Tenor } from "../types";
+import { computeAvailableOfferings, resolveCurrentPackageSource, summarizePackageSource } from "../lib/data";
+import type { CurrentPackageSummary } from "../lib/data";
+import type { OfferingMapping, Tenor } from "../types";
 import type { AddSubjectContextValue, ScheduleChoice, TenorPreview } from "./addSubjectContext";
 
 type LoadState =
   | { kind: "loading" }
   | { kind: "error"; message: string }
-  | { kind: "ready"; finance: RetentionFinance; catalog: OfferingMapping[] };
+  | { kind: "ready"; summary: CurrentPackageSummary; currentOfferings: OfferingMapping[]; availableOfferings: OfferingMapping[] };
 
 export function AddSubjectFlowLayout() {
   const { userId } = useParams<{ userId: string }>();
@@ -25,12 +24,13 @@ export function AddSubjectFlowLayout() {
     if (!userId) return;
     let cancelled = false;
 
-    fetchRetentionFinance(userId)
-      .then(async (finance) => {
-        if (!finance) throw new Error("Data paket tidak ditemukan.");
-        const catalog = await fetchOfferingMappingForGrade(finance.grade);
+    resolveCurrentPackageSource(userId)
+      .then(async (source) => {
+        const summary = summarizePackageSource(source);
+        if (!summary) throw new Error("Data paket tidak ditemukan.");
+        const { currentOfferings, availableOfferings } = await computeAvailableOfferings(summary);
         if (cancelled) return;
-        setState({ kind: "ready", finance, catalog });
+        setState({ kind: "ready", summary, currentOfferings, availableOfferings });
       })
       .catch((err: Error) => {
         if (cancelled) return;
@@ -45,19 +45,13 @@ export function AddSubjectFlowLayout() {
   if (state.kind === "loading") return <StatusScreen title="Memuat..." message="Mohon tunggu sebentar." />;
   if (state.kind === "error") return <StatusScreen title="Terjadi kesalahan" message={state.message} />;
 
-  const { finance, catalog } = state;
-  const currentIds = new Set(parseOfferingIds(finance.offering_ids));
-  const currentOfferings = catalog.filter((o) => currentIds.has(o.id));
-  // Never offer a same-subject variant at a lower weekly frequency than what the user already
-  // has (e.g. hide "Matematika 1x/Minggu" once they're on "Matematika 2x/Minggu") — downgrades
-  // aren't allowed, per product direction.
-  const availableOfferings = catalog.filter(
-    (o) => !currentIds.has(o.id) && !isFrequencyDowngrade(o, currentOfferings),
-  );
+  const { summary, currentOfferings, availableOfferings } = state;
 
   const context: AddSubjectContextValue = {
     userId: userId!,
-    finance,
+    userName: summary.userName,
+    grade: summary.grade,
+    sourceKind: summary.sourceKind,
     currentOfferings,
     availableOfferings,
     selectedOfferingIds,

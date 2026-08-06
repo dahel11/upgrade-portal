@@ -55,6 +55,21 @@ full context: `/Users/imamfachrudin/.claude/plans/woolly-stirring-hamming.md`.
     at a PROD-connected question when this app's checkout flow itself moves to PROD. Deploy this one
     with a slug that matches the folder name exactly (`supabase functions deploy
     sync-checkout-status`) — see the ⚠️ above for why that matters.
+  - `sync-semesterly-students-targetted` — syncs Metabase question #4581 ("Semesterly Students
+    Targetted") into `semesterly_students_targetted`, the same CSV-export sync pattern as the other
+    `sync-*` functions. This is a **second, independent targeting bucket**, added 2026-08-05,
+    unrelated to the retention-renewal data model above — it drives an "add another subject" upsell
+    for students already committed to a semesterly plan (see "Semesterly upsell bucket" below).
+    Deploy with a slug matching the folder name exactly (`supabase functions deploy
+    sync-semesterly-students-targetted`) — see the ⚠️ above about the other three sync functions'
+    slug drift.
+  - `track-visit` — added 2026-08-05, records a portal visit (`user_id`, route `path`,
+    `ip_address` read from the request's `x-forwarded-for` header, `user_agent`) into
+    `portal_visits` on every page load (see `src/App.tsx`'s `VisitTracker` and
+    `src/lib/tracking.ts`). Not a Metabase sync — this is the one Edge Function in this project
+    that writes data *originating* in this app rather than mirroring an external source. Deploy
+    like `validate-invoice`/`manual-checkout` (default JWT verification, no `--no-verify-jwt`), see
+    "Visit tracking / funnel report" below.
 - `supabase/migrations/`:
   - `20260724000000_create_checkout_tables.sql` — the two tables this app **owns and writes to**
     (`invoice_validations`, `checkout_transactions`), via the Edge Functions' service role.
@@ -92,6 +107,80 @@ full context: `/Users/imamfachrudin/.claude/plans/woolly-stirring-hamming.md`.
     Same trust model as every other anon-readable table here (no Supabase Auth session; the
     URL's `user_id` is the only access boundary) — only SELECT is opened, writes stay
     service-role-only.
+  - `20260805000000_create_semesterly_students_targetted.sql` — schema for the new
+    `semesterly_students_targetted` bucket (see "Semesterly upsell bucket" below), same shape as
+    `20260724000001` (table + user_id index + RLS + anon SELECT policy).
+  - `20260805000001_schedule_semesterly_targets_sync.sql` — `pg_cron`/`pg_net` job for
+    `sync-semesterly-students-targetted`, every 15 minutes, reusing the existing
+    `metabase_sync_secret` Vault entry (no new Vault setup needed if the other sync jobs are already
+    scheduled).
+  - `20260805000002_create_portal_visits.sql` — schema for `portal_visits` (see "Visit tracking /
+    funnel report" below). No anon SELECT/INSERT policy at all, unlike every other table in this
+    project — `ip_address` is personal data, so this one stays fully internal (service-role writes
+    via `track-visit`, reads via the Supabase SQL editor/Metabase only).
+
+## Semesterly upsell bucket
+
+Added 2026-08-05: `semesterly_students_targetted` (Metabase question #4581) is a **second,
+independent user-targeting bucket**, separate from the retention-renewal data model
+(`retention_to_finances`/`retention_to_payments`/`offering_mapping_to_grade`) above. It targets
+students already committed to a semesterly plan for an "add another subject" upsell — a different
+business purpose than the renewal flow, even though the same `user_id` is expected to show up in
+both tables sometimes.
+
+`src/lib/data.ts`'s `resolveCurrentPackageSource(userId)` is the single place that decides which
+bucket a user belongs to, shared by `LandingPage.tsx` and `AddSubjectFlowLayout.tsx` so this
+priority rule isn't duplicated in two components:
+
+1. An **active** `retention_to_finances` row always wins (renewal is treated as more urgent than an
+   upsell) — the existing renew/upgrade screen shows exactly as before.
+2. Otherwise, if the user is in `semesterly_students_targetted`, show a soft-sell screen instead of
+   the old neutral "Belum ada langkah"/"Terima kasih" messages: "Perpanjang paket saat ini" is
+   disabled (they don't need to renew), and "Tambah mata pelajaran lain" only offers subjects they
+   don't already have. If they have none left to add, show a "Terima kasih!" screen instead.
+3. Otherwise, fall back to whatever `retention_to_finances` row exists (possibly none) — preserves
+   today's behavior for users in neither bucket.
+
+⚠️ This priority order is a recommended default, not explicitly confirmed by the user (two rounds
+of clarifying questions went unanswered) — revisit if it turns out wrong in practice.
+
+**Semesterly-bucket users never see a monthly tenor option** in the add-subject flow — they're
+already committed to semesterly, so `AddSubjectSchedulePage.tsx` skips the monthly
+`validate-invoice` call entirely for this population (not just hides it in the UI), per explicit
+product direction ("tidak provide downgrade tenure option").
+
+**`finance_payment_type` needs a `hasActiveInvoice` flag for this population** — confirmed the hard
+way in production (2026-08-05): `resolveFinancePaymentType()` (`src/lib/financePaymentType.ts`)
+originally always prefixed the type with `retained_`, correct only when the user has a
+pre-existing **active** invoice (the `retention_to_finances` population, definitionally gated on
+one). Semesterly-bucket users are in the
+`UPGRADE_PORTAL_FINANCE_PAYMENT_TYPE_GUIDE.md`-defined "existing_paid_user" state (paid, no active
+invoice) — calling a `retained_*` type for them fails `validate_invoice` with `"No active invoice
+found"` (guide section 3b documents this exact failure mode). Fixed by adding `hasActiveInvoice`
+(`= ctx.sourceKind === "retention"`) to `resolveFinancePaymentType`'s params, which now omits the
+`retained_` prefix entirely for the plain family (`subject_upgrade`, `program_upgrade`, etc., per
+the guide's section 5b table) when false.
+
+## Visit tracking / funnel report
+
+Added 2026-08-05, per an ops request: every page load under `/:userId` logs a row to
+`portal_visits` (`user_id`, route `path`, `ip_address`, `user_agent`) via the `track-visit` Edge
+Function — see `src/App.tsx`'s `VisitTracker` (mounted once at the router root, not duplicated per
+page) and `src/lib/tracking.ts`'s `trackVisit()`. Fire-and-forget: a failed or slow tracking call
+never blocks or errors out the page itself.
+
+`ip_address` is personal data — `portal_visits` deliberately has **no anon SELECT or INSERT
+policy** (unlike every other table in this project), so it's unreachable from the frontend except
+through `track-visit`'s service role. Reads only happen internally (Supabase SQL editor / a
+Metabase question against this project's DB).
+
+`supabase/portal_visits_funnel_report.sql` answers the specific 5-way question this was built for
+— of the `retention_to_finances` population, how many: visited and paid without upgrading, visited
+and paid with an upgrade (add-subject), never visited but paid anyway, never visited and never
+paid, or visited but never paid. Read the caveats at the top of that file before trusting the
+numbers — notably, it can't see any visit that happened before `track-visit` was deployed and
+live, and it deliberately excludes the `semesterly_students_targetted` population ("paid" doesn't
+mean the same thing for users who are already paying customers being upsold).
 
 ## Local development
 
@@ -121,6 +210,7 @@ supabase db push                      # applies supabase/migrations/*
 supabase secrets set PACKAGE_PURCHASES_BASE_URL_DEV=... PACKAGE_PURCHASES_FINANCE_TOKEN_DEV=...
 supabase functions deploy validate-invoice
 supabase functions deploy manual-checkout
+supabase functions deploy track-visit
 ```
 
 `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` are auto-injected into Edge Functions by the Supabase
@@ -146,6 +236,7 @@ supabase functions deploy sync-retention-finances --no-verify-jwt
 supabase functions deploy sync-retention-payments --no-verify-jwt
 supabase functions deploy sync-offering-mapping --no-verify-jwt
 supabase functions deploy sync-checkout-status --no-verify-jwt
+supabase functions deploy sync-semesterly-students-targetted --no-verify-jwt
 ```
 
 ⚠️ Double-check after deploying that the live slug matches the command above exactly (e.g.
@@ -158,19 +249,21 @@ Then, in the Supabase SQL editor (one-off, do **not** commit this — it embeds 
 select vault.create_secret('<same value as METABASE_SYNC_SECRET above>', 'metabase_sync_secret');
 ```
 
-Then apply `20260724000002_schedule_metabase_sync.sql` and `20260729000003_schedule_checkout_status_sync.sql`
-(after replacing `<project-ref>` in each with this project's ref) to schedule the recurring pulls.
-To test each one immediately without waiting for the cron tick:
+Then apply `20260724000002_schedule_metabase_sync.sql`, `20260729000003_schedule_checkout_status_sync.sql`,
+and `20260805000001_schedule_semesterly_targets_sync.sql` (after replacing `<project-ref>` in each
+with this project's ref) to schedule the recurring pulls. To test each one immediately without
+waiting for the cron tick:
 
 ```sh
 curl -X POST https://<project-ref>.supabase.co/functions/v1/sync-retention-finances -H "x-sync-secret: <value>"
 curl -X POST https://<project-ref>.supabase.co/functions/v1/sync-retention-payments -H "x-sync-secret: <value>"
 curl -X POST https://<project-ref>.supabase.co/functions/v1/sync-offering-mapping -H "x-sync-secret: <value>"
 curl -X POST https://<project-ref>.supabase.co/functions/v1/sync-checkout-status -H "x-sync-secret: <value>"
+curl -X POST https://<project-ref>.supabase.co/functions/v1/sync-semesterly-students-targetted -H "x-sync-secret: <value>"
 ```
 
 Each returns its own `{ fetched, upserted, failed }` counts (or an error) so you can confirm the
-table synced correctly — check them one at a time rather than all three (four) at once.
+table synced correctly — check them one at a time rather than all five at once.
 
 `sync-retention-payments` needed three fixes to stop hitting `WORKER_RESOURCE_LIMIT` at ~18k rows:
 1. Its own function (not combined with the other two datasets).
@@ -226,3 +319,11 @@ command cannot affect row a second time"). Already fixed in `metabase-question-4
   `retention_to_payments` currently only have this worked around for a single hand-inserted test
   user directly in the PROD-shaped tables (not yet split into `_dev` counterparts — discussed, not
   yet applied).
+- The semesterly upsell bucket's overlap-priority rule (active retention always wins over
+  `semesterly_students_targetted`; the bucket is only consulted when retention isn't currently due)
+  is a recommended default, not user-confirmed — see "Semesterly upsell bucket" above.
+- The "outside periode retensi"-style edge cases for the semesterly bucket (e.g. exactly which
+  `finance_payment_type` package_purchases expects for every program/subject/tenure combination in
+  the "existing_paid_user" state) have only been spot-checked against one real test account, not
+  exhaustively verified against `UPGRADE_PORTAL_FINANCE_PAYMENT_TYPE_GUIDE.md`'s full section 5b
+  table.

@@ -76,6 +76,31 @@ export interface OfferingMapping {
   updated_at: string;
 }
 
+// Synced from Metabase question #4581 into `semesterly_students_targetted` — a second, independent
+// targeting bucket for students already committed to a semesterly plan, used to drive an
+// "add another subject" upsell. Distinct purpose from RetentionFinance (renewal-driven), even
+// though the same user_id can appear in both — see resolveCurrentPackageSource in lib/data.ts for
+// the priority rule between them. No status column here (unlike RetentionFinance), so multiple
+// rows per user_id are tie-broken by most recent created_at.
+export interface SemesterlyStudentTarget {
+  id: string;
+  reference_id: string | null;
+  invoice_number: string;
+  user_id: string;
+  phone_number: string | null;
+  students_name: string;
+  grade: string;
+  payment_category: string;
+  payment_tenure: string;
+  start_date_of_service: string | null;
+  created_at: string;
+  updated_at: string;
+  offering_names: string;
+  /** Comma-separated in the source export; may arrive as a Postgres array depending on how the
+   * sync stores it — always read through `parseOfferingIds`. */
+  offering_ids: string | string[];
+}
+
 export type Tenor = "monthly" | "semesterly";
 
 export interface ValidateInvoiceResult {

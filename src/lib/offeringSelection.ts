@@ -1,5 +1,5 @@
 import { normalizeSubjectKey, offeringFrequency } from "./format";
-import type { OfferingMapping } from "../types";
+import type { OfferingMapping, Tenor } from "../types";
 
 /** Prefer the authoritative `subject` column, normalized to strip any frequency marker it might
  * carry (observed in real data, e.g. "Matematika 2x" instead of a clean "Matematika") so two
@@ -96,11 +96,12 @@ export function computeOfferingSelection(
 }
 
 /**
- * This retention campaign's population is assumed to be entirely on a monthly tenure today (see
- * build plan, decision "current tenure detection"). There is no reliable per-user tenure signal
- * in the tables this portal reads. Revisit if/when a real per-user tenure field becomes
- * available.
+ * The retention campaign's population is assumed to be entirely on a monthly tenure today (see
+ * build plan, decision "current tenure detection") — there's no reliable per-user tenure signal
+ * in retention_to_finances/retention_to_payments. The semesterly_students_targetted bucket is the
+ * one population where a real per-user tenure signal DOES exist: it's definitionally why those
+ * users are in that bucket, so their current tenure is always "semesterly", never "monthly".
  */
-export function getAssumedCurrentTenure(): "monthly" | "semesterly" {
-  return "monthly";
+export function getAssumedCurrentTenure(sourceKind: "retention" | "semesterly-upsell"): Tenor {
+  return sourceKind === "semesterly-upsell" ? "semesterly" : "monthly";
 }
