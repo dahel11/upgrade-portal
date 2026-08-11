@@ -40,7 +40,9 @@ export async function fetchRetentionPayments(userId: string): Promise<RetentionP
   const { data, error } = await supabase
     .from("retention_to_payments")
     .select("*")
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .eq("retention_status", "active")
+    .eq("status", "pending");
 
   if (error) throw error;
   return (data ?? []) as RetentionPayment[];
