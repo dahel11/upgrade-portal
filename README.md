@@ -165,9 +165,12 @@ the guide's section 5b table) when false.
 
 Added 2026-08-05, per an ops request: every page load under `/:userId` logs a row to
 `portal_visits` (`user_id`, route `path`, `ip_address`, `user_agent`) via the `track-visit` Edge
-Function — see `src/App.tsx`'s `VisitTracker` (mounted once at the router root, not duplicated per
-page) and `src/lib/tracking.ts`'s `trackVisit()`. Fire-and-forget: a failed or slow tracking call
-never blocks or errors out the page itself.
+Function (deployed live under the slug `upgrade-tracking-visitor` — the folder is still named
+`track-visit` and the deploy command below still says `track-visit`, but the *live* function name
+`src/lib/tracking.ts`'s `trackVisit()` actually calls is `upgrade-tracking-visitor`; confirmed
+working 2026-08-12, ~2849 events recorded) — see `src/App.tsx`'s `VisitTracker` (mounted once at
+the router root, not duplicated per page) and `src/lib/tracking.ts`'s `trackVisit()`.
+Fire-and-forget: a failed or slow tracking call never blocks or errors out the page itself.
 
 `ip_address` is personal data — `portal_visits` deliberately has **no anon SELECT or INSERT
 policy** (unlike every other table in this project), so it's unreachable from the frontend except
@@ -181,6 +184,43 @@ paid, or visited but never paid. Read the caveats at the top of that file before
 numbers — notably, it can't see any visit that happened before `track-visit` was deployed and
 live, and it deliberately excludes the `semesterly_students_targetted` population ("paid" doesn't
 mean the same thing for users who are already paying customers being upsold).
+
+### Funnel spreadsheet monitor (for manager/stakeholders)
+
+Added 2026-08-12, per a manager request for a place to check these numbers periodically without
+Metabase access: `get_portal_visits_funnel_summary()` (`20260812000000_create_portal_visits_funnel_summary_fn.sql`)
+is a `SECURITY DEFINER` Postgres function mirroring `portal_visits_funnel_report.sql`'s bucket
+logic, pivoted into one row of 6 aggregate counts (no user_id, no PII) and granted to `anon` —
+safe to expose even though the underlying tables (`portal_visits` especially) are not
+anon-readable themselves. Keep the two queries' bucket logic in sync if it ever changes.
+
+`supabase/portal_visits_funnel_appsscript.gs` is the Google Apps Script (pasted into the
+monitoring spreadsheet's Extensions > Apps Script, not part of this repo's deploy) that calls this
+RPC on a time-driven trigger (every 6 hours) and appends one row per run to a "Funnel History"
+sheet/tab — a trend over time, not just today's snapshot. See that file's header comment for
+one-time setup (Script Properties, running `setupTrigger` once).
+
+### Upgrade payments spreadsheet mirror (separate spreadsheet)
+
+Added 2026-08-12: `get_upgrade_payment_records()`
+(`20260812000001_create_get_upgrade_payment_records_fn.sql`) is a row-level `SECURITY DEFINER` RPC
+mirroring the same "upgraded and paid" eligibility query documented at the top of
+`supabase/functions/notify-upgrade-payments/index.ts` (`checkout_transactions` ⨝
+`checkout_invoice_statuses.status='paid'` ⨝ `invoice_validations`), queried live rather than read
+from `retention_upgrade_notifs` — that table is only a Slack-send dedup ledger and isn't guaranteed
+gap-free (its eligibility rule/dedup key already changed once, see
+`20260804000000_rename_retention_upgrade_notifs_to_invoice_id.sql`). Granted to `anon` like the
+funnel summary function above, for the same reason (`invoice_validations` has no anon SELECT policy
+of its own).
+
+`supabase/upgrade_payments_appsscript.gs` is the Google Apps Script for this — pasted into a **new,
+separate** spreadsheet's Extensions > Apps Script (not the "Funnel History" one above, per product
+decision). Unlike the funnel monitor's aggregate-count append, this mirrors row-level records: each
+run fetches the full current list and appends only rows whose `invoice_id` isn't already in the
+sheet yet (checked against the sheet itself, not a stored cursor) — so the very first run backfills
+every eligible record from the beginning of this app's checkout history, and every run after that
+only adds what's new. Runs every 30 minutes by default (see that file's `setupTrigger`). See that
+file's header comment for one-time setup (Script Properties, running `setupTrigger` once).
 
 ## Local development
 

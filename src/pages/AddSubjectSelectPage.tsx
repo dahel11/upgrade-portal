@@ -2,16 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { TopBar } from "../components/TopBar";
 import { UnpaidTransactionModal } from "../components/UnpaidTransactionModal";
-import { AddSubjectIcon, ChevronDownIcon, InfoIcon } from "../components/icons";
+import { AddSubjectIcon } from "../components/icons";
 import { fetchPendingCheckoutTransactions } from "../lib/data";
-import { stripGradeSuffix } from "../lib/format";
 import { isFrequencyUpgrade } from "../lib/offeringSelection";
 import type { AddSubjectContextValue } from "./addSubjectContext";
 
 export function AddSubjectSelectPage() {
   const ctx = useOutletContext<AddSubjectContextValue>();
   const navigate = useNavigate();
-  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
   const [showUnpaidModal, setShowUnpaidModal] = useState(false);
 
@@ -48,15 +46,6 @@ export function AddSubjectSelectPage() {
         Object.fromEntries(Object.entries(ctx.scheduleChoices).filter(([offeringId]) => offeringId !== id)),
       );
     }
-
-    setExpandedId((current) => {
-      if (nowSelected) return id;
-      return current === id ? null : current;
-    });
-  }
-
-  function toggleInfo(id: string) {
-    setExpandedId((current) => (current === id ? null : id));
   }
 
   return (
@@ -68,50 +57,31 @@ export function AddSubjectSelectPage() {
       <div className="option-list">
         {ctx.availableOfferings.map((offering) => {
           const selected = ctx.selectedOfferingIds.includes(offering.id);
-          const expanded = expandedId === offering.id;
           const upgrade = isFrequencyUpgrade(offering, ctx.currentOfferings);
           return (
-            <div key={offering.id} className={`option-card option-card-expandable${selected ? " selected" : ""}`}>
-              <div className="option-card-row">
-                <button type="button" className="option-card-main" onClick={() => toggle(offering.id)}>
-                  <span className="option-indicator checkbox">{selected ? "✓" : ""}</span>
-                  <span className="option-body">
-                    <span className="option-title">{offering.name}</span>
-                    {upgrade && (
-                      <span className="option-badge option-badge-warning option-badge-block">
-                        Teman-teman & guru akan berbeda
-                      </span>
-                    )}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className="option-info-toggle"
-                  aria-label={`Info tentang ${stripGradeSuffix(offering.name)}`}
-                  aria-expanded={expanded}
-                  onClick={() => toggleInfo(offering.id)}
-                >
-                  <InfoIcon />
-                  <span className={`option-info-chevron${expanded ? " rotated" : ""}`}>
-                    <ChevronDownIcon />
-                  </span>
-                </button>
-              </div>
-              {expanded && (
-                <div className="option-info-panel">
-                  {offering.description && <p>{offering.description}</p>}
-                  {/* {upgrade && (
-                    // Temporarily placeholder text (2026-07-30, per direct request) — the pill
-                    // badge above ("Teman-teman & guru akan berganti") stays as final copy, only
-                    // this longer explanation is unreviewed draft copy for now.
-                    <p className="option-info-warning">
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
-                      labore et dolore magna aliqua.
-                    </p>
-                  )} */}
-                </div>
+            <button
+              key={offering.id}
+              type="button"
+              className={`option-card option-card-expandable${selected ? " selected" : ""}`}
+              onClick={() => toggle(offering.id)}
+            >
+              <span className="option-card-row">
+                <span className="option-indicator checkbox">{selected ? "✓" : ""}</span>
+                <span className="option-body">
+                  <span className="option-title">{offering.name}</span>
+                  {upgrade && (
+                    <span className="option-badge option-badge-warning option-badge-block">
+                      Teman-teman & guru akan berbeda
+                    </span>
+                  )}
+                </span>
+              </span>
+              {offering.description && (
+                <span className="option-info-panel">
+                  <span>{offering.description}</span>
+                </span>
               )}
-            </div>
+            </button>
           );
         })}
         {ctx.availableOfferings.length === 0 && (
